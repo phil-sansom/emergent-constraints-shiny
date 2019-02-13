@@ -409,25 +409,30 @@ server = function(input, output) {
   output$alphaPlot <- renderPlot({
     
     ## Plotting parameters
-    par(las = 1, mar = c(2.5,2.5,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
+    par(las = 1, mar = c(2.5,4.0,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
         xaxs = "r", yaxs = "r")
     
-    p    = dnorm(yyy(), input$mu_alpha, input$sigma_alpha)
-    ymax = 10^(floor(log10(max(p))))
-    ymax = ymax*ceiling(1.04*max(p)/ymax)
+    mu    = input$mu_alpha
+    sigma = input$sigma_alpha
+    xmin  = qnorm(pnorm(-4), mu, sigma)
+    xmax  = qnorm(pnorm(+4), mu, sigma)
+    xx    = seq(xmin, xmax, length.out = 101)
+    yy    = dnorm(xx, mu, sigma)
+    ymax  = 1.04*max(yy)
     
     ## Plot density
-    plot(yyy(), p, type = "l", xlim = c(input$ymin,input$ymax), 
-         ylim = c(0,ymax), lwd = 2, col = "red", ann = FALSE, 
-         xaxs = "i", yaxs = "i")
+    plot(xx, yy, type = "l", xlim = c(xmin,xmax), ylim = c(0,ymax), 
+         lwd = 2, col = "red", ann = FALSE, xaxs = "i", yaxs = "i")
+    
+    ## Add titles
+    title(xlab = expression(paste("Intercept ", alpha)))
+    title(ylab = "Density", line = 3.0)
     
     ## Add quantiles
-    abline(v = input$mu_alpha, col = "blue", lty = "dotdash", lwd = 2)
-    abline(v = input$mu_alpha + 
-             qnorm(    as.numeric(input$alpha)) * input$sigma_alpha, 
+    abline(v = mu, col = "blue", lty = "dotdash", lwd = 2)
+    abline(v = mu + qnorm(    as.numeric(input$alpha)) * sigma, 
            col = "blue", lty = "dashed", lwd = 2)
-    abline(v = input$mu_alpha + 
-             qnorm(1 - as.numeric(input$alpha)) * input$sigma_alpha,
+    abline(v = mu + qnorm(1 - as.numeric(input$alpha)) * sigma,
            col = "blue", lty = "dashed", lwd = 2)
     
   }) ## alphaPlot
@@ -436,25 +441,30 @@ server = function(input, output) {
   output$betaPlot <- renderPlot({
     
     ## Plotting parameters
-    par(las = 1, mar = c(2.5,2.5,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
+    par(las = 1, mar = c(2.5,4.0,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
         xaxs = "r", yaxs = "r")
     
-    p    = dnorm(yyy(), input$mu_beta, input$sigma_beta)
-    ymax = 10^(floor(log10(max(p))))
-    ymax = ymax*ceiling(1.04*max(p)/ymax)
+    mu    = input$mu_beta
+    sigma = input$sigma_beta
+    xmin  = qnorm(pnorm(-4), mu, sigma)
+    xmax  = qnorm(pnorm(+4), mu, sigma)
+    xx    = seq(xmin, xmax, length.out = 101)
+    yy    = dnorm(xx, mu, sigma)
+    ymax  = 1.04*max(yy)
     
     ## Plot density
-    plot(yyy(), p, type = "l", xlim = c(input$xmin,input$xmax), 
-         ylim = c(0,ymax), lwd = 2, col = "red", ann = FALSE, 
-         xaxs = "i", yaxs = "i")
+    plot(xx, yy, type = "l", xlim = c(xmin,xmax), ylim = c(0,ymax), 
+         lwd = 2, col = "red", ann = FALSE, xaxs = "i", yaxs = "i")
+    
+    ## Add titles
+    title(xlab = expression(paste("Slope ", beta)))
+    title(ylab = "Density", line = 3.0)
     
     ## Add quantiles
-    abline(v = input$mu_beta, col = "blue", lty = "dotdash", lwd = 2)
-    abline(v = input$mu_beta + 
-             qnorm(    as.numeric(input$alpha)) * input$sigma_beta, 
+    abline(v = mu, col = "blue", lty = "dotdash", lwd = 2)
+    abline(v = mu + qnorm(    as.numeric(input$alpha)) * sigma, 
            col = "blue", lty = "dashed", lwd = 2)
-    abline(v = input$mu_beta + 
-             qnorm(1 - as.numeric(input$alpha)) * input$sigma_beta,
+    abline(v = mu + qnorm(1 - as.numeric(input$alpha)) * sigma,
            col = "blue", lty = "dashed", lwd = 2)
     
   }) ## betaPlot
@@ -463,25 +473,29 @@ server = function(input, output) {
   output$sigmaPlot <- renderPlot({
     
     ## Plotting parameters
-    par(las = 1, mar = c(2.5,2.5,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
+    par(las = 1, mar = c(2.5,4.0,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
         xaxs = "r", yaxs = "r")
     
-    p    = dnorm(yyy(), input$mu_sigma, input$sigma_sigma)
-    ymax = 10^(floor(log10(max(p))))
-    ymax = ymax*ceiling(1.04*max(p)/ymax)
+    mu    = input$mu_sigma
+    sigma = input$sigma_sigma
+    xmax  = qnorm(pnorm(+4), mu, sigma)
+    xx    = seq(0, xmax, length.out = 101)
+    yy    = dnorm(xx, mu, sigma) + dnorm(-xx, mu, sigma)
+    ymax  = 1.04*max(yy)
     
     ## Plot density
-    plot(yyy(), p, type = "l", xlim = c(input$ymin,input$ymax), 
-         ylim = c(0,ymax), lwd = 2, col = "red", ann = FALSE, 
-         xaxs = "i", yaxs = "i")
+    plot(xx, yy, type = "l", xlim = c(0,xmax), ylim = c(0,ymax), 
+         lwd = 2, col = "red", ann = FALSE, xaxs = "i", yaxs = "i")
+    
+    ## Add titles
+    title(xlab = expression(paste("Response spread ", sigma)))
+    title(ylab = "Density", line = 3.0)
     
     ## Add quantiles
-    abline(v = input$mu_sigma, col = "blue", lty = "dotdash", lwd = 2)
-    abline(v = input$mu_sigma + 
-             qnorm(    as.numeric(input$alpha)) * input$sigma_sigma, 
+    abline(v = mu, col = "blue", lty = "dotdash", lwd = 2)
+    abline(v = mu + qnorm(    as.numeric(input$alpha)) * sigma, 
            col = "blue", lty = "dashed", lwd = 2)
-    abline(v = input$mu_sigma + 
-             qnorm(1 - as.numeric(input$alpha)) * input$sigma_sigma,
+    abline(v = mu + qnorm(1 - as.numeric(input$alpha)) * sigma,
            col = "blue", lty = "dashed", lwd = 2)
     
   }) ## sigmaPlot
@@ -490,25 +504,30 @@ server = function(input, output) {
   output$xstarPlot <- renderPlot({
     
     ## Plotting parameters
-    par(las = 1, mar = c(2.5,2.5,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
+    par(las = 1, mar = c(2.5,4.0,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
         xaxs = "r", yaxs = "r")
     
-    p    = dnorm(xxx(), input$mu_xstar, input$sigma_xstar)
-    ymax = 10^(floor(log10(max(p))))
-    ymax = ymax*ceiling(1.04*max(p)/ymax)
+    mu    = input$mu_xstar
+    sigma = input$sigma_xstar
+    xmin  = qnorm(pnorm(-4), mu, sigma)
+    xmax  = qnorm(pnorm(+4), mu, sigma)
+    xx    = seq(xmin, xmax, length.out = 101)
+    yy    = dnorm(xx, mu, sigma)
+    ymax  = 1.04*max(yy)
     
     ## Plot density
-    plot(xxx(), p, type = "l", xlim = c(input$xmin,input$xmax), 
-         ylim = c(0,ymax), lwd = 2, col = "red", ann = FALSE, 
-         xaxs = "i", yaxs = "i")
+    plot(xx, yy, type = "l", xlim = c(xmin,xmax), ylim = c(0,ymax), 
+         lwd = 2, col = "red", ann = FALSE, xaxs = "i", yaxs = "i")
+    
+    ## Add titles
+    title(xlab = expression(paste("Real world predictor ", X["*"])))
+    title(ylab = "Density", line = 3.0)
     
     ## Add quantiles
-    abline(v = input$mu_xstar, col = "blue", lty = "dotdash", lwd = 2)
-    abline(v = input$mu_xstar + 
-             qnorm(    as.numeric(input$alpha)) * input$sigma_xstar, 
+    abline(v = mu, col = "blue", lty = "dotdash", lwd = 2)
+    abline(v = mu + qnorm(    as.numeric(input$alpha)) * sigma, 
            col = "blue", lty = "dashed", lwd = 2)
-    abline(v = input$mu_xstar + 
-             qnorm(1 - as.numeric(input$alpha)) * input$sigma_xstar,
+    abline(v = mu + qnorm(1 - as.numeric(input$alpha)) * sigma,
            col = "blue", lty = "dashed", lwd = 2)
     
   }) ## xstarPlot
