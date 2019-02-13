@@ -5,12 +5,14 @@ server = function(input, output) {
   ##########################
 
   output$predictor = renderUI({
-    selectInput(inputId = "predictor", label = "Predictor", 
+    selectInput(inputId = "predictor", 
+                label   = withMathJax("Predictor \\(X_m\\)"), 
                 choices = colnames(data()))
   })
 
   output$response = renderUI({
-    selectInput(inputId = "response", label = "Response", 
+    selectInput(inputId = "response", 
+                label   = withMathJax("Response \\(Y_m\\)"), 
                 choices = colnames(data()))
   })
 
@@ -190,13 +192,24 @@ server = function(input, output) {
     #title(main = "Emergent relationship fit", cex.main = 1, font.main = 1)
     #mtext("Emergent relationship fit", side = 3, adj = 0)
     
-    # ## Add observations
-    # abline(v = input$z, col = "blue", lty = "dotdash", lwd = 2)
-    # abline(v = input$z + qnorm(    as.numeric(input$alpha))*input$sigma_z, 
-    #        col = "blue", lty = "dashed", lwd = 2)
-    # abline(v = input$z + qnorm(1 - as.numeric(input$alpha))*input$sigma)z,
-    #        col = "blue", lty = "dashed", lwd = 2)
+    # ## Observation density    
+    # p      = dnorm(xxx(), input$z, input$sigma_z)
+    # # ymax = 10^(floor(log10(max(p)))-1)
+    # # ymax = ymax*ceiling(max(p)/ymax)
+    # pmax   = max(p)
+    # yrange = diff(input$ylim)
+    # pscale = 0.5*yrange/pmax
     # 
+    # ## Plot obs density
+    # lines(xxx(), input$ylim[1] + p * pscale, col = "blue", lwd = 2)
+    
+    ## Add observations
+    abline(v = input$z, col = "blue", lty = "dotdash", lwd = 2)
+    abline(v = input$z + qnorm(    as.numeric(input$alpha))*input$sigma_z,
+           col = "blue", lty = "dashed", lwd = 2)
+    abline(v = input$z + qnorm(1 - as.numeric(input$alpha))*input$sigma_z,
+           col = "blue", lty = "dashed", lwd = 2)
+    
     # ## Add legend
     # legend("bottomright",
     #        legend = c("Linear regression","Observational constraint"),
@@ -259,45 +272,6 @@ server = function(input, output) {
            lty = c("dotdash","dotdash","dotdash"), lwd = c(2,2,2), bty = "n")
     
   })
-  
-  ## Observation uncertainty
-  output$obsPlot <- renderPlot({
-    
-    ## Plotting parameters
-    par(las = 1, mar = c(2.5,2.5,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
-        xaxs = "r", yaxs = "r")
-   
-    ## Data
-    x = data()[,input$predictor]
-    y = data()[,input$response]
-    
-    ## Plot data
-    plot(x, y, xlim = input$xlim, ylim = input$ylim, ann = FALSE, pch = 19,
-         xaxs = "i", yaxs = "i")
-    
-    ## Add titles
-    title(xlab = input$xlab)
-    title(ylab = input$ylab)
-
-    # ## Observation density    
-    # p      = dnorm(xxx(), input$z, input$sigma_z)
-    # # ymax = 10^(floor(log10(max(p)))-1)
-    # # ymax = ymax*ceiling(max(p)/ymax)
-    # pmax   = max(p)
-    # yrange = diff(input$ylim)
-    # pscale = 0.5*yrange/pmax
-    # 
-    # ## Plot obs density
-    # lines(xxx(), input$ylim[1] + p * pscale, col = "blue", lwd = 2)
-    
-    ## Add quantiles
-    abline(v = input$z, col = "blue", lty = "dotdash", lwd = 2)
-    abline(v = input$z + qnorm(    as.numeric(input$alpha))*input$sigma_z,
-           col = "blue", lty = "dashed", lwd = 2)
-    abline(v = input$z + qnorm(1 - as.numeric(input$alpha))*input$sigma_z,
-           col = "blue", lty = "dashed", lwd = 2)
-
-  }) ## obsPlot
   
   ## Joint prior plot
   output$priorPlot <- renderPlot({
