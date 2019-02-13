@@ -1,4 +1,5 @@
 ## Load libraries
+library(MASS)
 library(shiny)
 library(rstan)
 options(mc.cores = 4)             ## Set the number of CPU cores to use
@@ -379,7 +380,8 @@ server <- function(input, output) {
   discrepancy = reactive({
     
     ## Sample discrepancy
-    alphastar    = rnorm(input$N, posterior()$alpha  , input$sigmam)
+    xstar     = posterior()$xstar
+    alphastar = rnorm(input$N, posterior()$alpha  , input$sigmam)
     betastar  = rnorm(input$N, posterior()$beta, input$sigmab)
     sigmastar = sqrt(posterior()$sigma^2 + input$sigmad^2)
     
@@ -392,9 +394,12 @@ server <- function(input, output) {
       upr[i] = quantile(buffer, 1 - as.numeric(input$alpha))
     }
     
+    ## Posterior predictive distribution
+    ystar = alphastar + betastar * xstar + sigmastar * rnorm(input$N)
+    
     ## Return predictions
     list(alphastar = alphastar, betastar = betastar, sigmastar = sigmastar,
-         lwr = lwr, upr = upr)
+         xstar = xstar, ystar = ystar, lwr = lwr, upr = upr)
     
   })
   
@@ -469,6 +474,16 @@ server <- function(input, output) {
            col = "blue", lty = "dashed", lwd = 2)
     abline(v = input$z + qnorm(1 - as.numeric(input$alpha))*input$sigmaz,
            col = "blue", lty = "dashed", lwd = 2)
+    
+    ## Add HPC CI
+    dens = kde2d(discrepancy()$xstar, discrepancy()$ystar, n = 25)
+    z = dens$z
+    z = z/sum(z)
+    o = order(z, decreasing = TRUE)
+    for (i in 2:length(z))
+      z[o[i]] = z[o[i]] + z[o[i-1]]
+    contour(dens$x, dens$y, z, levels = 1 - 2*as.numeric(input$alpha),
+            drawlabels = FALSE, col = 2, lwd = 2, add = TRUE)
     
     ## Add legend
     legend("bottomright",
