@@ -56,80 +56,91 @@ ui = navbarPage(
                          \\text{Real world predictor}
 
                      \\end{align} $$")
-           )
-  ),
+           ) ## mainPanel
+  ), ## tabPanel
   
   ## Data tab
   tabPanel(title = "Data",
            sidebarLayout(
-             
              sidebarPanel(
-               
                tabsetPanel(
-                 
                  tabPanel(
                    title = "Data and observations",
                    h4("Data"),
-                   fileInput("file", "Choose CSV File",
-                             accept = c(
-                               "text/csv",
-                               "text/comma-separated-values,text/plain",
-                               ".csv")
-                   ),
-                   checkboxInput("header", "Header", TRUE),
-
+                   fileInput(inputId = "file", 
+                             label   = "Choose CSV File",
+                             accept  = c("text/csv",
+                                         "text/comma-separated-values,text/plain",
+                                         ".csv")
+                   ), ## fileInput
+                   checkboxInput(inputId = "header", 
+                                 label   = "Header", 
+                                 value   = TRUE
+                   ), ## checkboxInput
                    hr(),
                    fluidRow(
-                     column(6,
-                       uiOutput("predictor")
+                     column(width = 6,
+                            uiOutput("predictor")
                      ), ## column
-                     column(6,
-                       uiOutput("response")
+                     column(width = 6,
+                            uiOutput("response")
                      ) ## column
                    ), ## fluidRow
-
                    hr(),
                    h4("Observations"),
                    fluidRow(
-                     column(6, 
-                            numericInput(inputId = "z"     , 
-                                         label   = "Observation 
-                                           \\(Z\\)",
-                                         value   = 0)
+                     column(width = 6, 
+                            numericInput(inputId = "z", 
+                                         label   = "Observation \\(Z\\)",
+                                         value   = 0
+                            ) ## numericInput
                      ), ## column
-                     column(6,
+                     column(width = 6,
                             numericInput(inputId = "sigma_z", 
                                          label   = "Observation uncertainty 
                                            \\(\\sigma_Z\\)",
                                          value   = 1, 
-                                         min     = 0)
+                                         min     = 0
+                            ) ## numericInput
                      ) ## column
                    ) ## fluidRow
-                   
                  ), ## tabPanel
-                 
                  tabPanel(
-                   
                    title = "Plotting options",
-                   uiOutput("xlab"),
-                   uiOutput("ylab"),
-                   uiOutput("xlim"),
-                   uiOutput("ylim")
-                   
+                   fluidRow(
+                     h4("Axis labels"),
+                     column(width = 6,
+                            uiOutput("xlab")
+                     ), ## column
+                     column(width = 6,
+                            uiOutput("ylab")
+                     ) ## column
+                   ), ## fluidRow
+                   fluidRow(
+                     h4("Predictor limits"),
+                     column(width = 6,
+                            uiOutput("xmin")
+                     ), ## column
+                     column(width = 6,
+                            uiOutput("xmax")
+                     ) ## column
+                   ), ## fluidRow
+                   fluidRow(
+                     h4("Response limits"),
+                     column(width = 6,
+                            uiOutput("ymin")
+                     ), ## column
+                     column(width = 6,
+                            uiOutput("ymax")
+                     ) ## column
+                   ) ## fluidRow
                  ) ## tabPanel
-                 
                ) ## tabsetPanel
-               
              ), ## sidePanel
-             
              mainPanel(
-               
                plotOutput(outputId = "dataPlot")
-               
              ) ## mainPanel
-             
            ) ## sidebarLayout
-           
   ), ## tabPanel
   
   ## Prior panel
@@ -138,83 +149,110 @@ ui = navbarPage(
              sidebarPanel(
                h4("Multi-model ensemble"),
                fluidRow(
-                 column(6,
+                 h5("Intercept \\(\\alpha\\)"),
+                 column(width = 6,
                         numericInput(inputId = "mu_alpha", 
-                                     label   = "Intercept mean 
-                                                \\(\\mu_\\alpha\\)",
-                                     value   = 0)
+                                     label   = "Mean \\(\\mu_\\alpha\\)",
+                                     value   = 0
+                        ) ## numericInput
                  ), ## column
-                 column(6,
+                 column(width = 6,
                         numericInput(inputId = "sigma_alpha", 
-                                     label   = "Intercept uncertainty
+                                     label   = "Standard deviation
                                                 \\(\\sigma_\\alpha\\)",
                                      value   = 1e3, 
-                                     min     = 0)
+                                     min     = 0
+                        ) ## numericInput
                  ) ## column
                ), ## fluidRow
                fluidRow(
-                 column(6,
+                 h5("Slope \\(\\beta\\)"),
+                 column(width = 6,
                         numericInput(inputId = "mu_beta", 
-                                     label   = "Slope mean \\(\\mu_\\beta\\)",
-                                     value   = 0)
+                                     label   = "Mean \\(\\mu_\\beta\\)",
+                                     value   = 0
+                        ) ## numericInput
                  ), ## column
-                 column(6,
+                 column(width = 6,
                         numericInput(inputId = "sigma_beta", 
-                                     label   = "Slope uncertainty 
-                                           \\(\\sigma_\\beta\\)",
+                                     label   = "Standard deviation
+                                                \\(\\sigma_\\beta\\)",
                                      value   = 1e3, 
-                                     min     = 0)
+                                     min     = 0
+                        ) ## numericInput
                  ) ## column
                ), ## fluidRow
                fluidRow(
-                 column(6,
+                 h5("Response spread \\(\\sigma\\)"),
+                 column(width = 6,
                         numericInput(inputId = "mu_sigma", 
-                            label   = "Spread mean \\(\\mu_\\sigma\\)",
-                            value   = 0, 
-                            min     = 0)
+                                     label   = "Location \\(\\mu_\\sigma\\)",
+                                     value   = 0, 
+                                     min     = 0
+                        ) ## numericInput
                  ), ## column
-                 column(6,
+                 column(width = 6,
                         numericInput(inputId = "sigma_sigma", 
-                                     label   = "Spread uncertainty 
-                                       \\(\\sigma_\\sigma\\)",
+                                     label   = "Scale \\(\\sigma_\\sigma\\)",
                                      value   = 1e3, 
-                                     min     = 0)
+                                     min     = 0
+                        ) ## numericInput
                  ) ## column
                ), ## fluidRow
                hr(),
                h4("Real world"),
                fluidRow(
-                 column(6,
+                 h5("Predictor \\(X_\\star\\)"),
+                 column(width = 6,
                         numericInput(inputId = "mu_xstar", 
-                            label   = "Predictor mean
-                                       \\(\\mu_{X_\\star}\\)",
-                            value   = 0)
-                 ),
-                 column(6,
+                                     label   = "Mean \\(\\mu_{X_\\star}\\)",
+                                     value   = 0
+                        ) ## numericInput
+                 ), ## column
+                 column(width = 6,
                         numericInput(inputId = "sigma_xstar", 
-                                     label   = "Predictor uncertainty
+                                     label   = "Standard deviation
                                                 \\(\\sigma_{X_\\star}\\)",
                                      value   = 1e3, 
-                                     min     = 0)
+                                     min     = 0
+                        ) ## numericInput
                  ) ## column
                ) ## fluidRow
              ), ## sidePanel
              
              mainPanel(
                fluidRow(
-                 plotOutput(outputId = "priorPlot", height = 400)
-               ),
+                 plotOutput(outputId = "priorPlot", 
+                            height   = 400
+                 ) ## plotOutput
+               ), ## fluidRow
                fluidRow(
-                 column(6, plotOutput(outputId = "alphaPlot", height = 200)),
-                 column(6, plotOutput(outputId = "betaPlot" , height = 200))
-               ),
+                 column(width = 6, 
+                        plotOutput(outputId = "alphaPlot", 
+                                   height   = 200
+                        ) ## plotOutput
+                 ), ## column
+                 column(width = 6, 
+                        plotOutput(outputId = "betaPlot", 
+                                   height   = 200
+                        ) ## plotOutput
+                 ) ## column
+               ), ## fluidRow
                fluidRow(
-                 column(6, plotOutput(outputId = "sigmaPlot", height = 200)),
-                 column(6, plotOutput(outputId = "xstarPlot", height = 200))
-               )
-             )
-           )
-  ),
+                 column(width = 6, 
+                        plotOutput(outputId = "sigmaPlot", 
+                                   height   = 200
+                        ) ## plotOutput
+                 ), ## column
+                 column(width = 6, 
+                        plotOutput(outputId = "xstarPlot", 
+                                   height   = 200
+                        ) ## plotOutput
+                 ) ## column
+               ) ## fluidRow
+             ) ## mainPanel
+           ) ## sidepanelLayout
+  ), ## tabPanel
   
   ## Discrepancy tab
   tabPanel("Discrepancy",
@@ -223,39 +261,80 @@ ui = navbarPage(
                tabsetPanel(
                  tabPanel(
                    title = "Discrepancy parameters",
-                   sliderInput(inputId = "mu_delta_alpha", 
-                               label = "Intercept bias 
-                                      \\(\\mu_{\\delta_\\alpha}\\)",
-                               min = 0, max =  3, value = 0, step = 0.1),
-                   sliderInput(inputId = "sigma_delta_alpha", 
-                               label = "Intercept uncertainty
-                                      \\(\\sigma_{\\delta_\\alpha}\\)",
-                               min = 0, max =  3, value = 0, step = 0.1),
-                   sliderInput(inputId = "mu_delta_beta", 
-                               label = "Slope bias 
-                                      \\(\\mu_{\\delta_\\beta}\\)",
-                               min = 0, max =  10, value = 0, step = 0.5),
-                   sliderInput(inputId = "sigma_delta_beta", 
-                               label = "Slope uncertainty
-                                      \\(\\sigma_{\\delta_\\beta}\\)",
-                               min = 0, max = 10, value = 0, step = 0.5),
-                   sliderInput(inputId = "sigmad", 
-                               label = "Spread uncertainty
-                                      \\(\\sigma_{\\sigma_\\star}\\)",
-                               min = 0, max =  3, value = 0, step = 0.1)
+                   fluidRow(
+                     h5("Intercept \\(\\alpha_\\star\\)"),
+                     column(width = 6,
+                            numericInput(inputId = "mu_delta_alpha", 
+                                         label   = "Bias 
+                                         \\(\\mu_{\\delta_\\alpha}\\)",
+                                         value   = 0
+                            ) ## numericInput
+                     ), ## column
+                     column(width = 6,
+                            numericInput(inputId = "sigma_delta_alpha", 
+                                         label   = "Uncertainty 
+                                         \\(\\sigma_{\\delta_\\alpha}\\)",
+                                         value   = 0, 
+                                         min     = 0
+                            ) ## numericInput
+                     ) ## column
+                   ), ## fluidRow
+                   fluidRow(
+                     h5("Slope \\(\\beta_\\star\\)"),
+                     column(width = 6,
+                            numericInput(inputId = "mu_delta_beta", 
+                                         label   = "Bias 
+                                         \\(\\mu_{\\delta_\\beta}\\)",
+                                         value   = 0
+                            ) ## numericInput
+                     ), ## cloumn
+                     column(width = 6,
+                            numericInput(inputId = "sigma_delta_beta", 
+                                         label   = "Uncertainty
+                                         \\(\\sigma_{\\delta_\\beta}\\)",
+                                         value   = 0,
+                                         min     = 0
+                            ) ## numericInput
+                     ) ## column
+                   ), ## fluidRow
+                   fluidRow(
+                     h5("Spread \\(\\sigma_\\star\\)"),
+                     column(width = 6
+                     ), ## cloumn
+                     column(width = 6,
+                            numericInput(inputId = "sigmad", 
+                                         label   = "Uncertainty
+                                         \\(\\sigma_{\\sigma_\\star}\\)",
+                                         value   = 0,
+                                         min     = 0
+                            ) ## numericInput
+                     ) ## column
+                   ) ## fluidRow
                  ), ## tabPanel
+                 
                  tabPanel(
                    title = "Plotting options",
-                   numericInput(inputId = "N", label = "Number of samples",
-                                value = 10000, min = 1000, step = 1000),
-                   # numericInput(inputId = "mc.cores", label = "Number of cores",
-                   #              min = 1, max = 16, value = 4, step = 1),
-                   selectInput(inputId = "alpha", label = "Credible interval",
-                               choices = list("68% (1 sd)" = 0.16,
-                                              "90%"        = 0.05,
-                                              "95% (2 sd)" = 0.025,
-                                              "99%"        = 0.005),
-                               selected = 0.05)
+                   numericInput(inputId = "N", 
+                                label   = "Number of samples",
+                                value   = 10000, 
+                                min     = 1000, 
+                                step    = 1000
+                   ), ## numericInput
+                   # numericInput(inputId = "mc.cores", 
+                   #              label   = "Number of cores",
+                   #              value   = 4,
+                   #              min     = 1, 
+                   #              max     = 16, 
+                   #              step    = 1
+                   # ), ## numericInput
+                   selectInput(inputId  = "alpha", 
+                               label    = "Credible interval",
+                               choices  = list("68% (1 sd)" = 0.160,
+                                               "90%"        = 0.050,
+                                               "95% (2 sd)" = 0.025,
+                                               "99%"        = 0.005),
+                               selected = 0.05
+                   ) ## selectInput
                  ) ## tabPanel
                ) ## tabsetPanel
              ), ## sidebarPanel

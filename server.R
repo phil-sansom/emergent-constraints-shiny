@@ -26,44 +26,64 @@ server = function(input, output) {
               value = input$response)
   })
   
-  output$xlim = renderUI({
-    x       = data()[,input$predictor]
-    xrange  = range(x)
-    xdiff   = diff(xrange)
-    xmean   = mean(x)
-    xstep   = 10^floor(log10(xdiff))
-    xmin    = xrange[1] - xdiff
-    xmax    = xrange[2] + xdiff
-    xminval = xrange[1] - 0.04 * xdiff
-    xmaxval = xrange[2] + 0.04 * xdiff
-    xmin    = floor  (xmin   /xstep)*xstep
-    xmax    = ceiling(xmax   /xstep)*xstep
-    xminval = floor  (xminval/xstep)*xstep
-    xmaxval = ceiling(xmaxval/xstep)*xstep
-    
-    sliderInput(inputId = "xlim", label = "X limits",
-                min = xmin, max = xmax, value = c(xminval,xmaxval), 
-                step = xstep)
+  output$xmin = renderUI({
+    v       = data()[,input$predictor]
+    vmin    = min(v)
+    vmax    = max(v)
+    vrange  = vmax - vmin
+    vstep   = 10^floor(log10(vrange))
+    vmin    = vmin - 0.04 * vrange
+    vmin    = floor  (vmin / vstep) * vstep
+
+    numericInput(inputId = "xmin", 
+                 label   = "X min",
+                 value   = vmin,
+                 step    = vstep)
   })
 
-  output$ylim = renderUI({
-    y       = data()[,input$response]
-    yrange  = range(y)
-    ydiff   = diff(yrange)
-    ymean   = mean(y)
-    ystep   = 10^floor(log10(ydiff))
-    ymin    = yrange[1] - ydiff
-    ymax    = yrange[2] + ydiff
-    yminval = yrange[1] - 0.04 * ydiff
-    ymaxval = yrange[2] + 0.04 * ydiff
-    ymin    = floor  (ymin   /ystep)*ystep
-    ymax    = ceiling(ymax   /ystep)*ystep
-    yminval = floor  (yminval/ystep)*ystep
-    ymaxval = ceiling(ymaxval/ystep)*ystep
+  output$xmax = renderUI({
+    v       = data()[,input$predictor]
+    vmin    = min(v)
+    vmax    = max(v)
+    vrange  = vmax - vmin
+    vstep   = 10^floor(log10(vrange))
+    vmax    = vmax + 0.04 * vrange
+    vmax    = ceiling(vmax / vstep) * vstep
     
-    sliderInput(inputId = "ylim", label = "Y limits",
-                min = ymin, max = ymax, value = c(yminval,ymaxval), 
-                step = ystep)
+    numericInput(inputId = "xmax", 
+                 label   = "X max",
+                 value   = vmax,
+                 step    = vstep)
+  })
+  
+  output$ymin = renderUI({
+    v       = data()[,input$response]
+    vmin    = min(v)
+    vmax    = max(v)
+    vrange  = vmax - vmin
+    vstep   = 10^floor(log10(vrange))
+    vmin    = vmin - 0.04 * vrange
+    vmin    = floor  (vmin / vstep) * vstep
+    
+    numericInput(inputId = "ymin", 
+                 label   = "Y min",
+                 value   = vmin,
+                 step    = vstep)
+  })
+  
+  output$ymax = renderUI({
+    v       = data()[,input$response]
+    vmin    = min(v)
+    vmax    = max(v)
+    vrange  = vmax - vmin
+    vstep   = 10^floor(log10(vrange))
+    vmax    = vmax + 0.04 * vrange
+    vmax    = ceiling(vmax / vstep) * vstep
+    
+    numericInput(inputId = "ymax", 
+                 label   = "Y max",
+                 value   = vmax,
+                 step    = vstep)
   })
   
   
@@ -84,9 +104,9 @@ server = function(input, output) {
   })
   
   ## Plotting points
-  xx  = reactive(seq(input$xlim[1], input$xlim[2], length.out = 100))
-  xxx = reactive(seq(input$xlim[1], input$xlim[2], length.out = 100))
-  yyy = reactive(seq(input$ylim[1], input$ylim[2], length.out = 100))
+  xx  = reactive(seq(input$xmin, input$xmin, length.out = 100))
+  xxx = reactive(seq(input$xmin, input$xmin, length.out = 100))
+  yyy = reactive(seq(input$ymin, input$ymax, length.out = 100))
   
   ## Sample posterior  
   posterior = reactive({
@@ -183,8 +203,8 @@ server = function(input, output) {
     y = data()[,input$response]
     
     ## Plot data
-    plot(x, y, xlim = input$xlim, ylim = input$ylim, ann = FALSE, pch = 19,
-         xaxs = "i", yaxs = "i")
+    plot(x, y, xlim = c(input$xmin,input$xmax), ylim = c(input$ymin,input$ymax),
+         ann = FALSE, pch = 19, xaxs = "i", yaxs = "i")
     
     ## Add titles
     title(xlab = input$xlab)
@@ -229,8 +249,8 @@ server = function(input, output) {
     y = data()[,input$response]
     
     ## Plot data
-    plot(x, y, xlim = input$xlim, ylim = input$ylim, ann = FALSE, pch = 19,
-         xaxs = "i", yaxs = "i")
+    plot(x, y, xlim = c(input$xmin,input$xmax), ylim = c(input$ymin,input$ymax),
+         ann = FALSE, pch = 19, xaxs = "i", yaxs = "i")
     
     ## Add titles
     title(xlab = input$xlab)
@@ -280,8 +300,8 @@ server = function(input, output) {
         xaxs = "r", yaxs = "r")
     
     ## Plot data
-    plot(NULL, NULL, type = "n", xlim = input$xlim, ylim = input$ylim, 
-         ann = FALSE, xaxs = "i", yaxs = "i")
+    plot(NULL, NULL, type = "n", xlim = c(input$xmin,input$xmax), 
+         ylim = c(input$ymin,input$ymax), ann = FALSE, xaxs = "i", yaxs = "i")
     
     ## Add titles
     title(xlab = input$xlab)
@@ -324,8 +344,9 @@ server = function(input, output) {
     ymax = ymax*ceiling(1.04*max(p)/ymax)
     
     ## Plot density
-    plot(yyy(), p, type = "l", xlim = input$ylim, ylim = c(0,ymax),
-         lwd = 2, col = "red", ann = FALSE, xaxs = "i", yaxs = "i")
+    plot(yyy(), p, type = "l", xlim = c(input$ymin,input$ymax), 
+         ylim = c(0,ymax), lwd = 2, col = "red", ann = FALSE, 
+         xaxs = "i", yaxs = "i")
     
     ## Add quantiles
     abline(v = input$mu_alpha, col = "blue", lty = "dotdash", lwd = 2)
@@ -350,8 +371,9 @@ server = function(input, output) {
     ymax = ymax*ceiling(1.04*max(p)/ymax)
     
     ## Plot density
-    plot(yyy(), p, type = "l", xlim = input$xlim, ylim = c(0,ymax),
-         lwd = 2, col = "red", ann = FALSE, xaxs = "i", yaxs = "i")
+    plot(yyy(), p, type = "l", xlim = c(input$xmin,input$xmax), 
+         ylim = c(0,ymax), lwd = 2, col = "red", ann = FALSE, 
+         xaxs = "i", yaxs = "i")
     
     ## Add quantiles
     abline(v = input$mu_beta, col = "blue", lty = "dotdash", lwd = 2)
@@ -376,8 +398,9 @@ server = function(input, output) {
     ymax = ymax*ceiling(1.04*max(p)/ymax)
     
     ## Plot density
-    plot(yyy(), p, type = "l", xlim = input$ylim, ylim = c(0,ymax),
-         lwd = 2, col = "red", ann = FALSE, xaxs = "i", yaxs = "i")
+    plot(yyy(), p, type = "l", xlim = c(input$ymin,input$ymax), 
+         ylim = c(0,ymax), lwd = 2, col = "red", ann = FALSE, 
+         xaxs = "i", yaxs = "i")
     
     ## Add quantiles
     abline(v = input$mu_sigma, col = "blue", lty = "dotdash", lwd = 2)
@@ -402,8 +425,9 @@ server = function(input, output) {
     ymax = ymax*ceiling(1.04*max(p)/ymax)
     
     ## Plot density
-    plot(xxx(), p, type = "l", xlim = input$xlim, ylim = c(0,ymax),
-         lwd = 2, col = "red", ann = FALSE, xaxs = "i", yaxs = "i")
+    plot(xxx(), p, type = "l", xlim = c(input$xmin,input$xmax), 
+         ylim = c(0,ymax), lwd = 2, col = "red", ann = FALSE, 
+         xaxs = "i", yaxs = "i")
     
     ## Add quantiles
     abline(v = input$mu_xstar, col = "blue", lty = "dotdash", lwd = 2)
