@@ -130,7 +130,7 @@ server = function(input, output) {
                       verbose = FALSE, show_messages = FALSE)
     
     ## Extract posterior samples
-    extract(buffer, c("alpha","beta","sigma","xstar"))
+    extract(buffer, c("alpha","beta","sigma","xstar","ystar"))
   })
   
   
@@ -273,8 +273,18 @@ server = function(input, output) {
            col = "blue", lty = "dashed", lwd = 2)
     abline(v = input$z + qnorm(1 - as.numeric(input$alpha))*input$sigma_z,
            col = "blue", lty = "dashed", lwd = 2)
-    
-    ## Add HPC CI
+
+    ## Add basic HPC CI
+    dens = kde2d(posterior()$xstar, posterior()$ystar, n = 25)
+    z = dens$z
+    z = z/sum(z)
+    o = order(z, decreasing = TRUE)
+    for (i in 2:length(z))
+      z[o[i]] = z[o[i]] + z[o[i-1]]
+    contour(dens$x, dens$y, z, levels = 1 - 2*as.numeric(input$alpha),
+            drawlabels = FALSE, lwd = 2, lty = "dotted", add = TRUE)
+        
+    ## Add discrepancy HPC CI
     dens = kde2d(discrepancy()$xstar, discrepancy()$ystar, n = 25)
     z = dens$z
     z = z/sum(z)
@@ -282,7 +292,8 @@ server = function(input, output) {
     for (i in 2:length(z))
       z[o[i]] = z[o[i]] + z[o[i-1]]
     contour(dens$x, dens$y, z, levels = 1 - 2*as.numeric(input$alpha),
-            drawlabels = FALSE, col = 2, lwd = 2, add = TRUE)
+            drawlabels = FALSE, col = "red", lwd = 2, lty = "dotted", 
+            add = TRUE)
     
     ## Add legend
     legend("bottomright",

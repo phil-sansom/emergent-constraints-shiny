@@ -30,3 +30,8 @@ model{
   z ~ normal(xstar, sigma_z);
   y ~ normal(alpha + beta * x, sigma);
 }
+generated quantities{
+  real ystar;                 // predicted response
+  
+  ystar = normal_rng(alpha + beta * xstar, sigma);
+}
