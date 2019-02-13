@@ -104,8 +104,8 @@ server = function(input, output) {
   })
   
   ## Plotting points
-  xx  = reactive(seq(input$xmin, input$xmin, length.out = 100))
-  xxx = reactive(seq(input$xmin, input$xmin, length.out = 100))
+  xx  = reactive(seq(input$xmin, input$xmax, length.out = 100))
+  xxx = reactive(seq(input$xmin, input$xmax, length.out = 100))
   yyy = reactive(seq(input$ymin, input$ymax, length.out = 100))
   
   ## Sample posterior  
@@ -125,9 +125,9 @@ server = function(input, output) {
     
     ## Fit STAN model
     buffer = sampling(model, data = data, chains = getOption("mc.cores"),
-                 iter = 2*input$N/getOption("mc.cores"), 
-                 warmup = input$N/getOption("mc.cores"), 
-                 verbose = FALSE, show_messages = FALSE)
+                      iter = 2*input$N/getOption("mc.cores"), 
+                      warmup = input$N/getOption("mc.cores"), 
+                      verbose = FALSE, show_messages = FALSE)
     
     ## Extract posterior samples
     extract(buffer, c("alpha","beta","sigma","xstar"))
