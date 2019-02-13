@@ -1,4 +1,4 @@
-fluidPage(
+ui = fluidPage(
   title = "Uncertainty quantification for emergent constraints",
   titlePanel("Uncertainty quantification for emergent constraints"),
   withMathJax(),

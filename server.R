@@ -1,18 +1,5 @@
-function(input, output) {
+server = function(input, output) {
   
-  ##############
-  ## Preamble ##
-  ##############
-  
-  ## Load libraries
-  library(MASS)
-  library(rstan)
-  options(mc.cores = 4)             ## Set the number of CPU cores to use
-  rstan_options(auto_write = TRUE)  ## Prevent STAN recompiling unnecessarily
-  
-  ## Compile STAN model
-  model = stan_model("model.stan")
-
   ##########################
   ## Reactive UI elements ##
   ##########################
@@ -194,8 +181,8 @@ function(input, output) {
     y = data()[,input$response]
     
     ## Plot data
-    plot(x, y, xlim = input$xlim, ylim = input$ylim, ann = FALSE, pch = 16,
-         xaxs = "i", yaxs = "i", cex = 2)
+    plot(x, y, xlim = input$xlim, ylim = input$ylim, ann = FALSE, pch = 19,
+         xaxs = "i", yaxs = "i")
     
     ## Add titles
     title(xlab = input$xlab)
@@ -229,8 +216,8 @@ function(input, output) {
     y = data()[,input$response]
     
     ## Plot data
-    plot(x, y, xlim = input$xlim, ylim = input$ylim, ann = FALSE, pch = 16,
-         xaxs = "i", yaxs = "i", cex = 2)
+    plot(x, y, xlim = input$xlim, ylim = input$ylim, ann = FALSE, pch = 19,
+         xaxs = "i", yaxs = "i")
     
     ## Add titles
     title(xlab = input$xlab)
@@ -285,29 +272,30 @@ function(input, output) {
     y = data()[,input$response]
     
     ## Plot data
-    plot(x, y, xlim = input$xlim, ylim = input$ylim, ann = FALSE, pch = 16,
-         xaxs = "i", yaxs = "i", cex = 2)
+    plot(x, y, xlim = input$xlim, ylim = input$ylim, ann = FALSE, pch = 19,
+         xaxs = "i", yaxs = "i")
     
     ## Add titles
     title(xlab = input$xlab)
     title(ylab = input$ylab)
-    
-    p      = dnorm(xxx(), input$z, input$sigma_z)
-    # ymax = 10^(floor(log10(max(p)))-1)
-    # ymax = ymax*ceiling(max(p)/ymax)
-    pmax   = max(p)
-    yrange = diff(input$ylim)
-    pscale = 0.5*yrange/pmax
-    
-    ## Plot obs density
-    lines(xxx(), input$ylim[1] + p * pscale, col = "blue", lwd = 2)
+
+    # ## Observation density    
+    # p      = dnorm(xxx(), input$z, input$sigma_z)
+    # # ymax = 10^(floor(log10(max(p)))-1)
+    # # ymax = ymax*ceiling(max(p)/ymax)
+    # pmax   = max(p)
+    # yrange = diff(input$ylim)
+    # pscale = 0.5*yrange/pmax
+    # 
+    # ## Plot obs density
+    # lines(xxx(), input$ylim[1] + p * pscale, col = "blue", lwd = 2)
     
     ## Add quantiles
     abline(v = input$z, col = "blue", lty = "dotdash", lwd = 2)
-    # abline(v = input$z + qnorm(    as.numeric(input$alpha))*input$sigma_z,
-    #        col = "blue", lty = "dashed", lwd = 2)
-    # abline(v = input$z + qnorm(1 - as.numeric(input$alpha))*input$sigma_z,
-    #        col = "blue", lty = "dashed", lwd = 2)
+    abline(v = input$z + qnorm(    as.numeric(input$alpha))*input$sigma_z,
+           col = "blue", lty = "dashed", lwd = 2)
+    abline(v = input$z + qnorm(1 - as.numeric(input$alpha))*input$sigma_z,
+           col = "blue", lty = "dashed", lwd = 2)
 
   }) ## obsPlot
   
