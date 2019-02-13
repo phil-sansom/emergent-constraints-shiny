@@ -239,7 +239,7 @@ server = function(input, output) {
   })
   
   ## Main plot
-  output$ecPlot <- renderPlot({
+  output$mainPlot <- renderPlot({
     
     par(las = 1, mar = c(2.5,2.5,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
         xaxs = "r", yaxs = "r")
@@ -297,10 +297,72 @@ server = function(input, output) {
     
     ## Add legend
     legend("bottomright",
-           legend = c("Linear regression","Regression with discrepancy",
+           legend = c("Exchangeable model","Coexchangeable model",
                       "Observational constraint"),
            col = c("black","red","blue"),
            lty = c("dotdash","dotdash","dotdash"), lwd = c(2,2,2), bty = "n")
+    
+  })
+  
+  ## Auxilliary plot
+  output$auxPlot <- renderPlot({
+    
+    par(las = 1, mar = c(2.5,2.5,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
+        xaxs = "r", yaxs = "r")
+
+    ## Marginal distribution
+    dens0 = density(data()[,input$response])
+    
+    ## Basic projection
+    dens1 = density(posterior()$ystar)
+
+    ## Discrepancy projection
+    dens2 = density(discrepancy()$ystar)
+    
+    ymax = max(dens0$y,dens1$y,dens2$y)*1.04
+    
+    ## Plot data
+    plot(dens0, xlim = c(input$ymin,input$ymax), ylim = c(0,ymax), 
+         col = "green", ann = FALSE, type = "l", lwd = 2, 
+         xaxs = "i", yaxs = "i")
+    lines(dens1, lwd = 2, col = "black")
+    lines(dens2, lwd = 2, col = "red")
+    
+    ## Add titles
+    title(xlab = input$ylab)
+    title(ylab = "Density")
+    # title(main = "Emergent relationship fit", cex.main = 1, font.main = 1)
+    # mtext("Emergent relationship fit", side = 3, adj = 0)
+
+    ## Add quantiles
+    abline(v = mean(data()[,input$response]), 
+           col = "green", lwd = 2, lty = "dotdash")
+    abline(v = quantile(data()[,input$response],     as.numeric(input$alpha)), 
+           col = "green", lwd = 2, lty = "dashed")
+    abline(v = quantile(data()[,input$response], 1 - as.numeric(input$alpha)), 
+           col = "green", lwd = 2, lty = "dashed")
+        
+    ## Add quantiles
+    abline(v = mean(posterior()$ystar), col = "black", lwd = 2, lty = "dotdash")
+    abline(v = quantile(posterior()$ystar,     as.numeric(input$alpha)), 
+           col = "black", lwd = 2, lty = "dashed")
+    abline(v = quantile(posterior()$ystar, 1 - as.numeric(input$alpha)), 
+           col = "black", lwd = 2, lty = "dashed")
+
+    ## Add quantiles
+    abline(v = mean(discrepancy()$ystar), 
+           col = "red", lwd = 2, lty = "dotdash")
+    abline(v = quantile(discrepancy()$ystar,     as.numeric(input$alpha)), 
+           col = "red", lwd = 2, lty = "dashed")
+    abline(v = quantile(discrepancy()$ystar, 1 - as.numeric(input$alpha)), 
+           col = "red", lwd = 2, lty = "dashed")
+    
+    ## Add legend
+    legend("topright",
+           legend = c("Model response","Exchangeable model",
+                      "Coexchangeable model"),
+           col = c("green","black","red"), lty = c("solid","solid","solid"), 
+           lwd = c(2,2,2), bty = "n")
     
   })
   

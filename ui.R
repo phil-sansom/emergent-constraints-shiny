@@ -254,8 +254,8 @@ ui = navbarPage(
            ) ## sidepanelLayout
   ), ## tabPanel
   
-  ## Discrepancy tab
-  tabPanel("Discrepancy",
+  ## Projection tab
+  tabPanel("Projections",
            sidebarLayout(
              sidebarPanel(
                tabsetPanel(
@@ -339,7 +339,8 @@ ui = navbarPage(
                ) ## tabsetPanel
              ), ## sidebarPanel
              mainPanel(
-               plotOutput(outputId = "ecPlot")
+               plotOutput(outputId = "mainPlot"),
+               plotOutput(outputId = "auxPlot")
              ) ## mainPanel
            ) ## sidebarLayout
   ) ## tabPanel
