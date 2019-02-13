@@ -141,13 +141,13 @@ ui = navbarPage(
                  column(6,
                         numericInput(inputId = "mu_alpha", 
                                      label   = "Intercept mean 
-                                                \\(\\mu_\\alpha\\):",
+                                                \\(\\mu_\\alpha\\)",
                                      value   = 0)
                  ), ## column
                  column(6,
                         numericInput(inputId = "sigma_alpha", 
                                      label   = "Intercept uncertainty
-                                                \\(\\sigma_\\alpha\\):",
+                                                \\(\\sigma_\\alpha\\)",
                                      value   = 1e3, 
                                      min     = 0)
                  ) ## column
@@ -155,13 +155,13 @@ ui = navbarPage(
                fluidRow(
                  column(6,
                         numericInput(inputId = "mu_beta", 
-                                     label   = "Slope mean \\(\\mu_\\beta\\):",
+                                     label   = "Slope mean \\(\\mu_\\beta\\)",
                                      value   = 0)
                  ), ## column
                  column(6,
                         numericInput(inputId = "sigma_beta", 
                                      label   = "Slope uncertainty 
-                                           \\(\\sigma_\\beta\\):",
+                                           \\(\\sigma_\\beta\\)",
                                      value   = 1e3, 
                                      min     = 0)
                  ) ## column
@@ -169,14 +169,14 @@ ui = navbarPage(
                fluidRow(
                  column(6,
                         numericInput(inputId = "mu_sigma", 
-                            label   = "Spread mean \\(\\mu_\\sigma\\):",
+                            label   = "Spread mean \\(\\mu_\\sigma\\)",
                             value   = 0, 
                             min     = 0)
                  ), ## column
                  column(6,
                         numericInput(inputId = "sigma_sigma", 
                                      label   = "Spread uncertainty 
-                                       \\(\\sigma_\\sigma\\):",
+                                       \\(\\sigma_\\sigma\\)",
                                      value   = 1e3, 
                                      min     = 0)
                  ) ## column
@@ -187,13 +187,13 @@ ui = navbarPage(
                  column(6,
                         numericInput(inputId = "mu_xstar", 
                             label   = "Predictor mean
-                                       \\(\\mu_{X_\\star}\\):",
+                                       \\(\\mu_{X_\\star}\\)",
                             value   = 0)
                  ),
                  column(6,
                         numericInput(inputId = "sigma_xstar", 
                                      label   = "Predictor uncertainty
-                                                \\(\\sigma_{X_\\star}\\):",
+                                                \\(\\sigma_{X_\\star}\\)",
                                      value   = 1e3, 
                                      min     = 0)
                  ) ## column
@@ -225,32 +225,32 @@ ui = navbarPage(
                    title = "Discrepancy parameters",
                    sliderInput(inputId = "mu_delta_alpha", 
                                label = "Intercept bias 
-                                      \\(\\mu_{\\delta_\\alpha}\\):",
+                                      \\(\\mu_{\\delta_\\alpha}\\)",
                                min = 0, max =  3, value = 0, step = 0.1),
                    sliderInput(inputId = "sigma_delta_alpha", 
                                label = "Intercept uncertainty
-                                      \\(\\sigma_{\\delta_\\alpha}\\):",
+                                      \\(\\sigma_{\\delta_\\alpha}\\)",
                                min = 0, max =  3, value = 0, step = 0.1),
                    sliderInput(inputId = "mu_delta_beta", 
                                label = "Slope bias 
-                                      \\(\\mu_{\\delta_\\beta}\\):",
+                                      \\(\\mu_{\\delta_\\beta}\\)",
                                min = 0, max =  10, value = 0, step = 0.5),
                    sliderInput(inputId = "sigma_delta_beta", 
                                label = "Slope uncertainty
-                                      \\(\\sigma_{\\delta_\\beta}\\):",
+                                      \\(\\sigma_{\\delta_\\beta}\\)",
                                min = 0, max = 10, value = 0, step = 0.5),
                    sliderInput(inputId = "sigmad", 
                                label = "Spread uncertainty
-                                      \\(\\sigma_{\\sigma_\\star}\\):",
+                                      \\(\\sigma_{\\sigma_\\star}\\)",
                                min = 0, max =  3, value = 0, step = 0.1)
                  ), ## tabPanel
                  tabPanel(
                    title = "Plotting options",
-                   numericInput(inputId = "N", label = "Number of samples:",
+                   numericInput(inputId = "N", label = "Number of samples",
                                 value = 10000, min = 1000, step = 1000),
-                   # numericInput(inputId = "mc.cores", label = "Number of cores:",
+                   # numericInput(inputId = "mc.cores", label = "Number of cores",
                    #              min = 1, max = 16, value = 4, step = 1),
-                   selectInput(inputId = "alpha", label = "Credible interval:",
+                   selectInput(inputId = "alpha", label = "Credible interval",
                                choices = list("68% (1 sd)" = 0.16,
                                               "90%"        = 0.05,
                                               "95% (2 sd)" = 0.025,
