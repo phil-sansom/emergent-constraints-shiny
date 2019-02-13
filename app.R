@@ -5,18 +5,13 @@ library(rstan)
 options(mc.cores = 4)             ## Set the number of CPU cores to use
 rstan_options(auto_write = TRUE)  ## Prevent STAN recompiling unnecessarily
 
-# ## Load data
-# source("data.R")
-# x      = data$psi[1:16]
-# y      = data$ecs[1:16]
-# z      = obs$psi.mean[1]
-# sigmaz = obs$psi.sd[1]
-# rm(data,obs,time.series)
-
 ## Compile STAN model
 model = stan_model("app.stan")
 
-## Define UI
+###############
+## Define UI ##
+###############
+
 ui <- fluidPage(
   title = "Uncertainty quantification for emergent constraints",
   titlePanel("Uncertainty quantification for emergent constraints"),
@@ -39,21 +34,21 @@ ui <- fluidPage(
                            \\text{Normal} ( 0, \\sigma_\\star^2 ) &
                          \\text{Real world} \\\\
                        Z & = X_\\star + \\omega &
-                         \\omega & \\sim \\text{Normal} ( 0, \\sigma_z^2 ) &
+                         \\omega & \\sim \\text{Normal} ( 0, \\sigma_Z^2 ) &
                          \\text{Observations}
                      \\end{align} $$"),
                h2("Priors"),
                p("$$ \\begin{align}
-                       \\alpha & \\sim \\text{Normal} 
+                       \\alpha  & \\sim \\text{Normal} 
                          (\\mu_\\alpha, \\sigma_\\alpha^2 ) &
                          \\text{Ensemble intercept} \\\\
-                       \\beta  & \\sim \\text{Normal}
+                       \\beta   & \\sim \\text{Normal}
                          (\\mu_\\beta , \\sigma_\\beta^2  ) &
                          \\text{Ensemble slope} \\\\
-                       \\sigma^2 & \\sim \\text{Half-Normal} 
+                       \\sigma  & \\sim \\text{Half-Normal} 
                          (\\mu_\\sigma, \\sigma_\\sigma^2 ) &
                          \\text{Ensemble response uncertainty} \\\\
-                       X_\\star  & \\sim \\text{Normal}
+                       X_\\star & \\sim \\text{Normal}
                          (\\mu_{X_\\star} , \\sigma_{X_\\star}^2  ) &
                          \\text{Real world predictor}
                      \\end{align} $$"),
@@ -61,13 +56,16 @@ ui <- fluidPage(
                p("$$ \\begin{align}
                        \\alpha_\\star & = \\alpha + \\delta_\\alpha &
                           \\delta_\\alpha & \\sim \\text{Normal} 
-                           (0, \\sigma_{\\alpha_\\star}^2) &
+                            (\\mu_{\\delta_\\alpha}, 
+                              \\sigma_{\\delta_\\alpha}^2) &
                          \\text{Real world Intercept} \\\\
                        \\beta_\\star & = \\beta + \\delta_\\beta &
                           \\delta_\\beta & \\sim \\text{Normal} 
-                           (0, \\sigma_{\\beta_\\star}^2) &
+                            (\\mu_{\\delta_\\beta}, 
+                              \\sigma_{\\delta_\\beta}^2) &
                          \\text{Real world slope} \\\\
-                       \\sigma_\\star^2 & = \\sigma^2 + \\sigma_{\\sigma_\\star}^2 & & &
+                       \\sigma_\\star^2 & = 
+                           \\sigma^2 + \\sigma_{\\sigma_\\star}^2 & & &
                          \\text{Real world response uncertainty} \\\\
                      \\end{align} $$")
              )
@@ -102,9 +100,13 @@ ui <- fluidPage(
     tabPanel("Observations",
              sidebarLayout(
                sidebarPanel(
-                 numericInput(inputId = "z"     , label = "Observed Psi (K):",
-                              min = 0, value = 0.13, step = 0.01),
-                 numericInput(inputId = "sigmaz", label = "Observation SD (K):",
+                 numericInput(inputId = "z"     , 
+                              label = "Observation 
+                                       \\(Z\\):",
+                              value = 0.13, step = 0.01),
+                 numericInput(inputId = "sigma_z", 
+                              label = "Observation uncertainty 
+                                       \\(\\sigma_Z\\):",
                               min = 0, value = 0.016, step = 0.001)
                ),
                mainPanel(
@@ -117,39 +119,38 @@ ui <- fluidPage(
     tabPanel("Priors",
              sidebarLayout(
                sidebarPanel(
-                 # uiOutput("meanalpha"),
-                 # uiOutput("sdalpha"),
-                 # uiOutput("meanbeta"),
-                 # uiOutput("sdbeta"),
-                 # uiOutput("meansigma"),
-                 # uiOutput("sdsigma"),
-                 # uiOutput("meanxstar"),
-                 # uiOutput("sdxstar")
-                 numericInput(inputId = "meanalpha", label = "Mean alpha:",
+                 numericInput(inputId = "mu_alpha", 
+                              label = "Intercept mean
+                                       \\(\\mu_\\alpha\\):",
                               value = 0, step = 1),
-                 numericInput(inputId = "sdalpha"  , label = "SD alpha:",
+                 numericInput(inputId = "sigma_alpha", 
+                              label = "Intercept uncertainty
+                                       \\(\\sigma_\\alpha\\):",
                               value = 1e3, step = 1),
-                 numericInput(inputId = "meanbeta" , label = "Mean beta:",
+                 numericInput(inputId = "mu_beta", 
+                              label = "Slope mean
+                                       \\(\\mu_\\beta\\):",
                               value = 0, step = 1),
-                 numericInput(inputId = "sdbeta"   , label = "SD beta:",
+                 numericInput(inputId = "sigma_beta", 
+                              label = "Slope uncertainty
+                                       \\(\\sigma_\\beta\\):",
                               value = 1e3, step = 1),
-                 numericInput(inputId = "meansigma", label = "Mean sigma:",
+                 numericInput(inputId = "mu_sigma", 
+                              label = "Spread mean
+                                       \\(\\mu_\\sigma\\):",
                               value = 0, step = 1),
-                 numericInput(inputId = "sdsigma"  , label = "SD sigma:",
+                 numericInput(inputId = "sigma_sigma", 
+                              label = "Spread uncertainty
+                                       \\(\\sigma_\\sigma\\):",
                               value = 1e3, step = 1),
-                 numericInput(inputId = "meanxstar", label = "Mean xstar:",
+                 numericInput(inputId = "mu_xstar", 
+                              label = "Real world predictor mean
+                                       \\(\\mu_{X_\\star}\\):",
                               value = 0, step = 1),
-                 numericInput(inputId = "sdxstar"  , label = "SD xstar:",
+                 numericInput(inputId = "sigma_xstar", 
+                              label = "Real world predictor uncertainty
+                                       \\(\\sigma_{X_\\star}\\):",
                               value = 1e3, step = 1)
-                 
-                 # sliderInput(inputId = "alpha"   , label = 'Mean ECS:',
-                 #             min = 0, max =  3, value = 0, step = 0.1),
-                 # sliderInput(inputId = "beta" , label = "Slope:",
-                 #             min = 0, max = 10, value = 0, step = 0.5),
-                 # sliderInput(inputId = "sigma", label = "Spread:",
-                 #             min = 0, max =  3, value = 0, step = 0.1),
-                 # numericInput(inputId = "psi" , label = "Psi (K):",
-                 #              min = 0, value = 0.15, step = 0.01)
                ),
                mainPanel(
                  fluidRow(
@@ -171,11 +172,25 @@ ui <- fluidPage(
     tabPanel("Discrepancy",
              sidebarLayout(
                sidebarPanel(
-                 sliderInput(inputId = "sigmam", label = h6("\\(\\alpha\\) discrepancy:"),
+                 sliderInput(inputId = "mu_delta_alpha", 
+                             label = "Intercept bias 
+                                      \\(\\mu_{\\delta_\\alpha}\\):",
                              min = 0, max =  3, value = 0, step = 0.1),
-                 sliderInput(inputId = "sigmab", label = h6("\\(\\beta\\) discrepancy:"),
+                 sliderInput(inputId = "sigma_delta_alpha", 
+                             label = "Intercept uncertainty
+                                      \\(\\sigma_{\\delta_\\alpha}\\):",
+                             min = 0, max =  3, value = 0, step = 0.1),
+                 sliderInput(inputId = "mu_delta_beta", 
+                             label = "Slope bias 
+                                      \\(\\mu_{\\delta_\\beta}\\):",
+                             min = 0, max =  10, value = 0, step = 0.5),
+                 sliderInput(inputId = "sigma_delta_beta", 
+                             label = "Slope uncertainty
+                                      \\(\\sigma_{\\delta_\\beta}\\):",
                              min = 0, max = 10, value = 0, step = 0.5),
-                 sliderInput(inputId = "sigmad", label = h6("\\(\\sigma\\) discrepancy:"),
+                 sliderInput(inputId = "sigmad", 
+                             label = "Spread uncertainty
+                                      \\(\\sigma_{\\sigma_\\star}\\):",
                              min = 0, max =  3, value = 0, step = 0.1),
                  numericInput(inputId = "N", label = "Number of samples:",
                               value = 10000),
@@ -197,7 +212,11 @@ ui <- fluidPage(
   ) ## tabsetPanel
 ) ## ui
 
-## Define server logic
+
+#########################
+## Define server logic ##
+#########################
+
 server <- function(input, output) {
   
   ##########################
@@ -264,55 +283,11 @@ server <- function(input, output) {
                 step = ystep)
   })
   
-
-  # output$meanalpha = renderUI({
-  #   sliderInput(inputId = "meanalpha"   , label = 'Mean alpha:',
-  #               min = input$ylim[1], max = input$ylim[2], 
-  #               value = mean(input$ylim), step = 0.1)
-  # })
-  # 
-  # output$sdalpha = renderUI({
-  #   sliderInput(inputId = "sdalpha"   , label = 'SD alpha:',
-  #               min = 0, max = input$xlim[2], 
-  #               value = mean(input$xlim), step = 0.01)
-  # })
-  # 
-  # output$meanbeta = renderUI({
-  #   sliderInput(inputId = "meanbeta"   , label = 'Mean beta:',
-  #               min = input$xlim[1], max = input$xlim[2], 
-  #               value = mean(input$xlim), step = 0.01)
-  # })
-  # 
-  # output$sdbeta = renderUI({
-  #   sliderInput(inputId = "meanalpha"   , label = 'SD beta:',
-  #               min = input$xlim[1], max = input$xlim[2], 
-  #               value = mean(input$xlim), step = 0.01)
-  # })
-  # 
-  # output$meansigma = renderUI({
-  #   sliderInput(inputId = "meansigma"   , label = 'Mean sigma:',
-  #               min = input$xlim[1], max = input$xlim[2], 
-  #               value = mean(input$xlim), step = 0.01)
-  # })
-  # 
-  # output$sdsigma = renderUI({
-  #   sliderInput(inputId = "sdsigma"   , label = 'SD sigma:',
-  #               min = input$xlim[1], max = input$xlim[2], 
-  #               value = mean(input$xlim), step = 0.01)
-  # })
-  # 
-  # output$meanxstar = renderUI({
-  #   sliderInput(inputId = "meanxstar"   , label = 'Mean xstar:',
-  #               min = input$xlim[1], max = input$xlim[2], 
-  #               value = mean(input$xlim), step = 0.01)
-  # })
-  # 
-  # output$sdxstar = renderUI({
-  #   sliderInput(inputId = "sdxstar"   , label = 'SD xstar:',
-  #               min = input$xlim[1], max = input$xlim[2], 
-  #               value = mean(input$xlim), step = 0.01)
-  # })
-
+  
+  ##########################
+  ## Data and computation ##
+  ##########################
+  
   ## Data
   data = reactive({
     
@@ -339,11 +314,11 @@ server <- function(input, output) {
     
     ## Package data
     data = list(M = length(x), x = x, y = y, 
-                z = input$z, sigmaz = input$sigmaz,
-                meanalpha    = input$meanalpha   , sdalpha    = input$sdalpha,
-                meanbeta  = input$meanbeta , sdbeta  = input$sdbeta,
-                meansigma = input$meansigma, sdsigma = input$sdsigma,
-                meanxstar = input$meanxstar, sdxstar = input$sdxstar)
+                z = input$z, sigma_z = input$sigma_z,
+                mu_alpha = input$mu_alpha, sigma_alpha = input$sigma_alpha,
+                mu_beta  = input$mu_beta , sigma_beta  = input$sigma_beta ,
+                mu_sigma = input$mu_sigma, sigma_sigma = input$sigma_sigma,
+                mu_xstar = input$mu_xstar, sigma_xstar = input$sigma_xstar)
     
     ## Fit STAN model
     buffer = sampling(model, data = data, chains = getOption("mc.cores"),
@@ -379,11 +354,19 @@ server <- function(input, output) {
   ## Compute discrepancy
   discrepancy = reactive({
     
+    ## Posterior samples
+    samples = posterior()
+
     ## Sample discrepancy
-    xstar     = posterior()$xstar
-    alphastar = rnorm(input$N, posterior()$alpha  , input$sigmam)
-    betastar  = rnorm(input$N, posterior()$beta, input$sigmab)
-    sigmastar = sqrt(posterior()$sigma^2 + input$sigmad^2)
+    xstar     = samples$xstar
+    alphastar = samples$alpha + input$mu_delta_alpha + 
+      input$sigma_delta_alpha * rnorm(input$N)
+    betastar  = samples$beta  + input$mu_delta_beta  + 
+      input$sigma_delta_beta  * rnorm(input$N)
+    sigmastar = sqrt(samples$sigma^2 + input$sigmad^2)
+
+    ## Posterior predictive distribution
+    ystar = alphastar + betastar * xstar + sigmastar * rnorm(input$N)
     
     ## Summarize discrepancy
     lwr = numeric(length(xx()))
@@ -393,15 +376,17 @@ server <- function(input, output) {
       lwr[i] = quantile(buffer,     as.numeric(input$alpha))
       upr[i] = quantile(buffer, 1 - as.numeric(input$alpha))
     }
-    
-    ## Posterior predictive distribution
-    ystar = alphastar + betastar * xstar + sigmastar * rnorm(input$N)
-    
+
     ## Return predictions
     list(alphastar = alphastar, betastar = betastar, sigmastar = sigmastar,
          xstar = xstar, ystar = ystar, lwr = lwr, upr = upr)
     
   })
+  
+  
+  ##############
+  ## Plotting ##
+  ##############
   
   ## Data plot
   output$dataPlot <- renderPlot({
@@ -426,9 +411,9 @@ server <- function(input, output) {
     
     # ## Add observations
     # abline(v = input$z, col = "blue", lty = "dotdash", lwd = 2)
-    # abline(v = input$z + qnorm(    as.numeric(input$alpha))*input$sigmaz, 
+    # abline(v = input$z + qnorm(    as.numeric(input$alpha))*input$sigma_z, 
     #        col = "blue", lty = "dashed", lwd = 2)
-    # abline(v = input$z + qnorm(1 - as.numeric(input$alpha))*input$sigmaz,
+    # abline(v = input$z + qnorm(1 - as.numeric(input$alpha))*input$sigma)z,
     #        col = "blue", lty = "dashed", lwd = 2)
     # 
     # ## Add legend
@@ -470,9 +455,9 @@ server <- function(input, output) {
     
     ## Add observations
     abline(v = input$z, col = "blue", lty = "dotdash", lwd = 2)
-    abline(v = input$z + qnorm(    as.numeric(input$alpha))*input$sigmaz, 
+    abline(v = input$z + qnorm(    as.numeric(input$alpha))*input$sigma_z, 
            col = "blue", lty = "dashed", lwd = 2)
-    abline(v = input$z + qnorm(1 - as.numeric(input$alpha))*input$sigmaz,
+    abline(v = input$z + qnorm(1 - as.numeric(input$alpha))*input$sigma_z,
            col = "blue", lty = "dashed", lwd = 2)
     
     ## Add HPC CI
@@ -513,7 +498,7 @@ server <- function(input, output) {
     title(xlab = input$xlab)
     title(ylab = input$ylab)
     
-    p      = dnorm(xxx(), input$z, input$sigmaz)
+    p      = dnorm(xxx(), input$z, input$sigma_z)
     # ymax = 10^(floor(log10(max(p)))-1)
     # ymax = ymax*ceiling(max(p)/ymax)
     pmax   = max(p)
@@ -525,9 +510,9 @@ server <- function(input, output) {
     
     ## Add quantiles
     abline(v = input$z, col = "blue", lty = "dotdash", lwd = 2)
-    # abline(v = input$z + qnorm(    as.numeric(input$alpha))*input$sigmaz,
+    # abline(v = input$z + qnorm(    as.numeric(input$alpha))*input$sigma_z,
     #        col = "blue", lty = "dashed", lwd = 2)
-    # abline(v = input$z + qnorm(1 - as.numeric(input$alpha))*input$sigmaz,
+    # abline(v = input$z + qnorm(1 - as.numeric(input$alpha))*input$sigma_z,
     #        col = "blue", lty = "dashed", lwd = 2)
 
   }) ## obsPlot
@@ -549,9 +534,9 @@ server <- function(input, output) {
     mtext("Joint prior distribution", side = 3, adj = 0)
     
     ## Simulate from prior
-    alpha    =     rnorm(input$N, input$meanalpha   , input$sdalpha   )
-    beta  =     rnorm(input$N, input$meanbeta , input$sdbeta )
-    sigma = abs(rnorm(input$N, input$meansigma, input$sdsigma))
+    alpha =     rnorm(input$N, input$mu_alpha, input$sigma_alpha)
+    beta  =     rnorm(input$N, input$mu_beta , input$sigma_beta )
+    sigma = abs(rnorm(input$N, input$mu_sigma, input$sigma_sigma))
     
     ## Simulate from prior predictive distribution
     fit = length(xx())
@@ -559,9 +544,9 @@ server <- function(input, output) {
     upr = length(xx())
     for (i in 1:length(xx())) {
       buffer = alpha + beta * xx()[i] + sigma * rnorm(input$N)
-      fit[i]  = mean(buffer)
-      lwr[i]  = quantile(buffer,     as.numeric(input$alpha))
-      upr[i]  = quantile(buffer, 1 - as.numeric(input$alpha))
+      fit[i] = mean(buffer)
+      lwr[i] = quantile(buffer,     as.numeric(input$alpha))
+      upr[i] = quantile(buffer, 1 - as.numeric(input$alpha))
     }
 
     ## Plot prior predictive distribution
@@ -578,7 +563,7 @@ server <- function(input, output) {
     par(las = 1, mar = c(2.5,2.5,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
         xaxs = "r", yaxs = "r")
     
-    p    = dnorm(yyy(), input$meanalpha, input$sdalpha)
+    p    = dnorm(yyy(), input$mu_alpha, input$sigma_alpha)
     ymax = 10^(floor(log10(max(p))))
     ymax = ymax*ceiling(1.04*max(p)/ymax)
     
@@ -587,10 +572,12 @@ server <- function(input, output) {
          lwd = 2, col = "red", ann = FALSE, xaxs = "i", yaxs = "i")
     
     ## Add quantiles
-    abline(v = input$meanalpha, col = "blue", lty = "dotdash", lwd = 2)
-    abline(v = input$meanalpha + qnorm(    as.numeric(input$alpha))*input$sdalpha, 
+    abline(v = input$mu_alpha, col = "blue", lty = "dotdash", lwd = 2)
+    abline(v = input$mu_alpha + 
+             qnorm(    as.numeric(input$alpha)) * input$sigma_alpha, 
            col = "blue", lty = "dashed", lwd = 2)
-    abline(v = input$meanalpha + qnorm(1 - as.numeric(input$alpha))*input$sdalpha,
+    abline(v = input$mu_alpha + 
+             qnorm(1 - as.numeric(input$alpha)) * input$sigma_alpha,
            col = "blue", lty = "dashed", lwd = 2)
     
   }) ## alphaPlot
@@ -602,7 +589,7 @@ server <- function(input, output) {
     par(las = 1, mar = c(2.5,2.5,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
         xaxs = "r", yaxs = "r")
     
-    p    = dnorm(yyy(), input$meanbeta, input$sdbeta)
+    p    = dnorm(yyy(), input$mu_beta, input$sigma_beta)
     ymax = 10^(floor(log10(max(p))))
     ymax = ymax*ceiling(1.04*max(p)/ymax)
     
@@ -611,10 +598,12 @@ server <- function(input, output) {
          lwd = 2, col = "red", ann = FALSE, xaxs = "i", yaxs = "i")
     
     ## Add quantiles
-    abline(v = input$meanbeta, col = "blue", lty = "dotdash", lwd = 2)
-    abline(v = input$meanbeta + qnorm(    as.numeric(input$alpha))*input$sdbeta, 
+    abline(v = input$mu_beta, col = "blue", lty = "dotdash", lwd = 2)
+    abline(v = input$mu_beta + 
+             qnorm(    as.numeric(input$alpha)) * input$sigma_beta, 
            col = "blue", lty = "dashed", lwd = 2)
-    abline(v = input$meanbeta + qnorm(1 - as.numeric(input$alpha))*input$sdbeta,
+    abline(v = input$mu_beta + 
+             qnorm(1 - as.numeric(input$alpha)) * input$sigma_beta,
            col = "blue", lty = "dashed", lwd = 2)
     
   }) ## betaPlot
@@ -626,7 +615,7 @@ server <- function(input, output) {
     par(las = 1, mar = c(2.5,2.5,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
         xaxs = "r", yaxs = "r")
     
-    p    = dnorm(yyy(), input$meansigma, input$sdsigma)
+    p    = dnorm(yyy(), input$mu_sigma, input$sigma_sigma)
     ymax = 10^(floor(log10(max(p))))
     ymax = ymax*ceiling(1.04*max(p)/ymax)
     
@@ -635,10 +624,12 @@ server <- function(input, output) {
          lwd = 2, col = "red", ann = FALSE, xaxs = "i", yaxs = "i")
     
     ## Add quantiles
-    abline(v = input$meansigma, col = "blue", lty = "dotdash", lwd = 2)
-    abline(v = input$meansigma + qnorm(    as.numeric(input$alpha))*input$sdsigma, 
+    abline(v = input$mu_sigma, col = "blue", lty = "dotdash", lwd = 2)
+    abline(v = input$mu_sigma + 
+             qnorm(    as.numeric(input$alpha)) * input$sigma_sigma, 
            col = "blue", lty = "dashed", lwd = 2)
-    abline(v = input$meansigma + qnorm(1 - as.numeric(input$alpha))*input$sdsigma,
+    abline(v = input$mu_sigma + 
+             qnorm(1 - as.numeric(input$alpha)) * input$sigma_sigma,
            col = "blue", lty = "dashed", lwd = 2)
     
   }) ## sigmaPlot
@@ -650,7 +641,7 @@ server <- function(input, output) {
     par(las = 1, mar = c(2.5,2.5,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
         xaxs = "r", yaxs = "r")
     
-    p    = dnorm(xxx(), input$meanxstar, input$sdxstar)
+    p    = dnorm(xxx(), input$mu_xstar, input$sigma_xstar)
     ymax = 10^(floor(log10(max(p))))
     ymax = ymax*ceiling(1.04*max(p)/ymax)
     
@@ -659,10 +650,12 @@ server <- function(input, output) {
          lwd = 2, col = "red", ann = FALSE, xaxs = "i", yaxs = "i")
     
     ## Add quantiles
-    abline(v = input$meanxstar, col = "blue", lty = "dotdash", lwd = 2)
-    abline(v = input$meanxstar + qnorm(    as.numeric(input$alpha))*input$sdxstar, 
+    abline(v = input$mu_xstar, col = "blue", lty = "dotdash", lwd = 2)
+    abline(v = input$mu_xstar + 
+             qnorm(    as.numeric(input$alpha)) * input$sigma_xstar, 
            col = "blue", lty = "dashed", lwd = 2)
-    abline(v = input$meanxstar + qnorm(1 - as.numeric(input$alpha))*input$sdxstar,
+    abline(v = input$mu_xstar + 
+             qnorm(1 - as.numeric(input$alpha)) * input$sigma_xstar,
            col = "blue", lty = "dashed", lwd = 2)
     
   }) ## xstarPlot
@@ -670,6 +663,5 @@ server <- function(input, output) {
 } ## server
 
 ## Run the app
-#options(browser = "chrome")
 shinyApp(ui = ui, server = server, options = "launch.browser = TRUE")
 
