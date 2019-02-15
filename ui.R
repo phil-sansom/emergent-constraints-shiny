@@ -80,10 +80,18 @@ ui = navbarPage(
                    hr(),
                    fluidRow(
                      column(width = 6,
-                            uiOutput("predictor")
+                            selectInput(inputId  = "x", 
+                                        label    = withMathJax("Predictor 
+                                                               \\(X_m\\)"),
+                                        choices  = NULL,
+                                        selected = NULL)
                      ), ## column
                      column(width = 6,
-                            uiOutput("response")
+                            selectInput(inputId  = "y", 
+                                        label    = withMathJax("Response 
+                                                               \\(Y_m\\)"),
+                                        choices  = NULL,
+                                        selected = NULL)
                      ) ## column
                    ), ## fluidRow
                    hr(),
@@ -107,33 +115,37 @@ ui = navbarPage(
                  ), ## tabPanel
                  tabPanel(
                    title = "Plotting options",
+                   h4("Axis labels"),
                    fluidRow(
-                     h4("Axis labels"),
                      column(width = 6,
-                            uiOutput("xlab")
+                            textInput(inputId = "xlab",
+                                      label   = "Predictor label",
+                                      value   = NULL)
                      ), ## column
                      column(width = 6,
-                            uiOutput("ylab")
+                            textInput(inputId = "ylab",
+                                      label   = "Response label",
+                                      value   = NULL
+                            )
                      ) ## column
                    ), ## fluidRow
-                   fluidRow(
-                     h4("Predictor limits"),
-                     column(width = 6,
-                            uiOutput("xmin")
-                     ), ## column
-                     column(width = 6,
-                            uiOutput("xmax")
-                     ) ## column
-                   ), ## fluidRow
-                   fluidRow(
-                     h4("Response limits"),
-                     column(width = 6,
-                            uiOutput("ymin")
-                     ), ## column
-                     column(width = 6,
-                            uiOutput("ymax")
-                     ) ## column
-                   ) ## fluidRow
+                   h4("Predictor limits"),
+                   sliderInput(inputId = "xlim",
+                               label   = "X limits",
+                               value   = c(0,1),
+                               min     = 0,
+                               max     = 1,
+                               step    = 0.1,
+                               ticks   = FALSE
+                   ),
+                   sliderInput(inputId = "ylim",
+                               label   = "Y limits",
+                               value   = c(0,1),
+                               min     = 0,
+                               max     = 1,
+                               step    = 0.1,
+                               ticks   = FALSE
+                   )
                  ) ## tabPanel
                ) ## tabsetPanel
              ), ## sidePanel
@@ -148,104 +160,104 @@ ui = navbarPage(
            sidebarLayout(
              sidebarPanel(
                h4("Multi-model ensemble"),
+               h5("Intercept \\(\\alpha\\)"),
                fluidRow(
-                 h5("Intercept \\(\\alpha\\)"),
                  column(width = 6,
-                        numericInput(inputId = "mu_alpha", 
+                        numericInput(inputId = "mu_alpha",
                                      label   = "Mean \\(\\mu_\\alpha\\)",
                                      value   = 0
                         ) ## numericInput
                  ), ## column
                  column(width = 6,
-                        numericInput(inputId = "sigma_alpha", 
+                        numericInput(inputId = "sigma_alpha",
                                      label   = "Standard deviation
                                                 \\(\\sigma_\\alpha\\)",
-                                     value   = 1e3, 
+                                     value   = 1e3,
                                      min     = 0
                         ) ## numericInput
                  ) ## column
                ), ## fluidRow
+               h5("Slope \\(\\beta\\)"),
                fluidRow(
-                 h5("Slope \\(\\beta\\)"),
                  column(width = 6,
-                        numericInput(inputId = "mu_beta", 
+                        numericInput(inputId = "mu_beta",
                                      label   = "Mean \\(\\mu_\\beta\\)",
                                      value   = 0
                         ) ## numericInput
                  ), ## column
                  column(width = 6,
-                        numericInput(inputId = "sigma_beta", 
+                        numericInput(inputId = "sigma_beta",
                                      label   = "Standard deviation
                                                 \\(\\sigma_\\beta\\)",
-                                     value   = 1e3, 
+                                     value   = 1e3,
                                      min     = 0
                         ) ## numericInput
                  ) ## column
                ), ## fluidRow
+               h5("Response spread \\(\\sigma\\)"),
                fluidRow(
-                 h5("Response spread \\(\\sigma\\)"),
                  column(width = 6,
-                        numericInput(inputId = "mu_sigma", 
+                        numericInput(inputId = "mu_sigma",
                                      label   = "Location \\(\\mu_\\sigma\\)",
-                                     value   = 0, 
+                                     value   = 0,
                                      min     = 0
                         ) ## numericInput
                  ), ## column
                  column(width = 6,
-                        numericInput(inputId = "sigma_sigma", 
+                        numericInput(inputId = "sigma_sigma",
                                      label   = "Scale \\(\\sigma_\\sigma\\)",
-                                     value   = 1e3, 
+                                     value   = 1e3,
                                      min     = 0
                         ) ## numericInput
                  ) ## column
                ), ## fluidRow
                hr(),
                h4("Real world"),
+               h5("Predictor \\(X_\\star\\)"),
                fluidRow(
-                 h5("Predictor \\(X_\\star\\)"),
                  column(width = 6,
-                        numericInput(inputId = "mu_xstar", 
+                        numericInput(inputId = "mu_xstar",
                                      label   = "Mean \\(\\mu_{X_\\star}\\)",
                                      value   = 0
                         ) ## numericInput
                  ), ## column
                  column(width = 6,
-                        numericInput(inputId = "sigma_xstar", 
+                        numericInput(inputId = "sigma_xstar",
                                      label   = "Standard deviation
                                                 \\(\\sigma_{X_\\star}\\)",
-                                     value   = 1e3, 
+                                     value   = 1e3,
                                      min     = 0
                         ) ## numericInput
                  ) ## column
                ) ## fluidRow
              ), ## sidePanel
-             
+
              mainPanel(
                fluidRow(
-                 plotOutput(outputId = "priorPlot", 
+                 plotOutput(outputId = "priorPlot",
                             height   = 400
                  ) ## plotOutput
                ), ## fluidRow
                fluidRow(
-                 column(width = 6, 
-                        plotOutput(outputId = "alphaPlot", 
+                 column(width = 6,
+                        plotOutput(outputId = "alphaPlot",
                                    height   = 200
                         ) ## plotOutput
                  ), ## column
-                 column(width = 6, 
-                        plotOutput(outputId = "betaPlot", 
+                 column(width = 6,
+                        plotOutput(outputId = "betaPlot",
                                    height   = 200
                         ) ## plotOutput
                  ) ## column
                ), ## fluidRow
                fluidRow(
-                 column(width = 6, 
-                        plotOutput(outputId = "sigmaPlot", 
+                 column(width = 6,
+                        plotOutput(outputId = "sigmaPlot",
                                    height   = 200
                         ) ## plotOutput
                  ), ## column
-                 column(width = 6, 
-                        plotOutput(outputId = "xstarPlot", 
+                 column(width = 6,
+                        plotOutput(outputId = "xstarPlot",
                                    height   = 200
                         ) ## plotOutput
                  ) ## column
@@ -253,7 +265,7 @@ ui = navbarPage(
              ) ## mainPanel
            ) ## sidepanelLayout
   ), ## tabPanel
-  
+
   ## Projection tab
   tabPanel("Projections",
            sidebarLayout(
@@ -261,35 +273,35 @@ ui = navbarPage(
                tabsetPanel(
                  tabPanel(
                    title = "Discrepancy parameters",
+                   h5("Intercept \\(\\alpha_\\star\\)"),
                    fluidRow(
-                     h5("Intercept \\(\\alpha_\\star\\)"),
                      column(width = 6,
-                            numericInput(inputId = "mu_delta_alpha", 
-                                         label   = "Bias 
+                            numericInput(inputId = "mu_delta_alpha",
+                                         label   = "Bias
                                          \\(\\mu_{\\delta_\\alpha}\\)",
                                          value   = 0
                             ) ## numericInput
                      ), ## column
                      column(width = 6,
-                            numericInput(inputId = "sigma_delta_alpha", 
-                                         label   = "Uncertainty 
+                            numericInput(inputId = "sigma_delta_alpha",
+                                         label   = "Uncertainty
                                          \\(\\sigma_{\\delta_\\alpha}\\)",
-                                         value   = 0, 
+                                         value   = 0,
                                          min     = 0
                             ) ## numericInput
                      ) ## column
                    ), ## fluidRow
+                   h5("Slope \\(\\beta_\\star\\)"),
                    fluidRow(
-                     h5("Slope \\(\\beta_\\star\\)"),
                      column(width = 6,
-                            numericInput(inputId = "mu_delta_beta", 
-                                         label   = "Bias 
+                            numericInput(inputId = "mu_delta_beta",
+                                         label   = "Bias
                                          \\(\\mu_{\\delta_\\beta}\\)",
                                          value   = 0
                             ) ## numericInput
                      ), ## cloumn
                      column(width = 6,
-                            numericInput(inputId = "sigma_delta_beta", 
+                            numericInput(inputId = "sigma_delta_beta",
                                          label   = "Uncertainty
                                          \\(\\sigma_{\\delta_\\beta}\\)",
                                          value   = 0,
@@ -297,12 +309,12 @@ ui = navbarPage(
                             ) ## numericInput
                      ) ## column
                    ), ## fluidRow
+                   h5("Spread \\(\\sigma_\\star\\)"),
                    fluidRow(
-                     h5("Spread \\(\\sigma_\\star\\)"),
                      column(width = 6
                      ), ## cloumn
                      column(width = 6,
-                            numericInput(inputId = "sigmad", 
+                            numericInput(inputId = "sigmad",
                                          label   = "Uncertainty
                                          \\(\\sigma_{\\sigma_\\star}\\)",
                                          value   = 0,
@@ -311,23 +323,23 @@ ui = navbarPage(
                      ) ## column
                    ) ## fluidRow
                  ), ## tabPanel
-                 
+
                  tabPanel(
                    title = "Plotting options",
-                   numericInput(inputId = "N", 
+                   numericInput(inputId = "N",
                                 label   = "Number of samples",
-                                value   = 10000, 
-                                min     = 1000, 
+                                value   = 10000,
+                                min     = 1000,
                                 step    = 1000
                    ), ## numericInput
-                   # numericInput(inputId = "mc.cores", 
+                   # numericInput(inputId = "mc.cores",
                    #              label   = "Number of cores",
                    #              value   = 4,
-                   #              min     = 1, 
-                   #              max     = 16, 
+                   #              min     = 1,
+                   #              max     = 16,
                    #              step    = 1
                    # ), ## numericInput
-                   selectInput(inputId  = "alpha", 
+                   selectInput(inputId  = "alpha",
                                label    = "Credible interval",
                                choices  = list("68% (1 sd)" = 0.160,
                                                "90%"        = 0.050,

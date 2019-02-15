@@ -1,89 +1,97 @@
-server = function(input, output) {
+server = function(input, output, session) {
   
   ##########################
   ## Reactive UI elements ##
   ##########################
 
-  output$predictor = renderUI({
-    selectInput(inputId = "predictor", 
-                label   = withMathJax("Predictor \\(X_m\\)"), 
-                choices = colnames(data()))
-  })
-
-  output$response = renderUI({
-    selectInput(inputId = "response", 
-                label   = withMathJax("Response \\(Y_m\\)"), 
-                choices = colnames(data()))
-  })
-
-  output$xlab = renderUI({
-    textInput(inputId = "xlab", label = "Predictor label", 
-              value = input$predictor)
-  })
-
-  output$ylab = renderUI({
-    textInput(inputId = "ylab", label = "Response label", 
-              value = input$response)
+  observe({
+    choices = names(data())
+    updateSelectInput(session  = session,
+                      inputId  = "x",
+                      choices  = choices,
+                      selected = choices[1]
+    )
   })
   
-  output$xmin = renderUI({
-    v       = data()[,input$predictor]
-    vmin    = min(v)
-    vmax    = max(v)
-    vrange  = vmax - vmin
-    vstep   = 10^floor(log10(vrange))
-    vmin    = vmin - 0.04 * vrange
-    vmin    = floor  (vmin / vstep) * vstep
-
-    numericInput(inputId = "xmin", 
-                 label   = "X min",
-                 value   = vmin,
-                 step    = vstep)
+  observe({
+    choices = names(data())
+    updateSelectInput(session  = session,
+                      inputId  = "y",
+                      choices  = choices,
+                      selected = choices[2]
+    )
   })
 
-  output$xmax = renderUI({
-    v       = data()[,input$predictor]
-    vmin    = min(v)
-    vmax    = max(v)
-    vrange  = vmax - vmin
-    vstep   = 10^floor(log10(vrange))
-    vmax    = vmax + 0.04 * vrange
-    vmax    = ceiling(vmax / vstep) * vstep
-    
-    numericInput(inputId = "xmax", 
-                 label   = "X max",
-                 value   = vmax,
-                 step    = vstep)
+  observe(
+    updateTextInput(session  = session,
+                    inputId  = "xlab",
+                    value    = input$x
+    )
+  )
+  
+  observe(
+    updateTextInput(session  = session,
+                    inputId  = "ylab",
+                    value    = input$y
+    )
+  )
+  
+  observe({
+      xy = data()
+      choices = names(xy)
+      if (is.null(xy) | ! input$x %in% choices)
+        return(NULL)
+      v       = data()[,input$x]
+      
+      vrange  = range(v)
+      vdiff   = diff(vrange)
+      vmean   = mean(v)
+      vstep   = 10^floor(log10(vdiff))
+      vmin    = vrange[1] - vdiff
+      vmax    = vrange[2] + vdiff
+      vminval = vrange[1] - 0.04 * vdiff
+      vmaxval = vrange[2] + 0.04 * vdiff
+      vmin    = floor  (vmin   /vstep)*vstep
+      vmax    = ceiling(vmax   /vstep)*vstep
+      vminval = floor  (vminval/vstep)*vstep
+      vmaxval = ceiling(vmaxval/vstep)*vstep
+      
+      updateSliderInput(session = session,
+                        inputId = "xlim",
+                        value   = c(vminval,vmaxval),
+                        min     = vmin,
+                        max     = vmax,
+                        step    = vstep
+      )
   })
   
-  output$ymin = renderUI({
-    v       = data()[,input$response]
-    vmin    = min(v)
-    vmax    = max(v)
-    vrange  = vmax - vmin
-    vstep   = 10^floor(log10(vrange))
-    vmin    = vmin - 0.04 * vrange
-    vmin    = floor  (vmin / vstep) * vstep
+  observe({
+    xy = data()
+    choices = names(xy)
+    if (is.null(xy) | ! input$y %in% choices)
+      return(NULL)
+    v       = data()[,input$y]
     
-    numericInput(inputId = "ymin", 
-                 label   = "Y min",
-                 value   = vmin,
-                 step    = vstep)
-  })
-  
-  output$ymax = renderUI({
-    v       = data()[,input$response]
-    vmin    = min(v)
-    vmax    = max(v)
-    vrange  = vmax - vmin
-    vstep   = 10^floor(log10(vrange))
-    vmax    = vmax + 0.04 * vrange
-    vmax    = ceiling(vmax / vstep) * vstep
+    vrange  = range(v)
+    vdiff   = diff(vrange)
+    vmean   = mean(v)
+    vstep   = 10^floor(log10(vdiff))
+    vmin    = vrange[1] - vdiff
+    vmax    = vrange[2] + vdiff
+    vminval = vrange[1] - 0.04 * vdiff
+    vmaxval = vrange[2] + 0.04 * vdiff
+    vmin    = floor  (vmin   /vstep)*vstep
+    vmax    = ceiling(vmax   /vstep)*vstep
+    vminval = floor  (vminval/vstep)*vstep
+    vmaxval = ceiling(vmaxval/vstep)*vstep
     
-    numericInput(inputId = "ymax", 
-                 label   = "Y max",
-                 value   = vmax,
-                 step    = vstep)
+    updateSliderInput(session = session,
+                      inputId = "ylim",
+                      value   = c(vminval,vmaxval),
+                      min     = vmin,
+                      max     = vmax,
+                      step    = vstep
+    )
   })
   
   
@@ -94,83 +102,82 @@ server = function(input, output) {
   ## Data
   data = reactive({
     
-    inFile <- input$file
+    input_file = input$file
     
-    if (is.null(inFile))
+    if (is.null(input_file))
       return(NULL)
     
-    read.csv(inFile$datapath, header = input$header)
-    
+    read.csv(input_file$datapath, header = input$header)
+
   })
   
   ## Plotting points
-  xx  = reactive(seq(input$xmin, input$xmax, length.out = 100))
-  xxx = reactive(seq(input$xmin, input$xmax, length.out = 100))
-  yyy = reactive(seq(input$ymin, input$ymax, length.out = 100))
-  
-  ## Sample posterior  
+  xx  = reactive(seq(input$xlim[1], input$xlim[2], length.out = 100))
+
+  ## Sample posterior
   posterior = reactive({
-    
+
     ## Data
-    x = data()[,input$predictor]
-    y = data()[,input$response]
-    
+    x = data()[,input$x]
+    y = data()[,input$y]
+
     ## Package data
-    data = list(M = length(x), x = x, y = y, 
+    data = list(M = length(x), x = x, y = y,
                 z = input$z, sigma_z = input$sigma_z,
                 mu_alpha = input$mu_alpha, sigma_alpha = input$sigma_alpha,
                 mu_beta  = input$mu_beta , sigma_beta  = input$sigma_beta ,
                 mu_sigma = input$mu_sigma, sigma_sigma = input$sigma_sigma,
                 mu_xstar = input$mu_xstar, sigma_xstar = input$sigma_xstar)
-    
+
     ## Fit STAN model
     buffer = sampling(model, data = data, chains = getOption("mc.cores"),
-                      iter = 2*input$N/getOption("mc.cores"), 
-                      warmup = input$N/getOption("mc.cores"), 
+                      iter = 2*input$N/getOption("mc.cores"),
+                      warmup = input$N/getOption("mc.cores"),
                       verbose = FALSE, show_messages = FALSE)
-    
+
     ## Extract posterior samples
     extract(buffer, c("alpha","beta","sigma","xstar","ystar"))
-  })
-  
-  
-  ## Sample posterior predictive 
-  predictive = reactive({
     
+  })
+
+
+  ## Sample posterior predictive
+  predictive = reactive({
+
     ## Posterior predictive uncertainty
     fit = length(xx())
     lwr = length(xx())
     upr = length(xx())
     for (i in 1:length(xx())) {
-      buffer = posterior()$alpha + posterior()$beta * xx()[i] + 
+      buffer = posterior()$alpha + posterior()$beta * xx()[i] +
         posterior()$sigma * rnorm(input$N)
       fit[i]  = mean(buffer)
       lwr[i]  = quantile(buffer,     as.numeric(input$alpha))
       upr[i]  = quantile(buffer, 1 - as.numeric(input$alpha))
     }
-    
+
     ## Return samples
     list(fit = fit, lwr = lwr, upr = upr)
-    
+
   })
-  
+
   ## Compute discrepancy
   discrepancy = reactive({
-    
+
     ## Posterior samples
     samples = posterior()
 
     ## Sample discrepancy
     xstar     = samples$xstar
-    alphastar = samples$alpha + input$mu_delta_alpha + 
+    alphastar = samples$alpha + input$mu_delta_alpha +
       input$sigma_delta_alpha * rnorm(input$N)
-    betastar  = samples$beta  + input$mu_delta_beta  + 
+    betastar  = samples$beta  + input$mu_delta_beta  +
       input$sigma_delta_beta  * rnorm(input$N)
     sigmastar = sqrt(samples$sigma^2 + input$sigmad^2)
 
     ## Posterior predictive distribution
     ystar = alphastar + betastar * xstar + sigmastar * rnorm(input$N)
-    
+
     ## Summarize discrepancy
     lwr = numeric(length(xx()))
     upr = numeric(length(xx()))
@@ -183,7 +190,7 @@ server = function(input, output) {
     ## Return predictions
     list(alphastar = alphastar, betastar = betastar, sigmastar = sigmastar,
          xstar = xstar, ystar = ystar, lwr = lwr, upr = upr)
-    
+
   })
   
   
@@ -193,83 +200,99 @@ server = function(input, output) {
   
   ## Data plot
   output$dataPlot <- renderPlot({
+
+    ## Data
+    xy = data()
+    choices = names(xy)
+
+    ## Skip plotting if no data is loaded
+    if (is.null(xy) | ! input$x %in% choices)
+      return(NULL)
+    
+    x = xy[,input$x]
+    y = xy[,input$y]
     
     ## Plotting parameters
     par(las = 1, mar = c(2.5,2.5,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
         xaxs = "r", yaxs = "r")
     
-    ## Data
-    x = data()[,input$predictor]
-    y = data()[,input$response]
-    
     ## Plot data
-    plot(x, y, xlim = c(input$xmin,input$xmax), ylim = c(input$ymin,input$ymax),
+    plot(x, y, xlim = input$xlim, ylim = input$ylim,
          ann = FALSE, pch = 19, xaxs = "i", yaxs = "i")
-    
+
     ## Add titles
     title(xlab = input$xlab)
     title(ylab = input$ylab)
     #title(main = "Emergent relationship fit", cex.main = 1, font.main = 1)
     #mtext("Emergent relationship fit", side = 3, adj = 0)
-    
-    # ## Observation density    
+
+    # ## Observation density
     # p      = dnorm(xxx(), input$z, input$sigma_z)
     # # ymax = 10^(floor(log10(max(p)))-1)
     # # ymax = ymax*ceiling(max(p)/ymax)
     # pmax   = max(p)
     # yrange = diff(input$ylim)
     # pscale = 0.5*yrange/pmax
-    # 
+    #
     # ## Plot obs density
     # lines(xxx(), input$ylim[1] + p * pscale, col = "blue", lwd = 2)
-    
+
     ## Add observations
     abline(v = input$z, col = "blue", lty = "dotdash", lwd = 2)
     abline(v = input$z + qnorm(    as.numeric(input$alpha))*input$sigma_z,
            col = "blue", lty = "dashed", lwd = 2)
     abline(v = input$z + qnorm(1 - as.numeric(input$alpha))*input$sigma_z,
            col = "blue", lty = "dashed", lwd = 2)
-    
+
     # ## Add legend
     # legend("bottomright",
     #        legend = c("Linear regression","Observational constraint"),
     #        col = c("black","blue"), lty = c("dotdash","dotdash"), lwd = c(2,2),
     #        bty = "n")
-    
+
   })
   
   ## Main plot
   output$mainPlot <- renderPlot({
+
+    ## Data
+    xy = data()
+    choices = names(xy)
+    
+    ## Skip plotting if no data is loaded
+    if (is.null(xy) | ! input$x %in% choices)
+      return(NULL)
+    
     
     par(las = 1, mar = c(2.5,2.5,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
         xaxs = "r", yaxs = "r")
-    
+
     ## Data
-    x = data()[,input$predictor]
-    y = data()[,input$response]
-    
+    x = xy[,input$x]
+    y = xy[,input$y]
+
     ## Plot data
-    plot(x, y, xlim = c(input$xmin,input$xmax), ylim = c(input$ymin,input$ymax),
+    plot(x, y, xlim = input$xlim, ylim = input$ylim,
          ann = FALSE, pch = 19, xaxs = "i", yaxs = "i")
-    
+
     ## Add titles
     title(xlab = input$xlab)
     title(ylab = input$ylab)
     #title(main = "Emergent relationship fit", cex.main = 1, font.main = 1)
     mtext("Emergent relationship fit", side = 3, adj = 0)
-    
+
     ## Add linear regression
     lines(xx(), predictive()$fit, lty = "dotdash", lwd = 2)
     lines(xx(), predictive()$lwr, lty = "dashed" , lwd = 2)
     lines(xx(), predictive()$upr, lty = "dashed" , lwd = 2)
-    
+
     ## Add discrepancy
     lines(xx(), discrepancy()$lwr, lty = "dashed" , col = "red", lwd = 2)
     lines(xx(), discrepancy()$upr, lty = "dashed" , col = "red", lwd = 2)
-    
+
     ## Add observations
     abline(v = input$z, col = "blue", lty = "dotdash", lwd = 2)
-    abline(v = input$z + qnorm(    as.numeric(input$alpha))*input$sigma_z, 
+    abline(v = input$z + qnorm(    as.numeric(input$alpha))*input$sigma_z,
            col = "blue", lty = "dashed", lwd = 2)
     abline(v = input$z + qnorm(1 - as.numeric(input$alpha))*input$sigma_z,
            col = "blue", lty = "dashed", lwd = 2)
@@ -283,7 +306,7 @@ server = function(input, output) {
       z[o[i]] = z[o[i]] + z[o[i-1]]
     contour(dens$x, dens$y, z, levels = 1 - 2*as.numeric(input$alpha),
             drawlabels = FALSE, lwd = 2, lty = "dotted", add = TRUE)
-        
+
     ## Add discrepancy HPC CI
     dens = kde2d(discrepancy()$xstar, discrepancy()$ystar, n = 25)
     z = dens$z
@@ -292,42 +315,50 @@ server = function(input, output) {
     for (i in 2:length(z))
       z[o[i]] = z[o[i]] + z[o[i-1]]
     contour(dens$x, dens$y, z, levels = 1 - 2*as.numeric(input$alpha),
-            drawlabels = FALSE, col = "red", lwd = 2, lty = "dotted", 
+            drawlabels = FALSE, col = "red", lwd = 2, lty = "dotted",
             add = TRUE)
-    
+
     ## Add legend
     legend("bottomright",
            legend = c("Exchangeable model","Coexchangeable model",
                       "Observational constraint"),
            col = c("black","red","blue"),
            lty = c("dotdash","dotdash","dotdash"), lwd = c(2,2,2), bty = "n")
-    
+
   })
-  
+
   ## Auxilliary plot
   output$auxPlot <- renderPlot({
+
+    ## Data
+    xy = data()
+    choices = names(xy)
+    
+    ## Skip plotting if no data is loaded
+    if (is.null(xy) | ! input$x %in% choices)
+      return(NULL)
     
     par(las = 1, mar = c(2.5,2.5,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
         xaxs = "r", yaxs = "r")
 
     ## Marginal distribution
-    dens0 = density(data()[,input$response])
-    
+    dens0 = density(xy[,input$y])
+
     ## Basic projection
     dens1 = density(posterior()$ystar)
 
     ## Discrepancy projection
     dens2 = density(discrepancy()$ystar)
-    
+
     ymax = max(dens0$y,dens1$y,dens2$y)*1.04
-    
+
     ## Plot data
-    plot(dens0, xlim = c(input$ymin,input$ymax), ylim = c(0,ymax), 
-         col = "green", ann = FALSE, type = "l", lwd = 2, 
+    plot(dens0, xlim = input$ylim, ylim = c(0,ymax),
+         col = "green", ann = FALSE, type = "l", lwd = 2,
          xaxs = "i", yaxs = "i")
     lines(dens1, lwd = 2, col = "black")
     lines(dens2, lwd = 2, col = "red")
-    
+
     ## Add titles
     title(xlab = input$ylab)
     title(ylab = "Density")
@@ -335,58 +366,58 @@ server = function(input, output) {
     # mtext("Emergent relationship fit", side = 3, adj = 0)
 
     ## Add quantiles
-    abline(v = mean(data()[,input$response]), 
+    abline(v = mean(data()[,input$y]),
            col = "green", lwd = 2, lty = "dotdash")
-    abline(v = quantile(data()[,input$response],     as.numeric(input$alpha)), 
+    abline(v = quantile(data()[,input$y],     as.numeric(input$alpha)),
            col = "green", lwd = 2, lty = "dashed")
-    abline(v = quantile(data()[,input$response], 1 - as.numeric(input$alpha)), 
+    abline(v = quantile(data()[,input$y], 1 - as.numeric(input$alpha)),
            col = "green", lwd = 2, lty = "dashed")
-        
+
     ## Add quantiles
     abline(v = mean(posterior()$ystar), col = "black", lwd = 2, lty = "dotdash")
-    abline(v = quantile(posterior()$ystar,     as.numeric(input$alpha)), 
+    abline(v = quantile(posterior()$ystar,     as.numeric(input$alpha)),
            col = "black", lwd = 2, lty = "dashed")
-    abline(v = quantile(posterior()$ystar, 1 - as.numeric(input$alpha)), 
+    abline(v = quantile(posterior()$ystar, 1 - as.numeric(input$alpha)),
            col = "black", lwd = 2, lty = "dashed")
 
     ## Add quantiles
-    abline(v = mean(discrepancy()$ystar), 
+    abline(v = mean(discrepancy()$ystar),
            col = "red", lwd = 2, lty = "dotdash")
-    abline(v = quantile(discrepancy()$ystar,     as.numeric(input$alpha)), 
+    abline(v = quantile(discrepancy()$ystar,     as.numeric(input$alpha)),
            col = "red", lwd = 2, lty = "dashed")
-    abline(v = quantile(discrepancy()$ystar, 1 - as.numeric(input$alpha)), 
+    abline(v = quantile(discrepancy()$ystar, 1 - as.numeric(input$alpha)),
            col = "red", lwd = 2, lty = "dashed")
-    
+
     ## Add legend
     legend("topright",
            legend = c("Model response","Exchangeable model",
                       "Coexchangeable model"),
-           col = c("green","black","red"), lty = c("solid","solid","solid"), 
+           col = c("green","black","red"), lty = c("solid","solid","solid"),
            lwd = c(2,2,2), bty = "n")
-    
+
   })
-  
+
   ## Joint prior plot
   output$priorPlot <- renderPlot({
-    
+
     par(las = 1, mar = c(2.5,2.5,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
         xaxs = "r", yaxs = "r")
-    
+
     ## Plot data
-    plot(NULL, NULL, type = "n", xlim = c(input$xmin,input$xmax), 
-         ylim = c(input$ymin,input$ymax), ann = FALSE, xaxs = "i", yaxs = "i")
-    
+    plot(NULL, NULL, type = "n", xlim = input$xlim, ylim = input$ylim, 
+         ann = FALSE, xaxs = "i", yaxs = "i")
+
     ## Add titles
     title(xlab = input$xlab)
     title(ylab = input$ylab)
     #title(main = "Emergent relationship fit", cex.main = 1, font.main = 1)
     mtext("Joint prior distribution", side = 3, adj = 0)
-    
+
     ## Simulate from prior
     alpha =     rnorm(input$N, input$mu_alpha, input$sigma_alpha)
     beta  =     rnorm(input$N, input$mu_beta , input$sigma_beta )
     sigma = abs(rnorm(input$N, input$mu_sigma, input$sigma_sigma))
-    
+
     ## Simulate from prior predictive distribution
     fit = length(xx())
     lwr = length(xx())
@@ -404,14 +435,14 @@ server = function(input, output) {
     lines(xx(), upr, lty = "dashed" , lwd = 2)
 
   }) ## priorPlot
-  
+
   ## Mean/intercept prior
   output$alphaPlot <- renderPlot({
-    
+
     ## Plotting parameters
     par(las = 1, mar = c(2.5,4.0,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
         xaxs = "r", yaxs = "r")
-    
+
     mu    = input$mu_alpha
     sigma = input$sigma_alpha
     xmin  = qnorm(pnorm(-4), mu, sigma)
@@ -419,31 +450,31 @@ server = function(input, output) {
     xx    = seq(xmin, xmax, length.out = 101)
     yy    = dnorm(xx, mu, sigma)
     ymax  = 1.04*max(yy)
-    
+
     ## Plot density
-    plot(xx, yy, type = "l", xlim = c(xmin,xmax), ylim = c(0,ymax), 
+    plot(xx, yy, type = "l", xlim = c(xmin,xmax), ylim = c(0,ymax),
          lwd = 2, col = "red", ann = FALSE, xaxs = "i", yaxs = "i")
-    
+
     ## Add titles
     title(xlab = expression(paste("Intercept ", alpha)))
     title(ylab = "Density", line = 3.0)
-    
+
     ## Add quantiles
     abline(v = mu, col = "blue", lty = "dotdash", lwd = 2)
-    abline(v = mu + qnorm(    as.numeric(input$alpha)) * sigma, 
+    abline(v = mu + qnorm(    as.numeric(input$alpha)) * sigma,
            col = "blue", lty = "dashed", lwd = 2)
     abline(v = mu + qnorm(1 - as.numeric(input$alpha)) * sigma,
            col = "blue", lty = "dashed", lwd = 2)
-    
+
   }) ## alphaPlot
 
   ## Slope prior
   output$betaPlot <- renderPlot({
-    
+
     ## Plotting parameters
     par(las = 1, mar = c(2.5,4.0,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
         xaxs = "r", yaxs = "r")
-    
+
     mu    = input$mu_beta
     sigma = input$sigma_beta
     xmin  = qnorm(pnorm(-4), mu, sigma)
@@ -451,62 +482,62 @@ server = function(input, output) {
     xx    = seq(xmin, xmax, length.out = 101)
     yy    = dnorm(xx, mu, sigma)
     ymax  = 1.04*max(yy)
-    
+
     ## Plot density
-    plot(xx, yy, type = "l", xlim = c(xmin,xmax), ylim = c(0,ymax), 
+    plot(xx, yy, type = "l", xlim = c(xmin,xmax), ylim = c(0,ymax),
          lwd = 2, col = "red", ann = FALSE, xaxs = "i", yaxs = "i")
-    
+
     ## Add titles
     title(xlab = expression(paste("Slope ", beta)))
     title(ylab = "Density", line = 3.0)
-    
+
     ## Add quantiles
     abline(v = mu, col = "blue", lty = "dotdash", lwd = 2)
-    abline(v = mu + qnorm(    as.numeric(input$alpha)) * sigma, 
+    abline(v = mu + qnorm(    as.numeric(input$alpha)) * sigma,
            col = "blue", lty = "dashed", lwd = 2)
     abline(v = mu + qnorm(1 - as.numeric(input$alpha)) * sigma,
            col = "blue", lty = "dashed", lwd = 2)
-    
+
   }) ## betaPlot
-  
+
   ## Sigma prior
   output$sigmaPlot <- renderPlot({
-    
+
     ## Plotting parameters
     par(las = 1, mar = c(2.5,4.0,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
         xaxs = "r", yaxs = "r")
-    
+
     mu    = input$mu_sigma
     sigma = input$sigma_sigma
     xmax  = qnorm(pnorm(+4), mu, sigma)
     xx    = seq(0, xmax, length.out = 101)
     yy    = dnorm(xx, mu, sigma) + dnorm(-xx, mu, sigma)
     ymax  = 1.04*max(yy)
-    
+
     ## Plot density
-    plot(xx, yy, type = "l", xlim = c(0,xmax), ylim = c(0,ymax), 
+    plot(xx, yy, type = "l", xlim = c(0,xmax), ylim = c(0,ymax),
          lwd = 2, col = "red", ann = FALSE, xaxs = "i", yaxs = "i")
-    
+
     ## Add titles
     title(xlab = expression(paste("Response spread ", sigma)))
     title(ylab = "Density", line = 3.0)
-    
+
     ## Add quantiles
     abline(v = mu, col = "blue", lty = "dotdash", lwd = 2)
-    abline(v = mu + qnorm(    as.numeric(input$alpha)) * sigma, 
+    abline(v = mu + qnorm(    as.numeric(input$alpha)) * sigma,
            col = "blue", lty = "dashed", lwd = 2)
     abline(v = mu + qnorm(1 - as.numeric(input$alpha)) * sigma,
            col = "blue", lty = "dashed", lwd = 2)
-    
+
   }) ## sigmaPlot
 
   ## xstar prior
   output$xstarPlot <- renderPlot({
-    
+
     ## Plotting parameters
     par(las = 1, mar = c(2.5,4.0,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
         xaxs = "r", yaxs = "r")
-    
+
     mu    = input$mu_xstar
     sigma = input$sigma_xstar
     xmin  = qnorm(pnorm(-4), mu, sigma)
@@ -514,22 +545,22 @@ server = function(input, output) {
     xx    = seq(xmin, xmax, length.out = 101)
     yy    = dnorm(xx, mu, sigma)
     ymax  = 1.04*max(yy)
-    
+
     ## Plot density
-    plot(xx, yy, type = "l", xlim = c(xmin,xmax), ylim = c(0,ymax), 
+    plot(xx, yy, type = "l", xlim = c(xmin,xmax), ylim = c(0,ymax),
          lwd = 2, col = "red", ann = FALSE, xaxs = "i", yaxs = "i")
-    
+
     ## Add titles
     title(xlab = expression(paste("Real world predictor ", X["*"])))
     title(ylab = "Density", line = 3.0)
-    
+
     ## Add quantiles
     abline(v = mu, col = "blue", lty = "dotdash", lwd = 2)
-    abline(v = mu + qnorm(    as.numeric(input$alpha)) * sigma, 
+    abline(v = mu + qnorm(    as.numeric(input$alpha)) * sigma,
            col = "blue", lty = "dashed", lwd = 2)
     abline(v = mu + qnorm(1 - as.numeric(input$alpha)) * sigma,
            col = "blue", lty = "dashed", lwd = 2)
-    
+
   }) ## xstarPlot
   
 }
