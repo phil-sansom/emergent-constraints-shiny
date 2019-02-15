@@ -387,10 +387,14 @@ server = function(input, output, session) {
     x = xy[,input$x]
     y = xy[,input$y]
     
-    ## Plot data
-    plot(x, y, xlim = input$xlim, ylim = input$ylim,
-         ann = FALSE, pch = 19, xaxs = "i", yaxs = "i")
+    mask = sample.int(input$N, 1e3)
     
+    plot(discrepancy()$xstar[mask], discrepancy()$ystar[mask],  
+         ann = FALSE, pch = 19, col = gray(0.75,0.25), 
+         xlim = input$xlim, ylim = input$ylim, xaxs = "i", yaxs = "i")    
+    
+    points(x, y, pch = 19, col = "black")
+  
     ## Add titles
     title(xlab = input$xlab)
     title(ylab = input$ylab)
@@ -408,9 +412,9 @@ server = function(input, output, session) {
     
     ## Add observations
     abline(v = input$z, col = "blue", lty = "dotdash", lwd = 2)
-    abline(v = input$z + qnorm(    as.numeric(input$alpha))*input$sigma_z,
+    abline(v = input$z + qnorm(    as.numeric(input$alpha)) * input$sigma_z,
            col = "blue", lty = "dashed", lwd = 2)
-    abline(v = input$z + qnorm(1 - as.numeric(input$alpha))*input$sigma_z,
+    abline(v = input$z + qnorm(1 - as.numeric(input$alpha)) * input$sigma_z,
            col = "blue", lty = "dashed", lwd = 2)
     
     ## Add basic HPC CI
