@@ -559,10 +559,10 @@ server = function(input, output, session) {
   ## Joint prior plot
   output$priorPlot <- renderPlot({
     
-    if(is.na(input$mu_alpha) | is.na(input$sigma_alpha) | input$sigma_alpha <= 0 |
-       is.na(input$mu_beta ) | is.na(input$sigma_beta ) | input$sigma_beta  <= 0 |
-       is.na(input$mu_sigma) | is.na(input$sigma_sigma) | input$sigma_sigma <= 0 | 
-       is.na(input$mu_xstar) | is.na(input$sigma_xstar) | input$sigma_xstar <= 0)
+    if(is.na(input$mu_alpha) | is.na(input$sigma_alpha) | input$sigma_alpha < 0 |
+       is.na(input$mu_beta ) | is.na(input$sigma_beta ) | input$sigma_beta  < 0 |
+       is.na(input$mu_sigma) | is.na(input$sigma_sigma) | input$sigma_sigma < 0 | 
+       is.na(input$mu_xstar) | is.na(input$sigma_xstar) | input$sigma_xstar < 0)
       return(NULL)
 
     ## Simulate from prior
@@ -602,7 +602,7 @@ server = function(input, output, session) {
   ## Mean/intercept prior
   output$alphaPlot <- renderPlot({
     
-    if (is.na(input$mu_alpha) | is.na(input$sigma_alpha | input$sigma_alpha <= 0))
+    if (is.na(input$mu_alpha) | is.na(input$sigma_alpha) | input$sigma_alpha <= 0)
       return(NULL)
 
     ## Plotting parameters
@@ -706,7 +706,7 @@ server = function(input, output, session) {
   ## xstar prior
   output$xstarPlot <- renderPlot({
     
-    if (is.na(input$mu_xstar) | is.na(input$sigma_xstar | input$sigma_xstar <= 0))
+    if (is.na(input$mu_xstar) | is.na(input$sigma_xstar) | input$sigma_xstar <= 0)
       return(NULL)
 
     ## Plotting parameters
