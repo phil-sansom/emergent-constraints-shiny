@@ -107,7 +107,7 @@ ui = navbarPage(
                             numericInput(inputId = "sigma_z", 
                                          label   = "Observation uncertainty 
                                            \\(\\sigma_Z\\)",
-                                         value   = 0.0, 
+                                         value   = NULL, 
                                          min     = 0.0
                             ) ## numericInput
                      ) ## column
@@ -234,11 +234,6 @@ ui = navbarPage(
 
              mainPanel(
                fluidRow(
-                 plotOutput(outputId = "priorPlot",
-                            height   = 400
-                 ) ## plotOutput
-               ), ## fluidRow
-               fluidRow(
                  column(width = 6,
                         plotOutput(outputId = "alphaPlot",
                                    height   = 200
@@ -261,6 +256,11 @@ ui = navbarPage(
                                    height   = 200
                         ) ## plotOutput
                  ) ## column
+               ), ## fluidRow
+               fluidRow(
+                 plotOutput(outputId = "priorPlot",
+                            height   = 400
+                 ) ## plotOutput
                ) ## fluidRow
              ) ## mainPanel
            ) ## sidepanelLayout
@@ -352,12 +352,12 @@ ui = navbarPage(
                ) ## tabsetPanel
              ), ## sidebarPanel
              mainPanel(
-               plotOutput(outputId = "mainPlot"),
-               downloadButton(outputId = "save_main_plot",
-                              label    = "Download plot"
-               ),
                plotOutput(outputId = "auxPlot"),
                downloadButton(outputId = "save_aux_plot",
+                              label    = "Download plot"
+               ),
+               plotOutput(outputId = "mainPlot"),
+               downloadButton(outputId = "save_main_plot",
                               label    = "Download plot"
                )
              ) ## mainPanel

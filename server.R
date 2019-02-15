@@ -352,16 +352,28 @@ server = function(input, output, session) {
     if (is.null(xy) | ! input$x %in% choices)
       return(NULL)
     
+    ## Plotting parameters
+    par(las = 1, mar = c(2.5,2.5,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3, ps = 12)
+    
+    # ## Create plot
+    # p = ggplot() +
+    #   geom_point(mapping = aes_string(x = input$x, y = input$y), data = xy) + 
+    #   labs(x = input$xlab, y = input$ylab) 
+    # 
+    # ## Add observations
+    # if (is.numeric(input$z))
+    #   p = p + geom_vline(mapping = aes_string(xintercept = input$z), 
+    #                      na.rm = TRUE, colour   = "blue", linetype = "dotdash")
+    #   
+    # ## Plot data
+    # p
+    
     x = xy[,input$x]
     y = xy[,input$y]
     z = input$z
-
-    ## Plotting parameters
-    par(las = 1, mar = c(2.5,2.5,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
-        xaxs = "r", yaxs = "r", ps = 12)
     
     ## Plot data
-    plot(x, y, xlim = range(x, z, na.rm = TRUE), ylim = range(y), 
+    plot(x, y, xlim = range(x, z, na.rm = TRUE), ylim = range(y),
          ann = FALSE, pch = 19)
 
     ## Add titles
@@ -388,7 +400,10 @@ server = function(input, output, session) {
     choices = names(xy)
     
     ## Skip plotting if no data is loaded
-    if (is.null(xy) | ! input$x %in% choices)
+    if (is.null(xy) | ! input$x %in% choices | 
+        is.na(input$z) | is.na(input$sigma_z) |
+        input$sigma_z <= 0 | input$sigma_alpha <= 0 | input$sigma_beta <= 0 |
+        input$sigma_xstar <= 0 | input$sigma_sigma <= 0)
       return(NULL)
     
     par(las = 1, mar = c(2.5,2.5,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
@@ -470,7 +485,10 @@ server = function(input, output, session) {
     choices = names(xy)
     
     ## Skip plotting if no data is loaded
-    if (is.null(xy) | ! input$x %in% choices)
+    if (is.null(xy) | ! input$x %in% choices | 
+        is.na(input$z) | is.na(input$sigma_z) |
+        input$sigma_z <= 0 | input$sigma_alpha <= 0 | input$sigma_beta <= 0 |
+        input$sigma_xstar <= 0 | input$sigma_sigma <= 0)
       return(NULL)
     
     par(las = 1, mar = c(2.5,2.5,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
@@ -487,8 +505,10 @@ server = function(input, output, session) {
     
     ymax = max(dens0$y,dens1$y,dens2$y)*1.04
     
+    xlim = range(dens0$x,dens1$x,dens2$x)
+    
     ## Plot data
-    plot(dens0, xlim = input$ylim, ylim = c(0,ymax),
+    plot(dens0, xlim = xlim, ylim = c(0,ymax),
          col = "green", ann = FALSE, type = "l", lwd = 2,
          xaxs = "i", yaxs = "i")
     lines(dens1, lwd = 2, col = "black")
@@ -500,28 +520,28 @@ server = function(input, output, session) {
     # title(main = "Emergent relationship fit", cex.main = 1, font.main = 1)
     # mtext("Emergent relationship fit", side = 3, adj = 0)
     
-    ## Add quantiles
-    abline(v = mean(data()[,input$y]),
-           col = "green", lwd = 2, lty = "dotdash")
-    abline(v = quantile(data()[,input$y],     as.numeric(input$alpha)),
-           col = "green", lwd = 2, lty = "dashed")
-    abline(v = quantile(data()[,input$y], 1 - as.numeric(input$alpha)),
-           col = "green", lwd = 2, lty = "dashed")
-    
-    ## Add quantiles
-    abline(v = mean(posterior()$ystar), col = "black", lwd = 2, lty = "dotdash")
-    abline(v = quantile(posterior()$ystar,     as.numeric(input$alpha)),
-           col = "black", lwd = 2, lty = "dashed")
-    abline(v = quantile(posterior()$ystar, 1 - as.numeric(input$alpha)),
-           col = "black", lwd = 2, lty = "dashed")
-    
-    ## Add quantiles
-    abline(v = mean(discrepancy()$ystar),
-           col = "red", lwd = 2, lty = "dotdash")
-    abline(v = quantile(discrepancy()$ystar,     as.numeric(input$alpha)),
-           col = "red", lwd = 2, lty = "dashed")
-    abline(v = quantile(discrepancy()$ystar, 1 - as.numeric(input$alpha)),
-           col = "red", lwd = 2, lty = "dashed")
+    # ## Add quantiles
+    # abline(v = mean(data()[,input$y]),
+    #        col = "green", lwd = 2, lty = "dotdash")
+    # abline(v = quantile(data()[,input$y],     as.numeric(input$alpha)),
+    #        col = "green", lwd = 2, lty = "dashed")
+    # abline(v = quantile(data()[,input$y], 1 - as.numeric(input$alpha)),
+    #        col = "green", lwd = 2, lty = "dashed")
+    # 
+    # ## Add quantiles
+    # abline(v = mean(posterior()$ystar), col = "black", lwd = 2, lty = "dotdash")
+    # abline(v = quantile(posterior()$ystar,     as.numeric(input$alpha)),
+    #        col = "black", lwd = 2, lty = "dashed")
+    # abline(v = quantile(posterior()$ystar, 1 - as.numeric(input$alpha)),
+    #        col = "black", lwd = 2, lty = "dashed")
+    # 
+    # ## Add quantiles
+    # abline(v = mean(discrepancy()$ystar),
+    #        col = "red", lwd = 2, lty = "dotdash")
+    # abline(v = quantile(discrepancy()$ystar,     as.numeric(input$alpha)),
+    #        col = "red", lwd = 2, lty = "dashed")
+    # abline(v = quantile(discrepancy()$ystar, 1 - as.numeric(input$alpha)),
+    #        col = "red", lwd = 2, lty = "dashed")
     
     ## Add legend
     legend("topright",
@@ -538,25 +558,18 @@ server = function(input, output, session) {
 
   ## Joint prior plot
   output$priorPlot <- renderPlot({
-
-    par(las = 1, mar = c(2.5,2.5,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
-        xaxs = "r", yaxs = "r")
-
-    ## Plot data
-    plot(NULL, NULL, type = "n", xlim = input$xlim, ylim = input$ylim, 
-         ann = FALSE, xaxs = "i", yaxs = "i")
-
-    ## Add titles
-    title(xlab = input$xlab)
-    title(ylab = input$ylab)
-    #title(main = "Emergent relationship fit", cex.main = 1, font.main = 1)
-    mtext("Joint prior distribution", side = 3, adj = 0)
+    
+    if(is.na(input$mu_alpha) | is.na(input$sigma_alpha) | input$sigma_alpha <= 0 |
+       is.na(input$mu_beta ) | is.na(input$sigma_beta ) | input$sigma_beta  <= 0 |
+       is.na(input$mu_sigma) | is.na(input$sigma_sigma) | input$sigma_sigma <= 0 | 
+       is.na(input$mu_xstar) | is.na(input$sigma_xstar) | input$sigma_xstar <= 0)
+      return(NULL)
 
     ## Simulate from prior
     alpha =     rnorm(input$N, input$mu_alpha, input$sigma_alpha)
     beta  =     rnorm(input$N, input$mu_beta , input$sigma_beta )
     sigma = abs(rnorm(input$N, input$mu_sigma, input$sigma_sigma))
-
+    
     ## Simulate from prior predictive distribution
     fit = length(xx())
     lwr = length(xx())
@@ -567,9 +580,20 @@ server = function(input, output, session) {
       lwr[i] = quantile(buffer,     as.numeric(input$alpha))
       upr[i] = quantile(buffer, 1 - as.numeric(input$alpha))
     }
-
+    
+    par(las = 1, mar = c(2.5,2.5,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3)
+    
+    ## Plot data
+    plot(xx(), fit, type = "l", ann = FALSE, lty = "dotdash", lwd = 2,
+         ylim = range(lwr,upr), xaxs = "i", yaxs = "i")
+    
+    ## Add titles
+    title(xlab = input$xlab)
+    title(ylab = input$ylab)
+    #title(main = "Emergent relationship fit", cex.main = 1, font.main = 1)
+    mtext("Joint prior distribution", side = 3, adj = 0)
+    
     ## Plot prior predictive distribution
-    lines(xx(), fit, lty = "dotdash", lwd = 2)
     lines(xx(), lwr, lty = "dashed" , lwd = 2)
     lines(xx(), upr, lty = "dashed" , lwd = 2)
 
@@ -577,6 +601,9 @@ server = function(input, output, session) {
 
   ## Mean/intercept prior
   output$alphaPlot <- renderPlot({
+    
+    if (is.na(input$mu_alpha) | is.na(input$sigma_alpha | input$sigma_alpha <= 0))
+      return(NULL)
 
     ## Plotting parameters
     par(las = 1, mar = c(2.5,4.0,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
@@ -610,6 +637,9 @@ server = function(input, output, session) {
   ## Slope prior
   output$betaPlot <- renderPlot({
 
+    if (is.na(input$mu_beta) | is.na(input$sigma_beta) | input$sigma_beta <= 0)
+      return(NULL)
+    
     ## Plotting parameters
     par(las = 1, mar = c(2.5,4.0,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
         xaxs = "r", yaxs = "r")
@@ -642,6 +672,9 @@ server = function(input, output, session) {
   ## Sigma prior
   output$sigmaPlot <- renderPlot({
 
+    if (is.na(input$mu_sigma) | is.na(input$sigma_sigma) | input$sigma_sigma <= 0)
+      return(NULL)
+    
     ## Plotting parameters
     par(las = 1, mar = c(2.5,4.0,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
         xaxs = "r", yaxs = "r")
@@ -672,6 +705,9 @@ server = function(input, output, session) {
 
   ## xstar prior
   output$xstarPlot <- renderPlot({
+    
+    if (is.na(input$mu_xstar) | is.na(input$sigma_xstar | input$sigma_xstar <= 0))
+      return(NULL)
 
     ## Plotting parameters
     par(las = 1, mar = c(2.5,4.0,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
