@@ -94,6 +94,98 @@ server = function(input, output, session) {
     )
   })
   
+  observe({
+    v     = input$ylim
+    vdiff = diff(v)
+    vstep = 10^(floor(log10(vdiff))-1)
+    vmin  = - vdiff / 2
+    vmax  = + vdiff / 2
+    vmin  = floor  (vmin / vstep) * vstep
+    vmax  = ceiling(vmax / vstep) * vstep
+
+    updateSliderInput(session = session,
+                      inputId = "mu_delta_alpha",
+                      value   = 0,
+                      min     = vmin,
+                      max     = vmax,
+                      step    = vstep
+    ) ## updateSliderInput
+  }) ## observe
+  
+  observe({
+    v     = input$ylim
+    vdiff = diff(v)
+    vstep = 10^(floor(log10(vdiff))-1)
+    vmax  = vdiff / 2
+    vmax  = ceiling(vmax / vstep) * vstep
+    
+    updateSliderInput(session = session,
+                      inputId = "sigma_delta_alpha",
+                      value   = 0,
+                      min     = 0,
+                      max     = vmax,
+                      step    = vstep
+    ) ## updateSliderInput
+  }) ## observe
+  
+  observe({
+    v     = input$ylim
+    vdiff = diff(v)
+    vstep = 10^(floor(log10(vdiff))-1)
+    vmax  = vdiff / 2
+    vmax  = ceiling(vmax / vstep) * vstep
+    
+    updateSliderInput(session = session,
+                      inputId = "sigma_sigma_star",
+                      value   = 0,
+                      min     = 0,
+                      max     = vmax,
+                      step    = vstep
+    ) ## updateSliderInput
+  }) ## observe
+
+  observe({
+    x     = input$xlim
+    y     = input$ylim
+    xdiff = diff(x)
+    ydiff = diff(y)
+    
+    vdiff = ydiff/xdiff
+    vstep = 10^(floor(log10(vdiff))-1)
+    vmin  = - vdiff / 2
+    vmax  = + vdiff / 2
+    vmin  = floor  (vmin / vstep) * vstep
+    vmax  = ceiling(vmax / vstep) * vstep
+    
+    updateSliderInput(session = session,
+                      inputId = "mu_delta_beta",
+                      value   = 0,
+                      min     = vmin,
+                      max     = vmax,
+                      step    = vstep
+    ) ## updateSliderInput
+  }) ## observe
+  
+  observe({
+    x     = input$xlim
+    y     = input$ylim
+    xdiff = diff(x)
+    ydiff = diff(y)
+    
+    vdiff = ydiff/xdiff
+    vstep = 10^(floor(log10(vdiff))-1)
+    vmax  = vdiff / 2
+    vmax  = ceiling(vmax / vstep) * vstep
+    
+    updateSliderInput(session = session,
+                      inputId = "sigma_delta_beta",
+                      value   = 0,
+                      min     = 0,
+                      max     = vmax,
+                      step    = vstep
+    ) ## updateSliderInput
+  }) ## observe
+  
   
   ##########################
   ## Data and computation ##
@@ -173,7 +265,7 @@ server = function(input, output, session) {
       input$sigma_delta_alpha * rnorm(input$N)
     betastar  = samples$beta  + input$mu_delta_beta  +
       input$sigma_delta_beta  * rnorm(input$N)
-    sigmastar = sqrt(samples$sigma^2 + input$sigmad^2)
+    sigmastar = sqrt(samples$sigma^2 + input$sigma_sigma_star^2)
 
     ## Posterior predictive distribution
     ystar = alphastar + betastar * xstar + sigmastar * rnorm(input$N)

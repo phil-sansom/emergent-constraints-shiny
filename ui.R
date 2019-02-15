@@ -274,54 +274,55 @@ ui = navbarPage(
                  tabPanel(
                    title = "Discrepancy parameters",
                    h5("Intercept \\(\\alpha_\\star\\)"),
-                   fluidRow(
-                     column(width = 6,
-                            numericInput(inputId = "mu_delta_alpha",
-                                         label   = "Bias
+                   sliderInput(inputId = "mu_delta_alpha",
+                               label   = "Bias
                                          \\(\\mu_{\\delta_\\alpha}\\)",
-                                         value   = 0
-                            ) ## numericInput
-                     ), ## column
-                     column(width = 6,
-                            numericInput(inputId = "sigma_delta_alpha",
-                                         label   = "Uncertainty
+                               min     = -1,
+                               max     = +1,
+                               value   = 0,
+                               step    = 0.1,
+                               ticks   = FALSE
+                   ), ## sliderInput
+                   sliderInput(inputId = "sigma_delta_alpha",
+                               label   = "Uncertainty
                                          \\(\\sigma_{\\delta_\\alpha}\\)",
-                                         value   = 0,
-                                         min     = 0
-                            ) ## numericInput
-                     ) ## column
-                   ), ## fluidRow
+                               min     = 0,
+                               max     = 1,
+                               value   = 0,
+                               step    = 0.1,
+                               ticks   = FALSE
+                   ), ## sliderInput
+                   hr(),
                    h5("Slope \\(\\beta_\\star\\)"),
-                   fluidRow(
-                     column(width = 6,
-                            numericInput(inputId = "mu_delta_beta",
-                                         label   = "Bias
+                   sliderInput(inputId = "mu_delta_beta",
+                               label   = "Bias
                                          \\(\\mu_{\\delta_\\beta}\\)",
-                                         value   = 0
-                            ) ## numericInput
-                     ), ## cloumn
-                     column(width = 6,
-                            numericInput(inputId = "sigma_delta_beta",
-                                         label   = "Uncertainty
+                               min     = -1,
+                               max     = +1,
+                               value   = 0,
+                               step    = 0.1,
+                               ticks   = FALSE
+                   ), ## sliderInput
+                   sliderInput(inputId = "sigma_delta_beta",
+                               label   = "Uncertainty
                                          \\(\\sigma_{\\delta_\\beta}\\)",
-                                         value   = 0,
-                                         min     = 0
-                            ) ## numericInput
-                     ) ## column
-                   ), ## fluidRow
+                               min     = 0,
+                               max     = 1,
+                               value   = 0,
+                               step    = 0.1,
+                               ticks   = FALSE
+                   ), ## sliderInput
+                   hr(),
                    h5("Spread \\(\\sigma_\\star\\)"),
-                   fluidRow(
-                     column(width = 6
-                     ), ## cloumn
-                     column(width = 6,
-                            numericInput(inputId = "sigmad",
-                                         label   = "Uncertainty
+                   sliderInput(inputId = "sigma_sigma_star",
+                               label   = "Uncertainty
                                          \\(\\sigma_{\\sigma_\\star}\\)",
-                                         value   = 0,
-                                         min     = 0
-                            ) ## numericInput
-                     ) ## column
-                   ) ## fluidRow
+                               min     = 0,
+                               max     = 1,
+                               value   = 0,
+                               step    = 0.1,
+                               ticks   = FALSE
+                   ) ## sliderInput
                  ), ## tabPanel
 
                  tabPanel(
