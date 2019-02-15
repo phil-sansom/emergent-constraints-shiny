@@ -36,16 +36,16 @@ server = function(input, output, session) {
     )
   )
   
+  ## Update X limits
   observe({
-      xy = data()
+      xy      = data()
       choices = names(xy)
       if (is.null(xy) | ! input$x %in% choices)
         return(NULL)
-      v       = data()[,input$x]
+      v       = xy[,input$x]
       
       vrange  = range(v)
       vdiff   = diff(vrange)
-      vmean   = mean(v)
       vstep   = 10^floor(log10(vdiff))
       vmin    = vrange[1] - vdiff
       vmax    = vrange[2] + vdiff
@@ -65,6 +65,7 @@ server = function(input, output, session) {
       )
   })
   
+  ## Update Y limits
   observe({
     xy = data()
     choices = names(xy)
@@ -74,7 +75,6 @@ server = function(input, output, session) {
     
     vrange  = range(v)
     vdiff   = diff(vrange)
-    vmean   = mean(v)
     vstep   = 10^floor(log10(vdiff))
     vmin    = vrange[1] - vdiff
     vmax    = vrange[2] + vdiff
@@ -94,6 +94,30 @@ server = function(input, output, session) {
     )
   })
   
+  ## Update observation inputs
+  observe({
+    xy      = data()
+    choices = names(xy)
+    if (is.null(xy) | ! input$x %in% choices)
+      return(NULL)
+    v       = xy[,input$x]
+    
+    vrange  = range(v)
+    vdiff   = diff(vrange)
+    vstep   = floor(log10(vdiff))
+
+    updateNumericInput(session = session,
+                       inputId = "z",
+                       step    = 10^(vstep-1)
+    )
+    
+    updateNumericInput(session = session,
+                       inputId = "sigma_z",
+                       step    = 10^(vstep-2)
+    )
+    
+  })
+
   observe({
     v     = input$ylim
     vdiff = diff(v)
@@ -330,44 +354,31 @@ server = function(input, output, session) {
     
     x = xy[,input$x]
     y = xy[,input$y]
-    
+    z = input$z
+
     ## Plotting parameters
     par(las = 1, mar = c(2.5,2.5,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
-        xaxs = "r", yaxs = "r")
+        xaxs = "r", yaxs = "r", ps = 12)
     
     ## Plot data
-    plot(x, y, xlim = input$xlim, ylim = input$ylim,
-         ann = FALSE, pch = 19, xaxs = "i", yaxs = "i")
+    plot(x, y, xlim = range(x, z, na.rm = TRUE), ylim = range(y), 
+         ann = FALSE, pch = 19)
 
     ## Add titles
     title(xlab = input$xlab)
     title(ylab = input$ylab)
-    #title(main = "Emergent relationship fit", cex.main = 1, font.main = 1)
-    #mtext("Emergent relationship fit", side = 3, adj = 0)
-
-    # ## Observation density
-    # p      = dnorm(xxx(), input$z, input$sigma_z)
-    # # ymax = 10^(floor(log10(max(p)))-1)
-    # # ymax = ymax*ceiling(max(p)/ymax)
-    # pmax   = max(p)
-    # yrange = diff(input$ylim)
-    # pscale = 0.5*yrange/pmax
-    #
-    # ## Plot obs density
-    # lines(xxx(), input$ylim[1] + p * pscale, col = "blue", lwd = 2)
 
     ## Add observations
     abline(v = input$z, col = "blue", lty = "dotdash", lwd = 2)
-    abline(v = input$z + qnorm(    as.numeric(input$alpha))*input$sigma_z,
-           col = "blue", lty = "dashed", lwd = 2)
-    abline(v = input$z + qnorm(1 - as.numeric(input$alpha))*input$sigma_z,
-           col = "blue", lty = "dashed", lwd = 2)
+    # abline(v = input$z + qnorm(    as.numeric(input$alpha))*input$sigma_z,
+    #        col = "blue", lty = "dashed", lwd = 2)
+    # abline(v = input$z + qnorm(1 - as.numeric(input$alpha))*input$sigma_z,
+    #        col = "blue", lty = "dashed", lwd = 2)
 
-    # ## Add legend
-    # legend("bottomright",
-    #        legend = c("Linear regression","Observational constraint"),
-    #        col = c("black","blue"), lty = c("dotdash","dotdash"), lwd = c(2,2),
-    #        bty = "n")
+    ## Add legend
+    legend("bottomright", legend = c("Models","Observation"),
+           col = c("black","blue"), lty = c(NA,"dotdash"), lwd = c(2,2),
+           pch = c(19,NA), bty = "n")
 
   })
   

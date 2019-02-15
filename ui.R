@@ -100,15 +100,15 @@ ui = navbarPage(
                      column(width = 6, 
                             numericInput(inputId = "z", 
                                          label   = "Observation \\(Z\\)",
-                                         value   = 0
+                                         value   = NULL
                             ) ## numericInput
                      ), ## column
                      column(width = 6,
                             numericInput(inputId = "sigma_z", 
                                          label   = "Observation uncertainty 
                                            \\(\\sigma_Z\\)",
-                                         value   = 1, 
-                                         min     = 0
+                                         value   = 0.0, 
+                                         min     = 0.0
                             ) ## numericInput
                      ) ## column
                    ) ## fluidRow
