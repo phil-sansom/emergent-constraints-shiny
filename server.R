@@ -187,6 +187,33 @@ server = function(input, output, session) {
   }) ## observe
   
   
+  ###############
+  ## Downloads ##
+  ###############
+  
+  output$save_main_plot = downloadHandler(
+    filename = "joint.pdf",
+    content = function(file) {
+      pdf(file = file, width = 210/25.4, height = 148/25.4,
+          title = "Joint distribution", pointsize = 12)
+      main_plot()
+      dev.off()
+    },
+    contentType = "application/pdf"
+  )
+
+  output$save_aux_plot = downloadHandler(
+    filename = "marginal.pdf",
+    content = function(file) {
+      pdf(file = file, width = 210/25.4, height = 148/25.4,
+          title = "Marginal distribution", pointsize = 12)
+      aux_plot()
+      dev.off()
+    },
+    contentType = "application/pdf"
+  )
+  
+  
   ##########################
   ## Data and computation ##
   ##########################
@@ -344,9 +371,7 @@ server = function(input, output, session) {
 
   })
   
-  ## Main plot
-  output$mainPlot <- renderPlot({
-
+  main_plot = function() {
     ## Data
     xy = data()
     choices = names(xy)
@@ -355,40 +380,39 @@ server = function(input, output, session) {
     if (is.null(xy) | ! input$x %in% choices)
       return(NULL)
     
-    
     par(las = 1, mar = c(2.5,2.5,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
         xaxs = "r", yaxs = "r")
-
+    
     ## Data
     x = xy[,input$x]
     y = xy[,input$y]
-
+    
     ## Plot data
     plot(x, y, xlim = input$xlim, ylim = input$ylim,
          ann = FALSE, pch = 19, xaxs = "i", yaxs = "i")
-
+    
     ## Add titles
     title(xlab = input$xlab)
     title(ylab = input$ylab)
     #title(main = "Emergent relationship fit", cex.main = 1, font.main = 1)
     mtext("Emergent relationship fit", side = 3, adj = 0)
-
+    
     ## Add linear regression
     lines(xx(), predictive()$fit, lty = "dotdash", lwd = 2)
     lines(xx(), predictive()$lwr, lty = "dashed" , lwd = 2)
     lines(xx(), predictive()$upr, lty = "dashed" , lwd = 2)
-
+    
     ## Add discrepancy
     lines(xx(), discrepancy()$lwr, lty = "dashed" , col = "red", lwd = 2)
     lines(xx(), discrepancy()$upr, lty = "dashed" , col = "red", lwd = 2)
-
+    
     ## Add observations
     abline(v = input$z, col = "blue", lty = "dotdash", lwd = 2)
     abline(v = input$z + qnorm(    as.numeric(input$alpha))*input$sigma_z,
            col = "blue", lty = "dashed", lwd = 2)
     abline(v = input$z + qnorm(1 - as.numeric(input$alpha))*input$sigma_z,
            col = "blue", lty = "dashed", lwd = 2)
-
+    
     ## Add basic HPC CI
     dens = kde2d(posterior()$xstar, posterior()$ystar, n = 25)
     z = dens$z
@@ -398,7 +422,7 @@ server = function(input, output, session) {
       z[o[i]] = z[o[i]] + z[o[i-1]]
     contour(dens$x, dens$y, z, levels = 1 - 2*as.numeric(input$alpha),
             drawlabels = FALSE, lwd = 2, lty = "dotted", add = TRUE)
-
+    
     ## Add discrepancy HPC CI
     dens = kde2d(discrepancy()$xstar, discrepancy()$ystar, n = 25)
     z = dens$z
@@ -409,19 +433,23 @@ server = function(input, output, session) {
     contour(dens$x, dens$y, z, levels = 1 - 2*as.numeric(input$alpha),
             drawlabels = FALSE, col = "red", lwd = 2, lty = "dotted",
             add = TRUE)
-
+    
     ## Add legend
     legend("bottomright",
            legend = c("Exchangeable model","Coexchangeable model",
                       "Observational constraint"),
            col = c("black","red","blue"),
            lty = c("dotdash","dotdash","dotdash"), lwd = c(2,2,2), bty = "n")
-
-  })
+    
+  }
+  
+  ## Main plot
+  output$mainPlot <- renderPlot(
+    main_plot()
+  )
 
   ## Auxilliary plot
-  output$auxPlot <- renderPlot({
-
+  aux_plot = function() {
     ## Data
     xy = data()
     choices = names(xy)
@@ -432,31 +460,31 @@ server = function(input, output, session) {
     
     par(las = 1, mar = c(2.5,2.5,1,1)+0.1, mgp = c(1.5,0.5,0), tcl = -1/3,
         xaxs = "r", yaxs = "r")
-
+    
     ## Marginal distribution
     dens0 = density(xy[,input$y])
-
+    
     ## Basic projection
     dens1 = density(posterior()$ystar)
-
+    
     ## Discrepancy projection
     dens2 = density(discrepancy()$ystar)
-
+    
     ymax = max(dens0$y,dens1$y,dens2$y)*1.04
-
+    
     ## Plot data
     plot(dens0, xlim = input$ylim, ylim = c(0,ymax),
          col = "green", ann = FALSE, type = "l", lwd = 2,
          xaxs = "i", yaxs = "i")
     lines(dens1, lwd = 2, col = "black")
     lines(dens2, lwd = 2, col = "red")
-
+    
     ## Add titles
     title(xlab = input$ylab)
     title(ylab = "Density")
     # title(main = "Emergent relationship fit", cex.main = 1, font.main = 1)
     # mtext("Emergent relationship fit", side = 3, adj = 0)
-
+    
     ## Add quantiles
     abline(v = mean(data()[,input$y]),
            col = "green", lwd = 2, lty = "dotdash")
@@ -464,14 +492,14 @@ server = function(input, output, session) {
            col = "green", lwd = 2, lty = "dashed")
     abline(v = quantile(data()[,input$y], 1 - as.numeric(input$alpha)),
            col = "green", lwd = 2, lty = "dashed")
-
+    
     ## Add quantiles
     abline(v = mean(posterior()$ystar), col = "black", lwd = 2, lty = "dotdash")
     abline(v = quantile(posterior()$ystar,     as.numeric(input$alpha)),
            col = "black", lwd = 2, lty = "dashed")
     abline(v = quantile(posterior()$ystar, 1 - as.numeric(input$alpha)),
            col = "black", lwd = 2, lty = "dashed")
-
+    
     ## Add quantiles
     abline(v = mean(discrepancy()$ystar),
            col = "red", lwd = 2, lty = "dotdash")
@@ -479,15 +507,19 @@ server = function(input, output, session) {
            col = "red", lwd = 2, lty = "dashed")
     abline(v = quantile(discrepancy()$ystar, 1 - as.numeric(input$alpha)),
            col = "red", lwd = 2, lty = "dashed")
-
+    
     ## Add legend
     legend("topright",
            legend = c("Model response","Exchangeable model",
                       "Coexchangeable model"),
            col = c("green","black","red"), lty = c("solid","solid","solid"),
            lwd = c(2,2,2), bty = "n")
-
-  })
+  }
+  
+  ## Auxilliary plot
+  output$auxPlot <- renderPlot(
+    aux_plot()
+  )
 
   ## Joint prior plot
   output$priorPlot <- renderPlot({

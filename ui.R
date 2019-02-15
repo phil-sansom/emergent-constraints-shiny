@@ -353,7 +353,13 @@ ui = navbarPage(
              ), ## sidebarPanel
              mainPanel(
                plotOutput(outputId = "mainPlot"),
-               plotOutput(outputId = "auxPlot")
+               downloadButton(outputId = "save_main_plot",
+                              label    = "Download plot"
+               ),
+               plotOutput(outputId = "auxPlot"),
+               downloadButton(outputId = "save_aux_plot",
+                              label    = "Download plot"
+               )
              ) ## mainPanel
            ) ## sidebarLayout
   ) ## tabPanel
