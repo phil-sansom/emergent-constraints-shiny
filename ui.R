@@ -1,21 +1,21 @@
 ui = navbarPage(
   title = "Uncertainty quantification for emergent constraints",
-  
+
   ## Overview tab
   tabPanel(title = "Overview",
            withMathJax(),
            mainPanel(
-             p("$$ \\begin{align} 
+             p("$$ \\begin{align}
 
                        \\text{Statistical model} \\\\
-                       Y_m & = \\alpha + \\beta X_m + \\epsilon_m & 
-                         \\epsilon_m & \\sim 
+                       Y_m & = \\alpha + \\beta X_m + \\epsilon_m &
+                         \\epsilon_m & \\sim
                            \\text{Normal} ( 0, \\sigma^2 ) \\quad
-                         (m = 1,\\ldots,M) & 
+                         (m = 1,\\ldots,M) &
                          \\text{Multi-model ensemble} \\\\
-                       Y_\\star & = \\alpha_\\star + \\beta_\\star X_\\star + 
+                       Y_\\star & = \\alpha_\\star + \\beta_\\star X_\\star +
                            \\epsilon_\\star &
-                         \\epsilon_\\star & \\sim 
+                         \\epsilon_\\star & \\sim
                            \\text{Normal} ( 0, \\sigma_\\star^2 ) &
                          \\text{Real world} \\\\
                        Z & = X_\\star + \\omega &
@@ -24,22 +24,22 @@ ui = navbarPage(
 
                        \\text{Discrepancies} \\\\
                        \\alpha_\\star & = \\alpha + \\delta_\\alpha &
-                          \\delta_\\alpha & \\sim \\text{Normal} 
-                            (\\mu_{\\delta_\\alpha}, 
+                          \\delta_\\alpha & \\sim \\text{Normal}
+                            (\\mu_{\\delta_\\alpha},
                               \\sigma_{\\delta_\\alpha}^2) &
                          \\text{Real world Intercept} \\\\
                        \\beta_\\star & = \\beta + \\delta_\\beta &
-                          \\delta_\\beta & \\sim \\text{Normal} 
-                            (\\mu_{\\delta_\\beta}, 
+                          \\delta_\\beta & \\sim \\text{Normal}
+                            (\\mu_{\\delta_\\beta},
                               \\sigma_{\\delta_\\beta}^2) &
                          \\text{Real world slope} \\\\
-                       \\sigma_\\star^2 & = 
+                       \\sigma_\\star^2 & =
                            \\sigma^2 + \\sigma_{\\sigma_\\star}^2 & & &
                          \\text{Real world response uncertainty} \\\\ ~ \\\\
 
                        \\text{Priors} \\\\
                        & &
-                       \\alpha  & \\sim \\text{Normal} 
+                       \\alpha  & \\sim \\text{Normal}
                          (\\mu_\\alpha, \\sigma_\\alpha^2 ) &
                          \\text{Ensemble intercept} \\\\
                        & &
@@ -47,7 +47,7 @@ ui = navbarPage(
                          (\\mu_\\beta , \\sigma_\\beta^2  ) &
                          \\text{Ensemble slope} \\\\
                        & &
-                       \\sigma  & \\sim \\text{Half-Normal} 
+                       \\sigma  & \\sim \\text{Half-Normal}
                          (\\mu_\\sigma, \\sigma_\\sigma^2 ) &
                          \\text{Ensemble response uncertainty} \\\\
                        & &
@@ -58,103 +58,65 @@ ui = navbarPage(
                      \\end{align} $$")
            ) ## mainPanel
   ), ## tabPanel
-  
+
   ## Data tab
   tabPanel(title = "Data",
            sidebarLayout(
              sidebarPanel(
-               tabsetPanel(
-                 tabPanel(
-                   title = "Data and observations",
-                   h4("Data"),
-                   fileInput(inputId = "file", 
-                             label   = "Choose CSV File",
-                             accept  = c("text/csv",
-                                         "text/comma-separated-values,text/plain",
-                                         ".csv")
-                   ), ## fileInput
-                   checkboxInput(inputId = "header", 
-                                 label   = "Header", 
-                                 value   = TRUE
-                   ), ## checkboxInput
-                   hr(),
-                   fluidRow(
-                     column(width = 6,
-                            selectInput(inputId  = "x", 
-                                        label    = withMathJax("Predictor 
+               title = "Data and observations",
+               h4("Data"),
+               fileInput(inputId = "file",
+                         label   = "Choose CSV File",
+                         accept  = c("text/csv",
+                                     "text/comma-separated-values,text/plain",
+                                     ".csv")
+               ), ## fileInput
+               checkboxInput(inputId = "header",
+                             label   = "Header",
+                             value   = TRUE
+               ), ## checkboxInput
+               hr(),
+               fluidRow(
+                 column(width = 6,
+                        selectInput(inputId  = "x",
+                                    label    = withMathJax("Predictor
                                                                \\(X_m\\)"),
-                                        choices  = NULL,
-                                        selected = NULL)
-                     ), ## column
-                     column(width = 6,
-                            selectInput(inputId  = "y", 
-                                        label    = withMathJax("Response 
+                                    choices  = NULL,
+                                    selected = NULL)
+                 ), ## column
+                 column(width = 6,
+                        selectInput(inputId  = "y",
+                                    label    = withMathJax("Response
                                                                \\(Y_m\\)"),
-                                        choices  = NULL,
-                                        selected = NULL)
-                     ) ## column
-                   ), ## fluidRow
-                   hr(),
-                   h4("Observations"),
-                   fluidRow(
-                     column(width = 6, 
-                            numericInput(inputId = "z", 
-                                         label   = "Observation \\(Z\\)",
-                                         value   = NULL
-                            ) ## numericInput
-                     ), ## column
-                     column(width = 6,
-                            numericInput(inputId = "sigma_z", 
-                                         label   = "Observation uncertainty 
+                                    choices  = NULL,
+                                    selected = NULL)
+                 ) ## column
+               ), ## fluidRow
+               hr(),
+               h4("Observations"),
+               fluidRow(
+                 column(width = 6,
+                        numericInput(inputId = "z",
+                                     label   = "Observation \\(Z\\)",
+                                     value   = NULL
+                        ) ## numericInput
+                 ), ## column
+                 column(width = 6,
+                        numericInput(inputId = "sigma_z",
+                                     label   = "Observation uncertainty
                                            \\(\\sigma_Z\\)",
-                                         value   = NULL, 
-                                         min     = 0.0
-                            ) ## numericInput
-                     ) ## column
-                   ) ## fluidRow
-                 ), ## tabPanel
-                 tabPanel(
-                   title = "Plotting options",
-                   h4("Axis labels"),
-                   fluidRow(
-                     column(width = 6,
-                            textInput(inputId = "xlab",
-                                      label   = "Predictor label",
-                                      value   = NULL)
-                     ), ## column
-                     column(width = 6,
-                            textInput(inputId = "ylab",
-                                      label   = "Response label",
-                                      value   = NULL
-                            )
-                     ) ## column
-                   ), ## fluidRow
-                   h4("Predictor limits"),
-                   sliderInput(inputId = "xlim",
-                               label   = "X limits",
-                               value   = c(0,1),
-                               min     = 0,
-                               max     = 1,
-                               step    = 0.1,
-                               ticks   = FALSE
-                   ),
-                   sliderInput(inputId = "ylim",
-                               label   = "Y limits",
-                               value   = c(0,1),
-                               min     = 0,
-                               max     = 1,
-                               step    = 0.1,
-                               ticks   = FALSE
-                   )
-                 ) ## tabPanel
-               ) ## tabsetPanel
+                                     value   = NULL,
+                                     min     = 0.0
+                        ) ## numericInput
+                 ) ## column
+               ) ## fluidRow
              ), ## sidePanel
              mainPanel(
                plotOutput(outputId = "dataPlot")
              ) ## mainPanel
            ) ## sidebarLayout
   ), ## tabPanel
-  
+
   ## Prior panel
   tabPanel("Priors",
            sidebarLayout(
@@ -327,6 +289,39 @@ ui = navbarPage(
 
                  tabPanel(
                    title = "Plotting options",
+                   h4("Axis labels"),
+                   fluidRow(
+                     column(width = 6,
+                            textInput(inputId = "xlab",
+                                      label   = "Predictor label",
+                                      value   = NULL)
+                     ), ## column
+                     column(width = 6,
+                            textInput(inputId = "ylab",
+                                      label   = "Response label",
+                                      value   = NULL
+                            )
+                     ) ## column
+                   ), ## fluidRow
+                   hr(),
+                   h4("Predictor limits"),
+                   sliderInput(inputId = "xlim",
+                               label   = "X limits",
+                               value   = c(0,1),
+                               min     = 0,
+                               max     = 1,
+                               step    = 0.1,
+                               ticks   = FALSE
+                   ),
+                   sliderInput(inputId = "ylim",
+                               label   = "Y limits",
+                               value   = c(0,1),
+                               min     = 0,
+                               max     = 1,
+                               step    = 0.1,
+                               ticks   = FALSE
+                   ),
+                   hr(),
                    numericInput(inputId = "N",
                                 label   = "Number of samples",
                                 value   = 10000,
@@ -352,16 +347,25 @@ ui = navbarPage(
                ) ## tabsetPanel
              ), ## sidebarPanel
              mainPanel(
-               plotOutput(outputId = "auxPlot"),
-               downloadButton(outputId = "save_aux_plot",
-                              label    = "Download plot"
-               ),
-               plotOutput(outputId = "mainPlot"),
-               downloadButton(outputId = "save_main_plot",
-                              label    = "Download plot"
-               )
+                 tabsetPanel(
+                     tabPanel(
+                         title = "Marginal projections",
+                         plotOutput(outputId = "auxPlot"),
+                         downloadButton(outputId = "save_aux_plot",
+                                        label    = "Download plot"
+                         ),
+                         tableOutput(outputId = "predictive_intervals")
+                     ), ## tabPanel
+                     tabPanel(
+                         title = "Joint projections",
+                         plotOutput(outputId = "mainPlot"),
+                         downloadButton(outputId = "save_main_plot",
+                                        label    = "Download plot"
+                         )
+                     ) ## tabPanel
+                 ) ## tabsetPanel
              ) ## mainPanel
            ) ## sidebarLayout
   ) ## tabPanel
-           
+
 ) ## ui
