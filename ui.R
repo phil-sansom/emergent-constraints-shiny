@@ -92,6 +92,19 @@ ui = navbarPage(
                                     selected = NULL)
                  ) ## column
                ), ## fluidRow
+               fluidRow(
+                 column(width = 6,
+                        textInput(inputId = "xlab",
+                                  label   = "Predictor label",
+                                  value   = NULL)
+                 ), ## column
+                 column(width = 6,
+                        textInput(inputId = "ylab",
+                                  label   = "Response label",
+                                  value   = NULL
+                        )
+                 ) ## column
+               ), ## fluidRow
                hr(),
                h4("Observations"),
                fluidRow(
@@ -112,7 +125,7 @@ ui = navbarPage(
                ) ## fluidRow
              ), ## sidePanel
              mainPanel(
-               plotOutput(outputId = "dataPlot")
+               plotOutput(outputId = "data_plot")
              ) ## mainPanel
            ) ## sidebarLayout
   ), ## tabPanel
@@ -195,35 +208,39 @@ ui = navbarPage(
              ), ## sidePanel
 
              mainPanel(
-               fluidRow(
-                 column(width = 6,
-                        plotOutput(outputId = "alphaPlot",
-                                   height   = 200
-                        ) ## plotOutput
-                 ), ## column
-                 column(width = 6,
-                        plotOutput(outputId = "betaPlot",
-                                   height   = 200
-                        ) ## plotOutput
-                 ) ## column
-               ), ## fluidRow
-               fluidRow(
-                 column(width = 6,
-                        plotOutput(outputId = "sigmaPlot",
-                                   height   = 200
-                        ) ## plotOutput
-                 ), ## column
-                 column(width = 6,
-                        plotOutput(outputId = "xstarPlot",
-                                   height   = 200
-                        ) ## plotOutput
-                 ) ## column
-               ), ## fluidRow
-               fluidRow(
-                 plotOutput(outputId = "priorPlot",
-                            height   = 400
-                 ) ## plotOutput
-               ) ## fluidRow
+               tabsetPanel(
+                 tabPanel(
+                   title = "Marginal priors",
+                   fluidRow(
+                     column(width = 6,
+                            plotOutput(outputId = "alpha_plot",
+                                       height   = 200
+                            ) ## plotOutput
+                     ), ## column
+                     column(width = 6,
+                            plotOutput(outputId = "beta_plot",
+                                       height   = 200
+                            ) ## plotOutput
+                     ) ## column
+                   ), ## fluidRow
+                   fluidRow(
+                     column(width = 6,
+                            plotOutput(outputId = "sigma_plot",
+                                       height   = 200
+                            ) ## plotOutput
+                     ), ## column
+                     column(width = 6,
+                            plotOutput(outputId = "xstar_plot",
+                                       height   = 200
+                            ) ## plotOutput
+                     ) ## column
+                   ) ## fluidRow
+                 ), ## tabPanel
+                 tabPanel(
+                   title = "Ensemble prior predictive",
+                   plotOutput(outputId = "joint_prior_plot")
+                 ) ## tabPanel
+               ) ## tabsetPanel
              ) ## mainPanel
            ) ## sidepanelLayout
   ), ## tabPanel
@@ -232,138 +249,124 @@ ui = navbarPage(
   tabPanel("Projections",
            sidebarLayout(
              sidebarPanel(
-               tabsetPanel(
-                 tabPanel(
-                   title = "Discrepancy parameters",
-                   h5("Intercept \\(\\alpha_\\star\\)"),
-                   sliderInput(inputId = "mu_delta_alpha",
-                               label   = "Bias
-                                         \\(\\mu_{\\delta_\\alpha}\\)",
-                               min     = -1,
-                               max     = +1,
-                               value   = 0,
-                               step    = 0.1,
-                               ticks   = FALSE
-                   ), ## sliderInput
-                   sliderInput(inputId = "sigma_delta_alpha",
-                               label   = "Uncertainty
+               title = "Discrepancy parameters",
+               h5("Intercept \\(\\alpha_\\star\\)"),
+               sliderInput(inputId = "mu_delta_alpha",
+                           label   = "Bias \\(\\mu_{\\delta_\\alpha}\\)",
+                           min     = -1,
+                           max     = +1,
+                           value   = 0,
+                           step    = 0.1,
+                           ticks   = FALSE
+               ), ## sliderInput
+               sliderInput(inputId = "sigma_delta_alpha",
+                           label   = "Uncertainty
                                          \\(\\sigma_{\\delta_\\alpha}\\)",
-                               min     = 0,
-                               max     = 1,
-                               value   = 0,
-                               step    = 0.1,
-                               ticks   = FALSE
-                   ), ## sliderInput
-                   hr(),
-                   h5("Slope \\(\\beta_\\star\\)"),
-                   sliderInput(inputId = "mu_delta_beta",
-                               label   = "Bias
+                           min     = 0,
+                           max     = 1,
+                           value   = 0,
+                           step    = 0.1,
+                           ticks   = FALSE
+               ), ## sliderInput
+               hr(),
+               h5("Slope \\(\\beta_\\star\\)"),
+               sliderInput(inputId = "mu_delta_beta",
+                           label   = "Bias
                                          \\(\\mu_{\\delta_\\beta}\\)",
-                               min     = -1,
-                               max     = +1,
-                               value   = 0,
-                               step    = 0.1,
-                               ticks   = FALSE
-                   ), ## sliderInput
-                   sliderInput(inputId = "sigma_delta_beta",
-                               label   = "Uncertainty
+                           min     = -1,
+                           max     = +1,
+                           value   = 0,
+                           step    = 0.1,
+                           ticks   = FALSE
+               ), ## sliderInput
+               sliderInput(inputId = "sigma_delta_beta",
+                           label   = "Uncertainty
                                          \\(\\sigma_{\\delta_\\beta}\\)",
-                               min     = 0,
-                               max     = 1,
-                               value   = 0,
-                               step    = 0.1,
-                               ticks   = FALSE
-                   ), ## sliderInput
-                   hr(),
-                   h5("Spread \\(\\sigma_\\star\\)"),
-                   sliderInput(inputId = "sigma_sigma_star",
-                               label   = "Uncertainty
+                           min     = 0,
+                           max     = 1,
+                           value   = 0,
+                           step    = 0.1,
+                           ticks   = FALSE
+               ), ## sliderInput
+               hr(),
+               h5("Spread \\(\\sigma_\\star\\)"),
+               sliderInput(inputId = "sigma_sigma_star",
+                           label   = "Uncertainty
                                          \\(\\sigma_{\\sigma_\\star}\\)",
-                               min     = 0,
-                               max     = 1,
-                               value   = 0,
-                               step    = 0.1,
-                               ticks   = FALSE
-                   ) ## sliderInput
-                 ), ## tabPanel
-
-                 tabPanel(
-                   title = "Plotting options",
-                   h4("Axis labels"),
-                   fluidRow(
-                     column(width = 6,
-                            textInput(inputId = "xlab",
-                                      label   = "Predictor label",
-                                      value   = NULL)
-                     ), ## column
-                     column(width = 6,
-                            textInput(inputId = "ylab",
-                                      label   = "Response label",
-                                      value   = NULL
-                            )
-                     ) ## column
-                   ), ## fluidRow
-                   hr(),
-                   h4("Predictor limits"),
-                   sliderInput(inputId = "xlim",
-                               label   = "X limits",
-                               value   = c(0,1),
-                               min     = 0,
-                               max     = 1,
-                               step    = 0.1,
-                               ticks   = FALSE
-                   ),
-                   sliderInput(inputId = "ylim",
-                               label   = "Y limits",
-                               value   = c(0,1),
-                               min     = 0,
-                               max     = 1,
-                               step    = 0.1,
-                               ticks   = FALSE
-                   ),
-                   hr(),
-                   numericInput(inputId = "N",
-                                label   = "Number of samples",
-                                value   = 10000,
-                                min     = 1000,
-                                step    = 1000
-                   ), ## numericInput
-                   # numericInput(inputId = "mc.cores",
-                   #              label   = "Number of cores",
-                   #              value   = 4,
-                   #              min     = 1,
-                   #              max     = 16,
-                   #              step    = 1
-                   # ), ## numericInput
-                   selectInput(inputId  = "alpha",
-                               label    = "Credible interval",
-                               choices  = list("68% (1 sd)" = 0.160,
-                                               "90%"        = 0.050,
-                                               "95% (2 sd)" = 0.025,
-                                               "99%"        = 0.005),
-                               selected = 0.05
-                   ) ## selectInput
-                 ) ## tabPanel
-               ) ## tabsetPanel
+                           min     = 0,
+                           max     = 1,
+                           value   = 0,
+                           step    = 0.1,
+                           ticks   = FALSE
+               ), ## sliderInput
+               hr(),
+               numericInput(inputId = "N",
+                            label   = "Number of samples",
+                            value   = 10000,
+                            min     = 1000,
+                            step    = 1000
+               ), ## numericInput
+               selectInput(inputId  = "gamma",
+                           label    = "Interval width",
+                           choices  = list("68% (1 sd)" = 0.68,
+                                           "90%"        = 0.90,
+                                           "95% (2 sd)" = 0.95,
+                                           "99%"        = 0.99),
+                           selected = 0.90
+               ) ## selectInput
              ), ## sidebarPanel
              mainPanel(
-                 tabsetPanel(
-                     tabPanel(
-                         title = "Marginal projections",
-                         plotOutput(outputId = "auxPlot"),
-                         downloadButton(outputId = "save_aux_plot",
-                                        label    = "Download plot"
-                         ),
-                         tableOutput(outputId = "predictive_intervals")
-                     ), ## tabPanel
-                     tabPanel(
-                         title = "Joint projections",
-                         plotOutput(outputId = "mainPlot"),
-                         downloadButton(outputId = "save_main_plot",
-                                        label    = "Download plot"
-                         )
-                     ) ## tabPanel
-                 ) ## tabsetPanel
+               tabsetPanel(
+                 tabPanel(
+                   title = "Marginal projections",
+                   plotOutput(outputId = "marginal_plot"),
+                   fluidRow(
+                     column(width = 6,
+                            sliderInput(inputId = "xlim_marginal",
+                                        label   = "X limits",
+                                        value   = c(0,1),
+                                        min     = 0,
+                                        max     = 1,
+                                        step    = 0.1,
+                                        ticks   = FALSE
+                            ) ## xlim_marginal
+                     ) ## column
+                   ), ## fluidRow
+                   downloadButton(outputId = "save_marginal_plot",
+                                  label    = "Download plot"
+                   ), ## save_marginal_plot
+                   tableOutput(outputId = "predictive_intervals")
+                 ), ## tabPanel
+                 tabPanel(
+                   title = "Joint projections",
+                   plotOutput(outputId = "joint_plot"),
+                   fluidRow(
+                     column(width = 6,
+                            sliderInput(inputId = "xlim_joint",
+                                        label   = "X limits",
+                                        value   = c(0,1),
+                                        min     = 0,
+                                        max     = 1,
+                                        step    = 0.1,
+                                        ticks   = FALSE
+                            ) ## xlim_joint
+                     ), ## column
+                     column(width = 6,
+                            sliderInput(inputId = "ylim_joint",
+                                        label   = "Y limits",
+                                        value   = c(0,1),
+                                        min     = 0,
+                                        max     = 1,
+                                        step    = 0.1,
+                                        ticks   = FALSE
+                            ) ## ylim_joint
+                     ) ## column
+                   ), ## fluidRow
+                   downloadButton(outputId = "save_joint_plot",
+                                  label    = "Download plot"
+                   )
+                 ) ## tabPanel
+               ) ## tabsetPanel
              ) ## mainPanel
            ) ## sidebarLayout
   ) ## tabPanel
