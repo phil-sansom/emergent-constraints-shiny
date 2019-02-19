@@ -210,6 +210,7 @@ server = function(input, output, session) {
   ## Downloads ##
   ###############
 
+  ## Download joint plot
   output$save_joint_plot = downloadHandler(
     filename = "joint.pdf",
     content = function(file) {
@@ -221,6 +222,7 @@ server = function(input, output, session) {
     contentType = "application/pdf"
   )
 
+  ## Download marginal plot
   output$save_marginal_plot = downloadHandler(
     filename = "marginal.pdf",
     content = function(file) {
@@ -230,6 +232,25 @@ server = function(input, output, session) {
       dev.off()
     },
     contentType = "application/pdf"
+  )
+
+  ## Download samples
+  output$save_samples = downloadHandler(
+    filename = "samples.csv",
+    content = function(file) {
+      ## Skip plotting if no data is loaded
+      if (is.null(data()) | ! input$x %in% names(data()) |
+          is.na(input$z) | is.na(input$sigma_z) |
+          input$sigma_z <= 0 | input$sigma_alpha <= 0 | input$sigma_beta <= 0 |
+          input$sigma_xstar <= 0 | input$sigma_sigma <= 0) {
+        write.csv(NULL, file = file, row.names = FALSE)
+      } else {
+        write.csv(cbind(data.frame(posterior  ()[c("alpha","beta","sigma")]),
+                        data.frame(discrepancy())),
+                  file = file, row.names = FALSE)
+      }
+    },
+    contentType = "text/csv"
   )
 
 
@@ -353,6 +374,8 @@ server = function(input, output, session) {
         input$sigma_z <= 0 | input$sigma_alpha <= 0 | input$sigma_beta <= 0 |
         input$sigma_xstar <= 0 | input$sigma_sigma <= 0) {
 
+      vminval = 0
+      vmaxval = 1
       vmin    = 0
       vmax    = 1
       vstep   = 0.1
@@ -495,10 +518,11 @@ server = function(input, output, session) {
           colnames(pred_int) = c("Mean",
                                  paste0(100*0.5*(1-as.numeric(input$gamma)),"%"),
                                  paste0(100*0.5*(1+as.numeric(input$gamma)),"%"))
-          rownames(pred_int) = c("Exchangeable model","Coexchangeable model")
+          rownames(pred_int) = c("Basic model",
+                                 "Conditionally exchangeable model")
 
-          pred_int[1,1] = mean(posterior()$ystar)
-          pred_int[2,1] = mean(discrepancy()$ystar)
+          pred_int[1,1  ] = mean(posterior()$ystar)
+          pred_int[2,1  ] = mean(discrepancy()$ystar)
           pred_int[1,2:3] = quantile(posterior()$ystar,
                                      c(0.5*(1 - as.numeric(input$gamma)),
                                        0.5*(1 + as.numeric(input$gamma))))

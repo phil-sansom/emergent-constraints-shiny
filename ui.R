@@ -332,9 +332,19 @@ ui = navbarPage(
                             ) ## xlim_marginal
                      ) ## column
                    ), ## fluidRow
-                   downloadButton(outputId = "save_marginal_plot",
-                                  label    = "Download plot"
-                   ), ## save_marginal_plot
+                   fluidRow(
+                     column(width = 4,
+                            downloadButton(outputId = "save_marginal_plot",
+                                           label    = "Download plot"
+                            )
+                     ), ## column
+                     column(width = 4),
+                     column(width = 4,
+                            downloadButton(outputId = "save_samples",
+                                           label    = "Download samples"
+                            )
+                     ) ## column
+                   ), ## fluidRow
                    tableOutput(outputId = "predictive_intervals")
                  ), ## tabPanel
                  tabPanel(
