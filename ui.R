@@ -75,6 +75,24 @@ ui = navbarPage(
                              label   = "Header",
                              value   = TRUE
                ), ## checkboxInput
+               fluidRow(
+                 column(width = 6,
+                 radioButtons("sep", "Separator",
+                              choices = c(Comma     = "," ,
+                                          Semicolon = ";" ,
+                                          Tab       = "\t"),
+                              selected = ","
+                 ) ## radioButtons
+                 ), ## column
+                 column(width = 6,
+                   radioButtons("quote", "Quote",
+                                choices = c(None           = "" ,
+                                            "Double Quote" = '"',
+                                            "Single Quote" = "'"),
+                                selected = '"'
+                   ) ## radioButtons
+                 ) ## column
+               ), ## fluidRow
                hr(),
                fluidRow(
                  column(width = 6,

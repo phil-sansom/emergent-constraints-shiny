@@ -266,7 +266,11 @@ server = function(input, output, session) {
     if (is.null(input_file))
       return(NULL)
 
-    read.csv(input_file$datapath, header = input$header)
+    read.csv(file   = input_file$datapath,
+             header = input$header,
+             sep    = input$sep,
+             quote  = input$quote
+    )
 
   })
 
