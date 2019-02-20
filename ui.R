@@ -150,9 +150,16 @@ ui = navbarPage(
 
   ## Prior panel
   tabPanel("Priors",
+           useShinyjs(),
            sidebarLayout(
              sidebarPanel(
-               h4("Multi-model ensemble"),
+               h4("Reference priors"),
+               checkboxInput(inputId = "reference",
+                             label   = "Use reference priors",
+                             value   = TRUE
+               ), ## checkboxInput
+               hr(),
+               h4("Informative priors"),
                h5("Intercept \\(\\alpha\\)"),
                fluidRow(
                  column(width = 6,
@@ -204,9 +211,9 @@ ui = navbarPage(
                         ) ## numericInput
                  ) ## column
                ), ## fluidRow
-               hr(),
-               h4("Real world"),
-               h5("Predictor \\(X_\\star\\)"),
+               # hr(),
+               # h4("Real world"),
+               h5("Real world predictor \\(X_\\star\\)"),
                fluidRow(
                  column(width = 6,
                         numericInput(inputId = "mu_xstar",

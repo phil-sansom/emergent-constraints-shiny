@@ -206,6 +206,18 @@ server = function(input, output, session) {
 
   })
 
+  ## Disable informative priors
+  observeEvent(input$reference, {
+    toggleState(id = "mu_alpha")
+    toggleState(id = "sigma_alpha")
+    toggleState(id = "mu_beta")
+    toggleState(id = "sigma_beta")
+    toggleState(id = "mu_sigma")
+    toggleState(id = "sigma_sigma")
+    toggleState(id = "mu_xstar")
+    toggleState(id = "sigma_xstar")
+  })
+  
   ###############
   ## Downloads ##
   ###############
@@ -258,6 +270,21 @@ server = function(input, output, session) {
   ## Data and computation ##
   ##########################
 
+  ## Posterior predictive distribution
+  posterior_predictive = function(x, alpha, beta, sigma, gamma, N) {
+    n   = length(x)
+    fit = numeric(n)
+    lwr = numeric(n)
+    upr = numeric(n)
+    for (i in 1:n) {
+      buffer = rnorm(N, alpha + beta*x[i], sigma)
+      fit[i] = mean(buffer)
+      lwr[i] = quantile(buffer, 0.5*(1 - gamma))
+      upr[i] = quantile(buffer, 0.5*(1 + gamma))
+    }
+    return(list(fit = fit, lwr = lwr, upr = upr))
+  }
+  
   ## Data
   data = reactive({
 
@@ -280,9 +307,9 @@ server = function(input, output, session) {
     xy      = data()
     choices = names(xy)
     if (is.null(xy) | ! input$x %in% choices)
-      return(list(min = 0, max = 1, val = c(0,1), step = 0.1))
-    v       = xy[,input$x]
+      return(list(value = c(0,1), min = 0, max = 1, step = 0.1))
 
+    v       = xy[,input$x]
     vrange  = range(v, input$z, na.rm = TRUE)
     vdiff   = diff(vrange)
     vstep   = 10^floor(log10(vdiff))
@@ -307,9 +334,9 @@ server = function(input, output, session) {
     xy = data()
     choices = names(xy)
     if (is.null(xy) | ! input$y %in% choices)
-      return(list(min = 0, max = 1, val = c(0,1), step = 0.1))
-    v       = data()[,input$y]
+      return(list(val = c(0,1), min = 0, max = 1, step = 0.1))
 
+    v       = data()[,input$y]
     vrange  = range(v)
     vdiff   = diff(vrange)
     vstep   = 10^floor(log10(vdiff))
@@ -337,32 +364,23 @@ server = function(input, output, session) {
     if (is.null(xy) | ! input$x %in% choices |
         is.na(input$z) | is.na(input$sigma_z) |
         input$sigma_z <= 0 | input$sigma_alpha <= 0 | input$sigma_beta <= 0 |
-        input$sigma_xstar <= 0 | input$sigma_sigma <= 0) {
+        input$sigma_xstar <= 0 | input$sigma_sigma <= 0) 
+      return(list(value = c(0,1), min = 0, max = 1, step = 0.1))
 
-      vminval = 0
-      vmaxval = 1
-      vmin    = 0
-      vmax    = 1
-      vstep   = 0.1
+    vrange  = range(xy[,input$x],discrepancy()$xstar)
+    vdiff   = diff(vrange)
+    vminval = vrange[1] - 0.04 * vdiff
+    vmaxval = vrange[2] + 0.04 * vdiff
+    vmin    = vminval
+    vmax    = vmaxval
+    vstep   = 10^floor(log10(vdiff)  )
+    vmin    = floor  (vmin   /vstep)*vstep
+    vmax    = ceiling(vmax   /vstep)*vstep
+    vstep   = 10^floor(log10(vdiff)-1)
+    vminval = floor  (vminval/vstep)*vstep
+    vmaxval = ceiling(vmaxval/vstep)*vstep
 
-    } else {
-
-      vrange  = range(xy[,input$x],posterior()$xstar,discrepancy()$xstar)
-      vdiff   = diff(vrange)
-      vminval = vrange[1] - 0.04 * vdiff
-      vmaxval = vrange[2] + 0.04 * vdiff
-      vmin    = vminval
-      vmax    = vmaxval
-      vstep   = 10^floor(log10(vdiff)  )
-      vmin    = floor  (vmin   /vstep)*vstep
-      vmax    = ceiling(vmax   /vstep)*vstep
-      vstep   = 10^floor(log10(vdiff)-1)
-      vminval = floor  (vminval/vstep)*vstep
-      vmaxval = ceiling(vmaxval/vstep)*vstep
-
-    }
-
-    return(list(value = c(vminval,vmaxval),
+    return(list(value = c(vminval,vmaxval), 
                 min = vmin, max = vmax, step = vstep))
 
   })
@@ -376,30 +394,21 @@ server = function(input, output, session) {
     if (is.null(xy) | ! input$x %in% choices |
         is.na(input$z) | is.na(input$sigma_z) |
         input$sigma_z <= 0 | input$sigma_alpha <= 0 | input$sigma_beta <= 0 |
-        input$sigma_xstar <= 0 | input$sigma_sigma <= 0) {
+        input$sigma_xstar <= 0 | input$sigma_sigma <= 0)
+      return(list(value = c(0,1), min = 0, max = 1, step = 0.1))
 
-      vminval = 0
-      vmaxval = 1
-      vmin    = 0
-      vmax    = 1
-      vstep   = 0.1
-
-    } else {
-
-      vrange  = range(xy[,input$y],posterior()$ystar,discrepancy()$ystar)
-      vdiff   = diff(vrange)
-      vminval = vrange[1] - 0.04 * vdiff
-      vmaxval = vrange[2] + 0.04 * vdiff
-      vmin    = vminval
-      vmax    = vmaxval
-      vstep   = 10^floor(log10(vdiff)  )
-      vmin    = floor  (vmin   /vstep)*vstep
-      vmax    = ceiling(vmax   /vstep)*vstep
-      vstep   = 10^floor(log10(vdiff)-1)
-      vminval = floor  (vminval/vstep)*vstep
-      vmaxval = ceiling(vmaxval/vstep)*vstep
-
-    }
+    vrange  = range(xy[,input$y],discrepancy()$ystar)
+    vdiff   = diff(vrange)
+    vminval = vrange[1] - 0.04 * vdiff
+    vmaxval = vrange[2] + 0.04 * vdiff
+    vmin    = vminval
+    vmax    = vmaxval
+    vstep   = 10^floor(log10(vdiff)  )
+    vmin    = floor  (vmin   /vstep)*vstep
+    vmax    = ceiling(vmax   /vstep)*vstep
+    vstep   = 10^floor(log10(vdiff)-1)
+    vminval = floor  (vminval/vstep)*vstep
+    vmaxval = ceiling(vmaxval/vstep)*vstep
 
     return(list(value = c(vminval,vmaxval),
                 min = vmin, max = vmax, step = vstep))
@@ -412,13 +421,37 @@ server = function(input, output, session) {
   ## Plotting points
   xx  = reactive(seq(xlim()$min, xlim()$max, length.out = 101))
 
-  ## Sample posterior
-  posterior = reactive({
+  ## Sample posterior with reference priors
+  reference_posterior = reactive({
+    
+    ## Data
+    x = data()[,input$x]
+    y = data()[,input$y]
+    z = input$z
+    sigma_z = input$sigma_z
+    
+    ## Model
+    model = lm(y ~ x)
+    
+    ## Sample posterior
+    theta = mvrnorm(input$N, model$coef, vcov(model))
+    sigma = sqrt(sum(model$residuals^2)/rchisq(input$N, df.residual(model)))
+    xstar = rnorm(input$N, z, sigma_z)
+    ystar = theta[,1] + theta[,2]*xstar + sigma*rnorm(input$N)
+    
+    ## Return posterior samples
+    list(alpha = theta[,1], beta = theta[,2], sigma = sigma, 
+         xstar = xstar, ystar = ystar)
+    
+  })
+  
+  ## Sample posterior with informative priors
+  informative_posterior = reactive({
 
     ## Data
     x = data()[,input$x]
     y = data()[,input$y]
-
+    
     ## Package data
     data = list(M = length(x), x = x, y = y,
                 z = input$z, sigma_z = input$sigma_z,
@@ -426,7 +459,7 @@ server = function(input, output, session) {
                 mu_beta  = input$mu_beta , sigma_beta  = input$sigma_beta ,
                 mu_sigma = input$mu_sigma, sigma_sigma = input$sigma_sigma,
                 mu_xstar = input$mu_xstar, sigma_xstar = input$sigma_xstar)
-
+    
     ## Fit STAN model
     buffer = sampling(model, data = data, chains = getOption("mc.cores"),
                       iter = 2*input$N/getOption("mc.cores"),
@@ -437,26 +470,15 @@ server = function(input, output, session) {
     extract(buffer, c("alpha","beta","sigma","xstar","ystar"))
 
   })
-
-  ## Sample posterior predictive
-  predictive = reactive({
-
-    ## Posterior predictive uncertainty
-    fit = length(xx())
-    lwr = length(xx())
-    upr = length(xx())
-    for (i in 1:length(xx())) {
-      buffer = posterior()$alpha + posterior()$beta * xx()[i] +
-        posterior()$sigma * rnorm(input$N)
-      fit[i]  = mean(buffer)
-      lwr[i]  = quantile(buffer, 0.5*(1 - as.numeric(input$gamma)))
-      upr[i]  = quantile(buffer, 0.5*(1 + as.numeric(input$gamma)))
+  
+  ## Posterior distribution
+  posterior = reactive(
+    if (input$reference) {
+      reference_posterior() 
+    } else {
+      informative_posterior()
     }
-
-    ## Return samples
-    list(fit = fit, lwr = lwr, upr = upr)
-
-  })
+  )
 
   ## Compute discrepancy
   discrepancy = reactive({
@@ -481,65 +503,78 @@ server = function(input, output, session) {
 
   })
 
-  ## Compute predictive discrepancy
-  predictive_discrepancy = reactive({
+  ## Sample posterior predictive
+  predictive = reactive(
+    posterior_predictive(x     = xx(),
+                         alpha = posterior()$alpha,
+                         beta  = posterior()$beta ,
+                         sigma = posterior()$sigma,
+                         gamma = as.numeric(input$gamma),
+                         N     = input$N
+    )
+  )
+  
+  ## Sample posterior predictive discrepancy
+  discrepancy_predictive = reactive(
+    posterior_predictive(x     = xx(),
+                         alpha = discrepancy()$alphastar,
+                         beta  = discrepancy()$betastar ,
+                         sigma = discrepancy()$sigmastar,
+                         gamma = as.numeric(input$gamma),
+                         N     = input$N
+    )
+  )
 
-    ## Summarize discrepancy
-    fit = length(xx())
-    lwr = length(xx())
-    upr = length(xx())
-    for (i in 1:length(xx())) {
-      buffer = discrepancy()$alphastar + discrepancy()$betastar * xx()[i] +
-        discrepancy()$sigmastar * rnorm(input$N)
-      fit[i]  = mean(buffer)
-      lwr[i]  = quantile(buffer, 0.5*(1 - as.numeric(input$gamma)))
-      upr[i]  = quantile(buffer, 0.5*(1 + as.numeric(input$gamma)))
-    }
+  ## Sample posterior predictive from basic model with reference priors
+  reference_predictive = reactive(
+    posterior_predictive(x     = xx(),
+                         alpha = reference_posterior()$alpha,
+                         beta  = reference_posterior()$beta ,
+                         sigma = reference_posterior()$sigma,
+                         gamma = as.numeric(input$gamma),
+                         N     = input$N
+    )
+  )
 
-    ## Return predictions
-    list(fit = fit, lwr = lwr, upr = upr)
-
-  })
-
-
+  
   ############
   ## Tables ##
   ############
 
-  output$predictive_intervals = renderTable(
-      {   ## Data
-          xy = data()
-          choices = names(xy)
-
-          ## Skip table if no data is loaded
-          if (is.null(xy) | ! input$x %in% choices |
-              is.na(input$z) | is.na(input$sigma_z) | input$sigma_z <= 0 |
-              input$sigma_alpha <= 0 | input$sigma_beta  <= 0 |
-              input$sigma_xstar <= 0 | input$sigma_sigma <= 0)
-              return(NULL)
-
-          pred_int = data.frame(numeric(2),numeric(2),numeric(2))
-          colnames(pred_int) = c("Mean",
-                                 paste0(100*0.5*(1-as.numeric(input$gamma)),"%"),
-                                 paste0(100*0.5*(1+as.numeric(input$gamma)),"%"))
-          rownames(pred_int) = c("Basic model",
-                                 "Conditionally exchangeable model")
-
-          pred_int[1,1  ] = mean(posterior()$ystar)
-          pred_int[2,1  ] = mean(discrepancy()$ystar)
-          pred_int[1,2:3] = quantile(posterior()$ystar,
-                                     c(0.5*(1 - as.numeric(input$gamma)),
-                                       0.5*(1 + as.numeric(input$gamma))))
-          pred_int[2,2:3] = quantile(discrepancy()$ystar,
-                                     c(0.5*(1 - as.numeric(input$gamma)),
-                                       0.5*(1 + as.numeric(input$gamma))))
-
-          return(pred_int)
-      },
-      rownames = TRUE
+  output$predictive_intervals = renderTable({   
+    ## Data
+    xy = data()
+    choices = names(xy)
+    
+    ## Skip table if no data is loaded
+    if (is.null(xy) | ! input$x %in% choices |
+        is.na(input$z) | is.na(input$sigma_z) | input$sigma_z <= 0 |
+        input$sigma_alpha <= 0 | input$sigma_beta  <= 0 |
+        input$sigma_xstar <= 0 | input$sigma_sigma <= 0)
+      return(NULL)
+    
+    pred_int = data.frame(numeric(2),numeric(2),numeric(2))
+    colnames(pred_int) = c("Mean",
+                           paste0(100*0.5*(1-as.numeric(input$gamma)),"%"),
+                           paste0(100*0.5*(1+as.numeric(input$gamma)),"%"))
+    rownames(pred_int) = c("Reference model",
+                           "Conditionally exchangeable model")
+    
+    pred_int[1,1  ] = mean(posterior()$ystar)
+    pred_int[2,1  ] = mean(discrepancy()$ystar)
+    pred_int[1,2:3] = quantile(posterior()$ystar,
+                               c(0.5*(1 - as.numeric(input$gamma)),
+                                 0.5*(1 + as.numeric(input$gamma))))
+    pred_int[2,2:3] = quantile(discrepancy()$ystar,
+                               c(0.5*(1 - as.numeric(input$gamma)),
+                                 0.5*(1 + as.numeric(input$gamma))))
+    
+    return(pred_int)
+  },
+  rownames = TRUE
   )
-
-
+  
+  
   ##############
   ## Plotting ##
   ##############
@@ -665,61 +700,69 @@ server = function(input, output, session) {
 
   })
 
-  ## Joint posterior predictive distribution
-  joint_plot = function() {
+  ## Joint posterior preditive plot
+  output$joint_plot = renderPlot({
+    
     ## Data
     xy = data()
     choices = names(xy)
-
+    
     ## Skip plotting if no data is loaded
     if (is.null(xy) | ! input$x %in% choices |
         is.na(input$z) | is.na(input$sigma_z) |
         input$sigma_z <= 0 | input$sigma_alpha <= 0 | input$sigma_beta <= 0 |
         input$sigma_xstar <= 0 | input$sigma_sigma <= 0)
       return(NULL)
-
+    
     ## Graphical parameters
     graphical_parameters()
-
+    
     ## Data
     x = xy[,input$x]
     y = xy[,input$y]
-
+    
     ## Plot predictive point cloud
     plot(discrepancy()$xstar[mask()], discrepancy()$ystar[mask()],
          col = gray(0.75,0.25), pch = 19,
          xlim = input$xlim_joint, ylim = input$ylim_joint)
-
+    
     ## Add data
     points(x, y, col = "black", pch = 19)
-
+    
     ## Add titles
     title(xlab = input$xlab)
     title(ylab = input$ylab)
-
-    ## Add linear regression
-    lines(xx(), predictive()$fit, lty = "dotdash", lwd = 2)
-    lines(xx(), predictive()$lwr, lty = "dashed" , lwd = 2)
-    lines(xx(), predictive()$upr, lty = "dashed" , lwd = 2)
-
+    
+    ## Add reference predictions
+    lines(xx(), reference_predictive()$fit, 
+          col = "black", lty = "dotdash", lwd = 2)
+    lines(xx(), reference_predictive()$lwr,
+          col = "black",  lty = "dashed" , lwd = 2)
+    lines(xx(), reference_predictive()$upr,
+          col = "black",  lty = "dashed" , lwd = 2)
+    
     ## Add discrepancy
-    lines(xx(), predictive_discrepancy()$fit,
+    lines(xx(), discrepancy_predictive()$fit,
           col = "red", lty = "dotdash", lwd = 2)
-    lines(xx(), predictive_discrepancy()$lwr,
+    lines(xx(), discrepancy_predictive()$lwr,
           col = "red", lty = "dashed" , lwd = 2)
-    lines(xx(), predictive_discrepancy()$upr,
+    lines(xx(), discrepancy_predictive()$upr,
           col = "red", lty = "dashed" , lwd = 2)
-
+    
     ## Add observations
-    abline(v = mean    (posterior()$xstar),
+    abline(v = mean    (reference_posterior()$xstar),
            col = "blue", lty = "dotdash", lwd = 2)
-    abline(v = quantile(posterior()$xstar, 0.5*(1 - as.numeric(input$gamma))),
+    abline(v = quantile(reference_posterior()$xstar, 
+                        0.5*(1 - as.numeric(input$gamma))),
            col = "blue", lty = "dashed" , lwd = 2)
-    abline(v = quantile(posterior()$xstar, 0.5*(1 + as.numeric(input$gamma))),
+    abline(v = quantile(reference_posterior()$xstar, 
+                        0.5*(1 + as.numeric(input$gamma))),
            col = "blue", lty = "dashed" , lwd = 2)
-
-    ## Add posterior density
-    joint_density = kde2d(posterior()$xstar, posterior()$ystar, n = 25)
+    
+    ## Add reference density
+    joint_density = kde2d(x = reference_posterior()$xstar, 
+                          y = reference_posterior()$ystar, 
+                          n = 25)
     z = joint_density$z
     z = z/sum(z)
     o = order(z, decreasing = TRUE)
@@ -729,7 +772,7 @@ server = function(input, output, session) {
     contour(joint_density$x, joint_density$y, joint_density$z,
             levels = as.numeric(input$gamma), drawlabels = FALSE,
             lwd = 2, col = "black", lty = "dotted", add = TRUE)
-
+    
     ## Add discrepancy density
     joint_density = kde2d(discrepancy()$xstar, discrepancy()$ystar, n = 25)
     z = joint_density$z
@@ -741,81 +784,72 @@ server = function(input, output, session) {
     contour(joint_density$x, joint_density$y, joint_density$z,
             levels = as.numeric(input$gamma), drawlabels = FALSE,
             lwd = 2, col = "red", lty = "dotted", add = TRUE)
-
+    
     ## Add legend
     legend("bottomright",
-           legend = c("Basic model","Conditionally exchangeable model",
+           legend = c("Reference model","Conditionally exchangeable model",
                       "Observational constraint"),
            col = c("black","red","blue"),
            lty = c("dotdash","dotdash","dotdash"), lwd = c(2,2,2), bty = "n")
+    
+  })
 
-  } ## Joint posterior predictive distribution
+  ## Marginal posterior predictive plot
+  output$marginal_plot = renderPlot({
 
-  ## Joint posterior preditive plot
-  output$joint_plot = renderPlot(
-    joint_plot()
-  )
-
-  ## Marginal posterior predictive distribution
-  marginal_plot = function() {
     ## Data
     xy = data()
     choices = names(xy)
-
+    
     ## Skip plotting if no data is loaded
     if (is.null(xy) | ! input$x %in% choices |
         is.na(input$z) | is.na(input$sigma_z) |
         input$sigma_z <= 0 | input$sigma_alpha <= 0 | input$sigma_beta <= 0 |
         input$sigma_xstar <= 0 | input$sigma_sigma <= 0)
       return(NULL)
-
+    
     ## Graphical parameters
     graphical_parameters()
-
+    
     ## Basic projection
-    dens1 = density (posterior()$ystar)
-    x1m   = quantile(posterior()$ystar,
+    dens1 = density (reference_posterior()$ystar)
+    x1m   = quantile(reference_posterior()$ystar,
                      0.5 + c(-0.5,+0.5)*as.numeric(input$gamma))
     x1m   = seq(max(which(dens1$x < x1m[1])), min(which(dens1$x > x1m[2])), 1)
-
+    
     ## Discrepancy projection
     dens2 = density (discrepancy()$ystar)
     x2m   = quantile(discrepancy()$ystar,
                      0.5 + c(-0.5,+0.5)*as.numeric(input$gamma))
     x2m   = seq(max(which(dens2$x < x2m[1])), min(which(dens2$x > x2m[2])), 1)
-
+    
     ymax = max(dens1$y,dens2$y)*1.04
-
+    
     xlim = input$xlim_marginal
     ylim = c(0,ymax)
-
+    
     ## Plot data
     plot (xy[,input$y], type = "n", xlim = xlim, ylim = ylim)
-    rug(xy[,input$y], ticksize = 0.02, lwd = 2, col = "black")
+    rug(xy[,input$y], ticksize = 0.02, lwd = 2, col = "black", quiet = TRUE)
     polygon(x = c(dens1$x[x1m[1]],dens1$x[x1m],dens1$x[x1m[length(x1m)]]),
             y = c(0,dens1$y[x1m],0), border = NA, col = alpha_black)
     polygon(x = c(dens2$x[x2m[1]],dens2$x[x2m],dens2$x[x2m[length(x2m)]]),
             y = c(0,dens2$y[x2m],0), border = NA, col = alpha_red)
-
+    
     lines(dens1, col = "black", lwd = 2)
     lines(dens2, col = "red"  , lwd = 2)
-
+    
     ## Add titles
     title(xlab = input$ylab)
     title(ylab = "Density")
-
+    
     ## Add legend
     legend("topright",
-           legend = c("Basic model","Conditionally exchangeable model"),
+           legend = c("Reference model","Conditionally exchangeable model"),
            col = c("black","red"), lty = c("solid","solid"), lwd = c(2,2),
            bty = "n")
-
-  } ## Marginal posterior predictive distribution
-
-  ## Marginal posterior predictive plot
-  output$marginal_plot = renderPlot(
-    marginal_plot()
-  )
+    
+  })
 
   ## Joint prior plot
   output$joint_prior_plot = renderPlot({
@@ -823,11 +857,11 @@ server = function(input, output, session) {
     xy = data()
     choices = names(data)
 
-    if(is.null(xy) | ! input$x %in% names(xy) |
+    if(is.null(xy) | ! input$x %in% names(xy) | input$reference |
        is.na(input$mu_alpha) | is.na(input$sigma_alpha) | input$sigma_alpha < 0 |
        is.na(input$mu_beta ) | is.na(input$sigma_beta ) | input$sigma_beta  < 0 |
        is.na(input$mu_sigma) | is.na(input$sigma_sigma) | input$sigma_sigma < 0 |
-       is.na(input$mu_xstar) | is.na(input$sigma_xstar) | input$sigma_xstar < 0)
+       is.na(input$mu_xstar) | is.na(input$sigma_xstar) | input$sigma_xstar < 0) 
       return(NULL)
 
     x = xy[,input$x]
@@ -880,7 +914,8 @@ server = function(input, output, session) {
   ## Mean/intercept prior
   output$alpha_plot = renderPlot({
 
-    if (is.na(input$mu_alpha) | is.na(input$sigma_alpha) | input$sigma_alpha <= 0)
+    if (is.na(input$mu_alpha) | is.na(input$sigma_alpha) | 
+        input$sigma_alpha <= 0 | input$reference)
       return(NULL)
 
     normal_prior_plot(mu    = input$mu_alpha,
@@ -894,7 +929,8 @@ server = function(input, output, session) {
   ## Slope prior
   output$beta_plot = renderPlot({
 
-    if (is.na(input$mu_beta) | is.na(input$sigma_beta) | input$sigma_beta <= 0)
+    if (is.na(input$mu_beta) | is.na(input$sigma_beta) | 
+        input$sigma_beta <= 0 | input$reference)
       return(NULL)
 
     normal_prior_plot(mu    = input$mu_beta,
@@ -908,7 +944,8 @@ server = function(input, output, session) {
   ## Sigma prior
   output$sigma_plot = renderPlot({
 
-    if (is.na(input$mu_sigma) | is.na(input$sigma_sigma) | input$sigma_sigma <= 0)
+    if (is.na(input$mu_sigma) | is.na(input$sigma_sigma) | 
+        input$sigma_sigma <= 0 | input$reference)
       return(NULL)
 
     folded_normal_prior_plot(mu    = input$mu_sigma,
@@ -923,7 +960,8 @@ server = function(input, output, session) {
   output$xstar_plot = renderPlot({
 
     ## Error checking
-    if (is.na(input$mu_xstar) | is.na(input$sigma_xstar) | input$sigma_xstar <= 0)
+    if (is.na(input$mu_xstar) | is.na(input$sigma_xstar) | 
+        input$sigma_xstar <= 0 | input$reference)
       return(NULL)
 
     normal_prior_plot(mu    = input$mu_xstar,
