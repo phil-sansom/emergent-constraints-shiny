@@ -4,68 +4,70 @@ server = function(input, output, session) {
   ## Observers ##
   ###############
 
-  ## Update predictor choices when data loaded
+  ## Update variable choices when data loaded
   observe({
+    
     choices = names(data())
+    
     updateSelectInput(session  = session,
                       inputId  = "x",
                       choices  = choices,
                       selected = choices[1]
-    )
-  }) ## observe
-
-  ## Update response choices when data loaded
-  observe({
-    choices = names(data())
+    ) ## x
+    
     updateSelectInput(session  = session,
                       inputId  = "y",
                       choices  = choices,
                       selected = choices[2]
-    )
+    ) ## y
+    
   }) ## observe
+
 
   ## Update predictor label when predictor changes
   observe(
-    updateTextInput(session  = session,
-                    inputId  = "xlab",
-                    value    = input$x
+    updateTextInput(session = session,
+                    inputId = "xlab",
+                    value   = input$x
     )
   ) ## observe
 
   ## Update response label when response changes
   observe(
-    updateTextInput(session  = session,
-                    inputId  = "ylab",
-                    value    = input$y
+    updateTextInput(session = session,
+                    inputId = "ylab",
+                    value   = input$y
     )
   ) ## observe
 
-  ## Update observation inputs
+  ## Update observation input controls
   observe({
-    xy      = data()
-    choices = names(xy)
-    if (is.null(xy) | ! input$x %in% choices)
-      return(NULL)
-    v       = xy[,input$x]
+    
+    if (is.null(data()) | ! input$x %in% names(data())) {
+      
+      vstep = 1
+      
+    } else {
+      
+      vstep  = floor(log10(diff(range(data()[,input$x]))))
 
-    vrange  = range(v)
-    vdiff   = diff(vrange)
-    vstep   = floor(log10(vdiff))
-
+    }
+      
     updateNumericInput(session = session,
                        inputId = "z",
                        step    = 10^(vstep-1)
-    )
+    ) ## z
 
     updateNumericInput(session = session,
                        inputId = "sigma_z",
                        step    = 10^(vstep-2)
-    )
+    ) ## sigma_z
 
   }) ## observe
 
   ## Update intercept bias range
   observe({
+    
     v     = c(ylim()$min,ylim()$max)
     vdiff = diff(v)
     vstep = 10^(floor(log10(vdiff))-1)
@@ -80,11 +82,13 @@ server = function(input, output, session) {
                       min     = vmin,
                       max     = vmax,
                       step    = vstep
-    ) ## updateSliderInput
+    ) ## mu_delta_alpha
+    
   }) ## observe
 
   ## Update intercept uncertainty range
   observe({
+    
     v     = c(ylim()$min,ylim()$max)
     vdiff = diff(v)
     vstep = 10^(floor(log10(vdiff))-1)
@@ -97,11 +101,13 @@ server = function(input, output, session) {
                       min     = 0,
                       max     = vmax,
                       step    = vstep
-    ) ## updateSliderInput
+    ) ## sigma_delta_alpha
+    
   }) ## observe
 
   ## Update slope bias range
   observe({
+    
     x     = c(xlim()$min,xlim()$max)
     y     = c(ylim()$min,ylim()$max)
     xdiff = diff(x)
@@ -120,11 +126,13 @@ server = function(input, output, session) {
                       min     = vmin,
                       max     = vmax,
                       step    = vstep
-    ) ## updateSliderInput
+    ) ## mu_delta_beta
+    
   }) ## observe
 
   ## Update slope uncertainty range
   observe({
+    
     x     = c(xlim()$min,xlim()$max)
     y     = c(ylim()$min,ylim()$max)
     xdiff = diff(x)
@@ -141,11 +149,13 @@ server = function(input, output, session) {
                       min     = 0,
                       max     = vmax,
                       step    = vstep
-    ) ## updateSliderInput
+    ) ## sigma_delta_beta
+    
   }) ## observe
 
   ## Update response uncertainty range
   observe({
+    
     v     = c(ylim()$min,ylim()$max)
     vdiff = diff(v)
     vstep = 10^(floor(log10(vdiff))-1)
@@ -158,51 +168,71 @@ server = function(input, output, session) {
                       min     = 0,
                       max     = vmax,
                       step    = vstep
-    ) ## updateSliderInput
+    ) ## sigma_sigma_star
+    
   }) ## observe
 
-  ## Update marginal plot limits
+  ## Compute useful limits for posterior plots
+  posterior_limits = function(...) {
+    
+    vrange  = range(...)
+    vdiff   = diff(vrange)
+    vminval = vrange[1] - 0.04 * vdiff
+    vmaxval = vrange[2] + 0.04 * vdiff
+    vmin    = vminval
+    vmax    = vmaxval
+    vstep   = 10^floor(log10(vdiff)  )
+    vmin    = floor  (vmin   /vstep)*vstep
+    vmax    = ceiling(vmax   /vstep)*vstep
+    vstep   = 10^floor(log10(vdiff)-1)
+    vminval = floor  (vminval/vstep)*vstep
+    vmaxval = ceiling(vmaxval/vstep)*vstep
+    
+    return(list(value = c(vminval,vmaxval), min = vmin, max = vmax, step = vstep))
+    
+  } ## posterior_limits
+  
+  ## Update posterior plot limits
   observe ({
 
-    limits = ylim_posterior()
+    if (is.null(data()) | ! input$x %in% names(data()) |
+        is.na(input$z) | is.na(input$sigma_z) |
+        input$sigma_z <= 0 | input$sigma_alpha <= 0 | input$sigma_beta <= 0 |
+        input$sigma_xstar <= 0 | input$sigma_sigma <= 0) {
+      
+      xlims = list(value = c(0,1), min = 0, max = 1, step = 0.1)
+      ylims = xlims
+      
+    } else {
+
+      xlims = posterior_limits(data()[,input$x], discrepancy()$xstar)
+      ylims = posterior_limits(data()[,input$y], discrepancy()$ystar)
+      
+    }    
 
     updateSliderInput(session = session,
                       inputId = "xlim_marginal",
-                      value   = limits$value,
-                      min     = limits$min,
-                      max     = limits$max,
-                      step    = limits$step
-    ) ## updateSliderInput
-
-  })
-
-  ## Update joint plot limits
-  observe ({
-
-    limits = ylim_posterior()
-
-    updateSliderInput(session = session,
-                      inputId = "ylim_joint",
-                      value   = limits$value,
-                      min     = limits$min,
-                      max     = limits$max,
-                      step    = limits$step
-    ) ## updateSliderInput
-
-  })
-
-  ## Update joint plot limits
-  observe ({
-
-    limits = xlim_posterior()
-
+                      value   = ylims$value,
+                      min     = ylims$min,
+                      max     = ylims$max,
+                      step    = ylims$step
+    ) ## xlim_marginal
+    
     updateSliderInput(session = session,
                       inputId = "xlim_joint",
-                      value   = limits$value,
-                      min     = limits$min,
-                      max     = limits$max,
-                      step    = limits$step
-    ) ## updateSliderInput
+                      value   = xlims$value,
+                      min     = xlims$min,
+                      max     = xlims$max,
+                      step    = xlims$step
+    ) ## xlim_joint
+    
+    updateSliderInput(session = session,
+                      inputId = "ylim_joint",
+                      value   = ylims$value,
+                      min     = ylims$min,
+                      max     = ylims$max,
+                      step    = ylims$step
+    ) ## ylim_joint
 
   })
 
@@ -304,13 +334,10 @@ server = function(input, output, session) {
   ## Update X limits
   xlim = reactive({
 
-    xy      = data()
-    choices = names(xy)
-    if (is.null(xy) | ! input$x %in% choices)
+    if (is.null(data()) | ! input$x %in% names(data()))
       return(list(value = c(0,1), min = 0, max = 1, step = 0.1))
 
-    v       = xy[,input$x]
-    vrange  = range(v, input$z, na.rm = TRUE)
+    vrange  = range(data()[,input$x], input$z, na.rm = TRUE)
     vdiff   = diff(vrange)
     vstep   = 10^floor(log10(vdiff))
     vmin    = vrange[1] - vdiff
@@ -331,13 +358,10 @@ server = function(input, output, session) {
   ## Update Y limits
   ylim = reactive({
 
-    xy = data()
-    choices = names(xy)
-    if (is.null(xy) | ! input$y %in% choices)
+    if (is.null(data()) | ! input$y %in% names(data()))
       return(list(val = c(0,1), min = 0, max = 1, step = 0.1))
 
-    v       = data()[,input$y]
-    vrange  = range(v)
+    vrange  = range(data()[,input$y])
     vdiff   = diff(vrange)
     vstep   = 10^floor(log10(vdiff))
     vmin    = vrange[1] - vdiff
@@ -355,75 +379,15 @@ server = function(input, output, session) {
 
   })
 
-  ## Update posterior X limits
-  xlim_posterior = reactive({
-
-    xy      = data()
-    choices = names(xy)
-    ## Return defaults if problem
-    if (is.null(xy) | ! input$x %in% choices |
-        is.na(input$z) | is.na(input$sigma_z) |
-        input$sigma_z <= 0 | input$sigma_alpha <= 0 | input$sigma_beta <= 0 |
-        input$sigma_xstar <= 0 | input$sigma_sigma <= 0) 
-      return(list(value = c(0,1), min = 0, max = 1, step = 0.1))
-
-    vrange  = range(xy[,input$x],discrepancy()$xstar)
-    vdiff   = diff(vrange)
-    vminval = vrange[1] - 0.04 * vdiff
-    vmaxval = vrange[2] + 0.04 * vdiff
-    vmin    = vminval
-    vmax    = vmaxval
-    vstep   = 10^floor(log10(vdiff)  )
-    vmin    = floor  (vmin   /vstep)*vstep
-    vmax    = ceiling(vmax   /vstep)*vstep
-    vstep   = 10^floor(log10(vdiff)-1)
-    vminval = floor  (vminval/vstep)*vstep
-    vmaxval = ceiling(vmaxval/vstep)*vstep
-
-    return(list(value = c(vminval,vmaxval), 
-                min = vmin, max = vmax, step = vstep))
-
-  })
-
-  ## Update posterior Y limits
-  ylim_posterior = reactive({
-
-    xy      = data()
-    choices = names(xy)
-    ## Return defaults if problem
-    if (is.null(xy) | ! input$x %in% choices |
-        is.na(input$z) | is.na(input$sigma_z) |
-        input$sigma_z <= 0 | input$sigma_alpha <= 0 | input$sigma_beta <= 0 |
-        input$sigma_xstar <= 0 | input$sigma_sigma <= 0)
-      return(list(value = c(0,1), min = 0, max = 1, step = 0.1))
-
-    vrange  = range(xy[,input$y],discrepancy()$ystar)
-    vdiff   = diff(vrange)
-    vminval = vrange[1] - 0.04 * vdiff
-    vmaxval = vrange[2] + 0.04 * vdiff
-    vmin    = vminval
-    vmax    = vmaxval
-    vstep   = 10^floor(log10(vdiff)  )
-    vmin    = floor  (vmin   /vstep)*vstep
-    vmax    = ceiling(vmax   /vstep)*vstep
-    vstep   = 10^floor(log10(vdiff)-1)
-    vminval = floor  (vminval/vstep)*vstep
-    vmaxval = ceiling(vmaxval/vstep)*vstep
-
-    return(list(value = c(vminval,vmaxval),
-                min = vmin, max = vmax, step = vstep))
-
-  })
-
   ## Subset samples for plotting
   mask = reactive(sample.int(input$N, 1e3))
 
   ## Plotting points
-  xx  = reactive(seq(xlim()$min, xlim()$max, length.out = 101))
+  xx = reactive(seq(xlim()$min, xlim()$max, length.out = 101))
 
   ## Sample posterior with reference priors
   reference_posterior = reactive({
-    
+
     ## Data
     x = data()[,input$x]
     y = data()[,input$y]
@@ -472,13 +436,13 @@ server = function(input, output, session) {
   })
   
   ## Posterior distribution
-  posterior = reactive(
+  posterior = reactive({
     if (input$reference) {
       reference_posterior() 
     } else {
       informative_posterior()
     }
-  )
+  })
 
   ## Compute discrepancy
   discrepancy = reactive({
@@ -504,7 +468,8 @@ server = function(input, output, session) {
   })
 
   ## Sample posterior predictive
-  predictive = reactive(
+  predictive = reactive({
+    
     posterior_predictive(x     = xx(),
                          alpha = posterior()$alpha,
                          beta  = posterior()$beta ,
@@ -512,10 +477,12 @@ server = function(input, output, session) {
                          gamma = as.numeric(input$gamma),
                          N     = input$N
     )
-  )
+    
+  })
   
   ## Sample posterior predictive discrepancy
-  discrepancy_predictive = reactive(
+  discrepancy_predictive = reactive({
+    
     posterior_predictive(x     = xx(),
                          alpha = discrepancy()$alphastar,
                          beta  = discrepancy()$betastar ,
@@ -523,10 +490,12 @@ server = function(input, output, session) {
                          gamma = as.numeric(input$gamma),
                          N     = input$N
     )
-  )
+    
+  })
 
   ## Sample posterior predictive from basic model with reference priors
-  reference_predictive = reactive(
+  reference_predictive = reactive({
+
     posterior_predictive(x     = xx(),
                          alpha = reference_posterior()$alpha,
                          beta  = reference_posterior()$beta ,
@@ -534,7 +503,8 @@ server = function(input, output, session) {
                          gamma = as.numeric(input$gamma),
                          N     = input$N
     )
-  )
+    
+  })
 
   
   ############
@@ -542,12 +512,9 @@ server = function(input, output, session) {
   ############
 
   output$predictive_intervals = renderTable({   
-    ## Data
-    xy = data()
-    choices = names(xy)
-    
+
     ## Skip table if no data is loaded
-    if (is.null(xy) | ! input$x %in% choices |
+    if (is.null(data()) | ! input$x %in% names(data()) |
         is.na(input$z) | is.na(input$sigma_z) | input$sigma_z <= 0 |
         input$sigma_alpha <= 0 | input$sigma_beta  <= 0 |
         input$sigma_xstar <= 0 | input$sigma_sigma <= 0)
@@ -655,12 +622,8 @@ server = function(input, output, session) {
   ## Data plot
   output$data_plot = renderPlot({
 
-    ## Data
-    xy = data()
-    choices = names(xy)
-
     ## Skip plotting if no data is loaded
-    if (is.null(xy) | ! input$x %in% choices)
+    if (is.null(data()) | ! input$x %in% names(data()))
       return(NULL)
 
     ## Graphical parameters
@@ -668,7 +631,7 @@ server = function(input, output, session) {
 
     # ## Create plot
     # p = ggplot() +
-    #   geom_point(mapping = aes_string(x = input$x, y = input$y), data = xy) +
+    #   geom_point(mapping = aes_string(x = input$x, y = input$y), data = data()) +
     #   labs(x = input$xlab, y = input$ylab)
     #
     # ## Add observations
@@ -679,8 +642,8 @@ server = function(input, output, session) {
     # ## Plot data
     # p
 
-    x = xy[,input$x]
-    y = xy[,input$y]
+    x = data()[,input$x]
+    y = data()[,input$y]
     z = input$z
 
     ## Plot data
@@ -702,13 +665,9 @@ server = function(input, output, session) {
 
   ## Joint posterior preditive plot
   output$joint_plot = renderPlot({
-    
-    ## Data
-    xy = data()
-    choices = names(xy)
-    
+
     ## Skip plotting if no data is loaded
-    if (is.null(xy) | ! input$x %in% choices |
+    if (is.null(data()) | ! input$x %in% names(data()) |
         is.na(input$z) | is.na(input$sigma_z) |
         input$sigma_z <= 0 | input$sigma_alpha <= 0 | input$sigma_beta <= 0 |
         input$sigma_xstar <= 0 | input$sigma_sigma <= 0)
@@ -717,17 +676,13 @@ server = function(input, output, session) {
     ## Graphical parameters
     graphical_parameters()
     
-    ## Data
-    x = xy[,input$x]
-    y = xy[,input$y]
-    
     ## Plot predictive point cloud
     plot(discrepancy()$xstar[mask()], discrepancy()$ystar[mask()],
          col = gray(0.75,0.25), pch = 19,
          xlim = input$xlim_joint, ylim = input$ylim_joint)
     
     ## Add data
-    points(x, y, col = "black", pch = 19)
+    points(data()[,input$x], data()[,input$y], col = "black", pch = 19)
     
     ## Add titles
     title(xlab = input$xlab)
@@ -797,12 +752,8 @@ server = function(input, output, session) {
   ## Marginal posterior predictive plot
   output$marginal_plot = renderPlot({
 
-    ## Data
-    xy = data()
-    choices = names(xy)
-    
     ## Skip plotting if no data is loaded
-    if (is.null(xy) | ! input$x %in% choices |
+    if (is.null(data()) | ! input$x %in% names(data()) |
         is.na(input$z) | is.na(input$sigma_z) |
         input$sigma_z <= 0 | input$sigma_alpha <= 0 | input$sigma_beta <= 0 |
         input$sigma_xstar <= 0 | input$sigma_sigma <= 0)
@@ -829,8 +780,8 @@ server = function(input, output, session) {
     ylim = c(0,ymax)
     
     ## Plot data
-    plot (xy[,input$y], type = "n", xlim = xlim, ylim = ylim)
-    rug(xy[,input$y], ticksize = 0.02, lwd = 2, col = "black", quiet = TRUE)
+    plot (data()[,input$y], type = "n", xlim = xlim, ylim = ylim)
+    rug(data()[,input$y], ticksize = 0.02, lwd = 2, col = "black", quiet = TRUE)
     polygon(x = c(dens1$x[x1m[1]],dens1$x[x1m],dens1$x[x1m[length(x1m)]]),
             y = c(0,dens1$y[x1m],0), border = NA, col = alpha_black)
     polygon(x = c(dens2$x[x2m[1]],dens2$x[x2m],dens2$x[x2m[length(x2m)]]),
@@ -854,29 +805,16 @@ server = function(input, output, session) {
   ## Joint prior plot
   output$joint_prior_plot = renderPlot({
 
-    xy = data()
-    choices = names(data)
-
-    if(is.null(xy) | ! input$x %in% names(xy) | input$reference |
+    if(is.null(data()) | ! input$x %in% names(data()) | input$reference |
        is.na(input$mu_alpha) | is.na(input$sigma_alpha) | input$sigma_alpha < 0 |
        is.na(input$mu_beta ) | is.na(input$sigma_beta ) | input$sigma_beta  < 0 |
        is.na(input$mu_sigma) | is.na(input$sigma_sigma) | input$sigma_sigma < 0 |
        is.na(input$mu_xstar) | is.na(input$sigma_xstar) | input$sigma_xstar < 0) 
       return(NULL)
 
-    x = xy[,input$x]
-    y = xy[,input$y]
+    x = data()[,input$x]
+    y = data()[,input$y]
     z = input$z
-
-    ## X limits
-    xrange  = range(x, z, na.rm = TRUE)
-    xdiff   = diff(xrange)
-    xstep   = 10^floor(log10(xdiff))
-    xmin    = xrange[1] - 0.04 * xdiff
-    xmax    = xrange[2] + 0.04 * xdiff
-    xmin    = floor  (xmin/xstep)*xstep
-    xmax    = ceiling(xmax/xstep)*xstep
-    xx      = seq(xmin, xmax, length.out = 101)
 
     ## Simulate from prior
     alpha =     rnorm(input$N, input$mu_alpha, input$sigma_alpha)
@@ -884,11 +822,11 @@ server = function(input, output, session) {
     sigma = abs(rnorm(input$N, input$mu_sigma, input$sigma_sigma))
 
     ## Simulate from prior predictive distribution
-    fit = length(xx)
-    lwr = length(xx)
-    upr = length(xx)
-    for (i in 1:length(xx)) {
-      buffer = alpha + beta * xx[i] + sigma * rnorm(input$N)
+    fit = numeric(length(xx()))
+    lwr = numeric(length(xx()))
+    upr = numeric(length(xx()))
+    for (i in 1:length(xx())) {
+      buffer = alpha + beta * xx()[i] + sigma * rnorm(input$N)
       fit[i] = mean(buffer)
       lwr[i] = quantile(buffer, 0.5*(1 - as.numeric(input$gamma)))
       upr[i] = quantile(buffer, 0.5*(1 + as.numeric(input$gamma)))
@@ -898,7 +836,7 @@ server = function(input, output, session) {
     graphical_parameters()
 
     ## Plot data
-    plot(xx, fit, type = "l", xlim = c(xmin,xmax), ylim = range(lwr,upr),
+    plot(xx(), fit, type = "l", xlim = xlim()$value, ylim = range(lwr,upr),
          lty = "dotdash", lwd = 2, yaxs = "r")
 
     ## Add titles
@@ -906,8 +844,8 @@ server = function(input, output, session) {
     title(ylab = input$ylab)
 
     ## Plot prior predictive distribution
-    lines(xx, lwr, lty = "dashed" , lwd = 2)
-    lines(xx, upr, lty = "dashed" , lwd = 2)
+    lines(xx(), lwr, lty = "dashed" , lwd = 2)
+    lines(xx(), upr, lty = "dashed" , lwd = 2)
 
   }) ## joint_prior_plot
 
