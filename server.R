@@ -205,8 +205,8 @@ server = function(input, output, session) {
       
     } else {
 
-      xlims = posterior_limits(data()[,input$x], discrepancy()$xstar)
-      ylims = posterior_limits(data()[,input$y], discrepancy()$ystar)
+      xlims = posterior_limits(data()[,input$x], discrepancy()[,,"xstar"])
+      ylims = posterior_limits(data()[,input$y], discrepancy()[,,"ystar"])
       
     }    
 
@@ -287,8 +287,15 @@ server = function(input, output, session) {
           input$sigma_xstar <= 0 | input$sigma_sigma <= 0) {
         write.csv(NULL, file = file, row.names = FALSE)
       } else {
-        write.csv(cbind(data.frame(posterior  ()[c("alpha","beta","sigma")]),
-                        data.frame(discrepancy())),
+        write.csv(data.frame(alpha     = as.numeric(posterior()[,,"alpha"]),
+                             beta      = as.numeric(posterior()[,,"beta" ]),
+                             sigma     = as.numeric(posterior()[,,"sigma"]),
+                             alphastar = as.numeric(discrepancy()[,,"alphastar"]),
+                             betastar  = as.numeric(discrepancy()[,,"betastar"]),
+                             sigmastar = as.numeric(discrepancy()[,,"sigmastar"]),
+                             xstar     = as.numeric(discrepancy()[,,"xstar"]),
+                             ystar     = as.numeric(discrepancy()[,,"ystar"])
+                             ),
                   file = file, row.names = FALSE)
       }
     },
@@ -302,17 +309,15 @@ server = function(input, output, session) {
 
   ## Posterior predictive distribution
   posterior_predictive = function(x, alpha, beta, sigma, gamma, N) {
-    n   = length(x)
-    fit = numeric(n)
-    lwr = numeric(n)
-    upr = numeric(n)
-    for (i in 1:n) {
+    results = matrix(NA, length(x), 3, 
+                     dimnames = list(x = x, y = c("fit","lwr","upr")))
+    for (i in 1:length(x)) {
       buffer = rnorm(N, alpha + beta*x[i], sigma)
-      fit[i] = mean(buffer)
-      lwr[i] = quantile(buffer, 0.5*(1 - gamma))
-      upr[i] = quantile(buffer, 0.5*(1 + gamma))
+      results[i,"fit"] = mean(buffer)
+      results[i,c("lwr","upr")] = 
+        quantile(buffer, c(0.5*(1 - gamma),0.5*(1 + gamma)))
     }
-    return(list(fit = fit, lwr = lwr, upr = upr))
+    return(results)
   }
   
   ## Data
@@ -397,15 +402,35 @@ server = function(input, output, session) {
     ## Model
     model = lm(y ~ x)
     
+    ## Initialize storage
+    samples = array(data     = NA, 
+                    dim      = c(input$N/getOption("mc.cores"),
+                                 getOption("mc.cores"),
+                                 7),
+                    dimnames = list(iterations = NULL,
+                                    chains     = paste("chain:",
+                                                       1:getOption("mc.cores"),
+                                                       sep = ""),
+                                    parameters = c("alpha","beta", "log_sigma",
+                                                   "xstar","sigma","ystar",
+                                                   "lp__")
+                    ) ## dimnames
+    ) ## samples
+    
     ## Sample posterior
     theta = mvrnorm(input$N, model$coef, vcov(model))
-    sigma = sqrt(sum(model$residuals^2)/rchisq(input$N, df.residual(model)))
-    xstar = rnorm(input$N, z, sigma_z)
-    ystar = theta[,1] + theta[,2]*xstar + sigma*rnorm(input$N)
+    samples[,,"alpha"]     = theta[,1]
+    samples[,,"beta" ]     = theta[,2]
+    samples[,,"sigma"]     = sqrt(sum(model$residuals^2) / 
+                                rchisq(input$N, df.residual(model)))
+    samples[,,"log_sigma"] = log(samples[,,"sigma"])
+    samples[,,"xstar"]     = rnorm(input$N, z, sigma_z)
+    samples[,,"ystar"]     = samples[,,"alpha"] + 
+      samples[,,"beta" ] * samples[,,"xstar"] + 
+      samples[,,"sigma"] * rnorm(input$N)
     
     ## Return posterior samples
-    list(alpha = theta[,1], beta = theta[,2], sigma = sigma, 
-         xstar = xstar, ystar = ystar)
+    return(samples)
     
   })
   
@@ -431,7 +456,7 @@ server = function(input, output, session) {
                       verbose = FALSE, show_messages = FALSE)
 
     ## Extract posterior samples
-    extract(buffer, c("alpha","beta","sigma","xstar","ystar"))
+    as.array(buffer)
 
   })
   
@@ -447,23 +472,36 @@ server = function(input, output, session) {
   ## Compute discrepancy
   discrepancy = reactive({
 
-    ## Posterior samples
-    samples = posterior()
-
+    ## Initialize storage
+    samples = array(data     = NA, 
+                    dim      = c(input$N/getOption("mc.cores"),
+                                 getOption("mc.cores"),
+                                 5),
+                    dimnames = list(iterations = NULL,
+                                    chains     = paste("chain:",
+                                                       1:getOption("mc.cores"),
+                                                       sep = ""),
+                                    parameters = c("alphastar","betastar", 
+                                                   "sigmastar","xstar","ystar")
+                    ) ## dimnames
+    ) ## samples
+    
     ## Sample discrepancy
-    xstar     = samples$xstar
-    alphastar = samples$alpha + input$mu_delta_alpha +
+    samples[,,"xstar"    ] = posterior()[,,"xstar"]
+    samples[,,"alphastar"] = posterior()[,,"alpha"] + input$mu_delta_alpha +
       input$sigma_delta_alpha * rnorm(input$N)
-    betastar  = samples$beta  + input$mu_delta_beta  +
+    samples[,,"betastar" ] = posterior()[,,"beta"]  + input$mu_delta_beta  +
       input$sigma_delta_beta  * rnorm(input$N)
-    sigmastar = sqrt(samples$sigma^2 + input$sigma_sigma_star^2)
+    samples[,,"sigmastar"] = sqrt(posterior()[,,"sigma"]^2 + 
+                                    input$sigma_sigma_star^2)
 
     ## Posterior predictive distribution
-    ystar = alphastar + betastar * xstar + sigmastar * rnorm(input$N)
+    samples[,,"ystar"] = samples[,,"alphastar"] + 
+      samples[,,"betastar"] * samples[,,"xstar"] + 
+      samples[,,"sigmastar"] * rnorm(input$N)
 
     ## Return predictions
-    list(alphastar = alphastar, betastar = betastar, sigmastar = sigmastar,
-         xstar = xstar, ystar = ystar)
+    return(samples)
 
   })
 
@@ -471,9 +509,9 @@ server = function(input, output, session) {
   predictive = reactive({
     
     posterior_predictive(x     = xx(),
-                         alpha = posterior()$alpha,
-                         beta  = posterior()$beta ,
-                         sigma = posterior()$sigma,
+                         alpha = posterior()[,,"alpha"],
+                         beta  = posterior()[,,"beta" ],
+                         sigma = posterior()[,,"sigma"],
                          gamma = as.numeric(input$gamma),
                          N     = input$N
     )
@@ -484,9 +522,9 @@ server = function(input, output, session) {
   discrepancy_predictive = reactive({
     
     posterior_predictive(x     = xx(),
-                         alpha = discrepancy()$alphastar,
-                         beta  = discrepancy()$betastar ,
-                         sigma = discrepancy()$sigmastar,
+                         alpha = discrepancy()[,,"alphastar"],
+                         beta  = discrepancy()[,,"betastar" ],
+                         sigma = discrepancy()[,,"sigmastar"],
                          gamma = as.numeric(input$gamma),
                          N     = input$N
     )
@@ -497,9 +535,9 @@ server = function(input, output, session) {
   reference_predictive = reactive({
 
     posterior_predictive(x     = xx(),
-                         alpha = reference_posterior()$alpha,
-                         beta  = reference_posterior()$beta ,
-                         sigma = reference_posterior()$sigma,
+                         alpha = reference_posterior()[,,"alpha"],
+                         beta  = reference_posterior()[,,"beta" ],
+                         sigma = reference_posterior()[,,"sigma"],
                          gamma = as.numeric(input$gamma),
                          N     = input$N
     )
@@ -527,12 +565,12 @@ server = function(input, output, session) {
     rownames(pred_int) = c("Reference model",
                            "Conditionally exchangeable model")
     
-    pred_int[1,1  ] = mean(posterior()$ystar)
-    pred_int[2,1  ] = mean(discrepancy()$ystar)
-    pred_int[1,2:3] = quantile(posterior()$ystar,
+    pred_int[1,1  ] = mean(posterior()  [,,"ystar"])
+    pred_int[2,1  ] = mean(discrepancy()[,,"ystar"])
+    pred_int[1,2:3] = quantile(posterior()[,,"ystar"],
                                c(0.5*(1 - as.numeric(input$gamma)),
                                  0.5*(1 + as.numeric(input$gamma))))
-    pred_int[2,2:3] = quantile(discrepancy()$ystar,
+    pred_int[2,2:3] = quantile(discrepancy()[,,"ystar"],
                                c(0.5*(1 - as.numeric(input$gamma)),
                                  0.5*(1 + as.numeric(input$gamma))))
     
@@ -677,7 +715,7 @@ server = function(input, output, session) {
     graphical_parameters()
     
     ## Plot predictive point cloud
-    plot(discrepancy()$xstar[mask()], discrepancy()$ystar[mask()],
+    plot(discrepancy()[,,"xstar"][mask()], discrepancy()[,,"ystar"][mask()],
          col = gray(0.75,0.25), pch = 19,
          xlim = input$xlim_joint, ylim = input$ylim_joint)
     
@@ -689,34 +727,34 @@ server = function(input, output, session) {
     title(ylab = input$ylab)
     
     ## Add reference predictions
-    lines(xx(), reference_predictive()$fit, 
+    lines(xx(), reference_predictive()[,"fit"], 
           col = "black", lty = "dotdash", lwd = 2)
-    lines(xx(), reference_predictive()$lwr,
+    lines(xx(), reference_predictive()[,"lwr"],
           col = "black",  lty = "dashed" , lwd = 2)
-    lines(xx(), reference_predictive()$upr,
+    lines(xx(), reference_predictive()[,"upr"],
           col = "black",  lty = "dashed" , lwd = 2)
     
     ## Add discrepancy
-    lines(xx(), discrepancy_predictive()$fit,
+    lines(xx(), discrepancy_predictive()[,"fit"],
           col = "red", lty = "dotdash", lwd = 2)
-    lines(xx(), discrepancy_predictive()$lwr,
+    lines(xx(), discrepancy_predictive()[,"lwr"],
           col = "red", lty = "dashed" , lwd = 2)
-    lines(xx(), discrepancy_predictive()$upr,
+    lines(xx(), discrepancy_predictive()[,"upr"],
           col = "red", lty = "dashed" , lwd = 2)
     
     ## Add observations
-    abline(v = mean    (reference_posterior()$xstar),
+    abline(v = mean    (reference_posterior()[,,"xstar"]),
            col = "blue", lty = "dotdash", lwd = 2)
-    abline(v = quantile(reference_posterior()$xstar, 
+    abline(v = quantile(reference_posterior()[,,"xstar"], 
                         0.5*(1 - as.numeric(input$gamma))),
            col = "blue", lty = "dashed" , lwd = 2)
-    abline(v = quantile(reference_posterior()$xstar, 
+    abline(v = quantile(reference_posterior()[,,"xstar"], 
                         0.5*(1 + as.numeric(input$gamma))),
            col = "blue", lty = "dashed" , lwd = 2)
     
     ## Add reference density
-    joint_density = kde2d(x = reference_posterior()$xstar, 
-                          y = reference_posterior()$ystar, 
+    joint_density = kde2d(x = as.numeric(reference_posterior()[,,"xstar"]), 
+                          y = as.numeric(reference_posterior()[,,"ystar"]), 
                           n = 25)
     z = joint_density$z
     z = z/sum(z)
@@ -729,7 +767,9 @@ server = function(input, output, session) {
             lwd = 2, col = "black", lty = "dotted", add = TRUE)
     
     ## Add discrepancy density
-    joint_density = kde2d(discrepancy()$xstar, discrepancy()$ystar, n = 25)
+    joint_density = kde2d(x = as.numeric(discrepancy()[,,"xstar"]), 
+                          y = as.numeric(discrepancy()[,,"ystar"]), 
+                          n = 25)
     z = joint_density$z
     z = z/sum(z)
     o = order(z, decreasing = TRUE)
@@ -763,14 +803,14 @@ server = function(input, output, session) {
     graphical_parameters()
     
     ## Basic projection
-    dens1 = density (reference_posterior()$ystar)
-    x1m   = quantile(reference_posterior()$ystar,
+    dens1 = density (reference_posterior()[,,"ystar"])
+    x1m   = quantile(reference_posterior()[,,"ystar"],
                      0.5 + c(-0.5,+0.5)*as.numeric(input$gamma))
     x1m   = seq(max(which(dens1$x < x1m[1])), min(which(dens1$x > x1m[2])), 1)
     
     ## Discrepancy projection
-    dens2 = density (discrepancy()$ystar)
-    x2m   = quantile(discrepancy()$ystar,
+    dens2 = density (discrepancy()[,,"ystar"])
+    x2m   = quantile(discrepancy()[,,"ystar"],
                      0.5 + c(-0.5,+0.5)*as.numeric(input$gamma))
     x2m   = seq(max(which(dens2$x < x2m[1])), min(which(dens2$x > x2m[2])), 1)
     
@@ -909,5 +949,26 @@ server = function(input, output, session) {
                       par   = list(mar = c(2.5,4.0,1,1)+0.1))
 
   }) ## xstar_plot
+  
+  #################
+  ## Diagnostics ##
+  #################
+  
+  output$sample_plot = renderPlot({
+    
+    ## Skip plotting if no data is loaded
+    if (is.null(data()) | ! input$x %in% names(data()) |
+        is.na(input$z) | is.na(input$sigma_z) |
+        input$sigma_z <= 0 | input$sigma_alpha <= 0 | input$sigma_beta <= 0 |
+        input$sigma_xstar <= 0 | input$sigma_sigma <= 0)
+      return(NULL)
+    
+    ## Graphical parameters
+    graphical_parameters()
+    
+    ## Plot samples
+    
+    
+  }) ## sample_plot
 
 }

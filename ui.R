@@ -97,15 +97,13 @@ ui = navbarPage(
                fluidRow(
                  column(width = 6,
                         selectInput(inputId  = "x",
-                                    label    = withMathJax("Predictor
-                                                               \\(X_m\\)"),
+                                    label    = "Predictor \\(X_m\\)",
                                     choices  = NULL,
                                     selected = NULL)
                  ), ## column
                  column(width = 6,
                         selectInput(inputId  = "y",
-                                    label    = withMathJax("Response
-                                                               \\(Y_m\\)"),
+                                    label    = "Response \\(Y_m\\)",
                                     choices  = NULL,
                                     selected = NULL)
                  ) ## column
@@ -404,6 +402,29 @@ ui = navbarPage(
                ) ## tabsetPanel
              ) ## mainPanel
            ) ## sidebarLayout
+  ), ## tabPanel
+  
+  ## Diagnostics tab
+  tabPanel(
+    title = "Diagnostics",
+    sidebarLayout(
+      sidebarPanel(
+        title = "Side panel",
+        selectInput(inputId = "diag_var",
+                    label   = "Select variable",
+                    choices = list("Intercept"            = "alpha",
+                                   "Slope"                = "beta",
+                                   "Response spread"      = "sigma",
+                                   "Real world predictor" = "xstar",
+                                   "Real world response"  = "ystar"),
+                    selected = "alpha"
+        ) ## diag_var
+      ), ## sidebarPanel
+      
+      mainPanel(
+        title = "Main panel" 
+      ) ## mainPanel
+    ) ## sidebarLayout
   ) ## tabPanel
 
 ) ## ui
