@@ -236,24 +236,24 @@ ui = navbarPage(
                    title = "Marginal priors",
                    fluidRow(
                      column(width = 6,
-                            plotOutput(outputId = "alpha_plot",
+                            plotOutput(outputId = "alpha_prior",
                                        height   = 200
                             ) ## plotOutput
                      ), ## column
                      column(width = 6,
-                            plotOutput(outputId = "beta_plot",
+                            plotOutput(outputId = "beta_prior",
                                        height   = 200
                             ) ## plotOutput
                      ) ## column
                    ), ## fluidRow
                    fluidRow(
                      column(width = 6,
-                            plotOutput(outputId = "sigma_plot",
+                            plotOutput(outputId = "sigma_prior",
                                        height   = 200
                             ) ## plotOutput
                      ), ## column
                      column(width = 6,
-                            plotOutput(outputId = "xstar_plot",
+                            plotOutput(outputId = "xstar_prior",
                                        height   = 200
                             ) ## plotOutput
                      ) ## column
@@ -261,7 +261,7 @@ ui = navbarPage(
                  ), ## tabPanel
                  tabPanel(
                    title = "Ensemble prior predictive",
-                   plotOutput(outputId = "joint_prior_plot")
+                   plotOutput(outputId = "prior_predictive")
                  ) ## tabPanel
                ) ## tabsetPanel
              ) ## mainPanel
