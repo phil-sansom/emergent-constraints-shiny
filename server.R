@@ -429,6 +429,10 @@ server = function(input, output, session) {
       samples[,,"beta" ] * samples[,,"xstar"] + 
       samples[,,"sigma"] * rnorm(input$N)
     
+    samples[,,"lp__"] = apply(samples, c(1,2), function(s) 
+      sum(dnorm(y, s["alpha"] + s["beta"]*x, s["sigma"], log = TRUE)) + 
+        dnorm(z, s["xstar"], sigma_z, log = TRUE))
+    
     ## Return posterior samples
     return(samples)
     
@@ -954,6 +958,13 @@ server = function(input, output, session) {
   ## Diagnostics ##
   #################
   
+  parameter_labels = c(expression(paste("Intercept ", alpha)),
+                       expression(paste("Slope ", beta)),
+                       expression(paste("Response spread ", sigma)),
+                       expression(paste("Real world predictor ", X["*"])),
+                       expression(paste("Real world response ", Y["*"])))
+  names(parameter_labels) = c("alpha","beta","sigma","xstar","ystar")
+  
   output$sample_plot = renderPlot({
     
     ## Skip plotting if no data is loaded
@@ -967,8 +978,120 @@ server = function(input, output, session) {
     graphical_parameters()
     
     ## Plot samples
+    x = posterior()[,,input$diag_var]
+    plot(x[,1], type = "n", xlim = c(0,nrow(x)), ylim = range(x), yaxs = "r")
+    for (i in 1:ncol(x))
+      lines(x[,i], col = i+1)
     
+    title(xlab = "Sample")
+    title(ylab = parameter_labels[input$diag_var])
     
   }) ## sample_plot
+  
+  output$density_plot = renderPlot({
+    
+    ## Skip plotting if no data is loaded
+    if (is.null(data()) | ! input$x %in% names(data()) |
+        is.na(input$z) | is.na(input$sigma_z) |
+        input$sigma_z <= 0 | input$sigma_alpha <= 0 | input$sigma_beta <= 0 |
+        input$sigma_xstar <= 0 | input$sigma_sigma <= 0)
+      return(NULL)
+    
+    ## Graphical parameters
+    graphical_parameters()
+    
+    x = posterior()[,,input$diag_var]
+    dd = list()
+    for (i in 1:ncol(x))
+      dd[[i]] = density(x[,i])
+    
+    xx = list()
+    for (i in 1:ncol(x)) {
+      qq = quantile(x[,i], 0.5 + c(-0.5,+0.5)*as.numeric(input$gamma))
+      xx[[i]] = seq(from = max(which(dd[[i]]$x < qq[1])), 
+                    to   = min(which(dd[[i]]$x > qq[2])), 1)
+    }
+    
+    ylim = c(0,1.04*max(sapply(1:ncol(x), function(i) max(dd[[i]]$y))))
+    
+    ## Plot density
+    plot(dd[[1]], type = "n", ylim = ylim)
+    for (i in 1:ncol(x)) {
+      icol = col2rgb(palette()[i%%8+1])/255
+      icol = rgb(icol[1], icol[2], icol[3], 0.5)
+      polygon(x = c(dd[[i]]$x[xx[[i]][1]],dd[[i]]$x[xx[[i]]],
+                    dd[[i]]$x[xx[[i]][length(xx[[i]])]]),
+              y = c(0,dd[[i]]$y[xx[[i]]],0), border = NA, col = icol)
+      lines(dd[[i]], col = palette()[i%%8+1], lwd = 2)
+    }
+    
+    title(xlab = parameter_labels[input$diag_var])
+    title(ylab = "Density")
+    
+  }) ## density_plot
+  
 
+  output$log_posterior_plot = renderPlot({
+    
+    ## Skip plotting if no data is loaded
+    if (is.null(data()) | ! input$x %in% names(data()) |
+        is.na(input$z) | is.na(input$sigma_z) |
+        input$sigma_z <= 0 | input$sigma_alpha <= 0 | input$sigma_beta <= 0 |
+        input$sigma_xstar <= 0 | input$sigma_sigma <= 0)
+      return(NULL)
+    
+    ## Graphical parameters
+    graphical_parameters()
+
+    ## Plot log posterior
+    x = posterior()[,,input$diag_var]
+    y = posterior()[,,"lp__"]
+    plot(x[,1], y[,1], type = "n", xlim = range(x), ylim = range(y),
+         xaxs = "r", yaxs = "r")
+    for (i in 1:ncol(x))
+      points(x[,i], y[,i], col = i+1)
+
+    title(xlab = parameter_labels[input$diag_var])
+    title(ylab = "Log Posterior")
+    
+  }) ## log_posterior_plot
+
+  output$autocorrelation_plot = renderPlot({
+
+    ## Skip plotting if no data is loaded
+    if (is.null(data()) | ! input$x %in% names(data()) |
+        is.na(input$z) | is.na(input$sigma_z) |
+        input$sigma_z <= 0 | input$sigma_alpha <= 0 | input$sigma_beta <= 0 |
+        input$sigma_xstar <= 0 | input$sigma_sigma <= 0)
+      return(NULL)
+
+    ## Graphical parameters
+    graphical_parameters()
+
+    x = posterior()[,,input$diag_var]
+    acfs = list()
+    for (i in 1:ncol(x))
+      acfs[[i]] = as.numeric(acf(x[,i], lag.max = 50, plot = FALSE)$acf)
+    
+    ylim = c(1.04*min(0,sapply(1:ncol(x), function(i) min(acfs[[i]]))),1)
+    xlim = c(0,1.2*51+0.2)
+    
+    ## Plot density
+    i = 1
+    icol = col2rgb(palette()[i%%8+1])/255
+    icol = rgb(icol[1], icol[2], icol[3], 0.5)
+    barplot(acfs[[i]], col = icol, border = NA, xlim = xlim, ylim = ylim)
+    for (i in 2:ncol(x)) {
+      icol = col2rgb(palette()[i%%8+1])/255
+      icol = rgb(icol[1], icol[2], icol[3], 0.5)
+      barplot(acfs[[i]], col = icol, border = NA, add = TRUE, axes = FALSE)
+    }
+    axis(side = 1, at = seq(from = 0.7, by = 1.2*5, length.out = 11),
+         labels = seq(0,50,5))
+    
+    title(xlab = "Lag")
+    title(ylab = "Autocorrelation")
+    
+  }) ## autocorrelation_plot
+  
 }

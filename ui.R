@@ -422,7 +422,17 @@ ui = navbarPage(
       ), ## sidebarPanel
       
       mainPanel(
-        title = "Main panel" 
+        title = "Main panel",
+        plotOutput(outputId = "sample_plot"),
+        fluidRow(
+          column(width = 6,
+                 plotOutput(outputId = "density_plot")
+          ),
+          column(width = 6,
+                 plotOutput(outputId = "log_posterior_plot")
+          )
+        ), ## fluidRow
+        plotOutput(outputId = "autocorrelation_plot")
       ) ## mainPanel
     ) ## sidebarLayout
   ) ## tabPanel
