@@ -1,3 +1,7 @@
+## Preamble
+model = stan_model("model.stan")  ## Load STAN model
+
+## Server function
 server = function(input, output, session) {
 
   ## Load source
