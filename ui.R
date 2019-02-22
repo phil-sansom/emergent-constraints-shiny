@@ -407,22 +407,22 @@ ui = navbarPage(
   ## Diagnostics tab
   tabPanel(
     title = "Diagnostics",
-    sidebarLayout(
-      sidebarPanel(
-        title = "Side panel",
+    navlistPanel(
+      tabPanel(
+        title = "Posterior summary statistics",
+        tableOutput(outputId = "summary")
+      ),
+      tabPanel(
+        title = "Model parameters",
         selectInput(inputId = "diag_var",
                     label   = "Select variable",
                     choices = list("Intercept"            = "alpha",
                                    "Slope"                = "beta",
                                    "Response spread"      = "sigma",
-                                   "Real world predictor" = "xstar",
-                                   "Real world response"  = "ystar"),
+                                   "Real world predictor" = "xstar"),
                     selected = "alpha"
-        ) ## diag_var
-      ), ## sidebarPanel
-      
-      mainPanel(
-        title = "Main panel",
+        ), ## diag_var
+        hr(),
         plotOutput(outputId = "sample_plot"),
         fluidRow(
           column(width = 6,
@@ -433,8 +433,13 @@ ui = navbarPage(
           )
         ), ## fluidRow
         plotOutput(outputId = "autocorrelation_plot")
-      ) ## mainPanel
-    ) ## sidebarLayout
+      ), ## tabPanel
+      tabPanel(
+        title = "Sample information",
+        plotOutput(outputId = "log_posterior_samples"),
+        plotOutput(outputId = "log_posterior_density")
+      )
+    ) ## navlistPanel
   ) ## tabPanel
-
+  
 ) ## ui

@@ -962,45 +962,48 @@ server = function(input, output, session) {
                        expression(paste("Slope ", beta)),
                        expression(paste("Response spread ", sigma)),
                        expression(paste("Real world predictor ", X["*"])),
-                       expression(paste("Real world response ", Y["*"])))
-  names(parameter_labels) = c("alpha","beta","sigma","xstar","ystar")
+                       "Log Posterior")
+  names(parameter_labels) = c("alpha","beta","sigma","xstar","lp__")
   
-  output$sample_plot = renderPlot({
+  output$summary = renderTable({   
     
-    ## Skip plotting if no data is loaded
+    ## Skip table if no data is loaded
     if (is.null(data()) | ! input$x %in% names(data()) |
         is.na(input$z) | is.na(input$sigma_z) |
         input$sigma_z <= 0 | input$sigma_alpha <= 0 | input$sigma_beta <= 0 |
         input$sigma_xstar <= 0 | input$sigma_sigma <= 0)
       return(NULL)
+    
+    monitor(posterior(), warmup = 0, print = FALSE)[c("alpha","beta","sigma","xstar"),]
+    
+  },
+  rownames = TRUE
+  ) ## summary
+  
+  ## Plot MCMC samples
+  plot_samples = function(diag_var) {
     
     ## Graphical parameters
     graphical_parameters()
     
     ## Plot samples
-    x = posterior()[,,input$diag_var]
+    x = posterior()[,,diag_var]
     plot(x[,1], type = "n", xlim = c(0,nrow(x)), ylim = range(x), yaxs = "r")
     for (i in 1:ncol(x))
       lines(x[,i], col = i+1)
     
     title(xlab = "Sample")
-    title(ylab = parameter_labels[input$diag_var])
+    title(ylab = parameter_labels[diag_var])
     
-  }) ## sample_plot
+  } ## plot_samples
   
-  output$density_plot = renderPlot({
-    
-    ## Skip plotting if no data is loaded
-    if (is.null(data()) | ! input$x %in% names(data()) |
-        is.na(input$z) | is.na(input$sigma_z) |
-        input$sigma_z <= 0 | input$sigma_alpha <= 0 | input$sigma_beta <= 0 |
-        input$sigma_xstar <= 0 | input$sigma_sigma <= 0)
-      return(NULL)
+  ## Plot densities
+  plot_density = function(diag_var){
     
     ## Graphical parameters
     graphical_parameters()
     
-    x = posterior()[,,input$diag_var]
+    x = posterior()[,,diag_var]
     dd = list()
     for (i in 1:ncol(x))
       dd[[i]] = density(x[,i])
@@ -1025,11 +1028,36 @@ server = function(input, output, session) {
       lines(dd[[i]], col = palette()[i%%8+1], lwd = 2)
     }
     
-    title(xlab = parameter_labels[input$diag_var])
+    title(xlab = parameter_labels[diag_var])
     title(ylab = "Density")
     
-  }) ## density_plot
+  }
   
+  output$sample_plot = renderPlot({
+    
+    ## Skip plotting if no data is loaded
+    if (is.null(data()) | ! input$x %in% names(data()) |
+        is.na(input$z) | is.na(input$sigma_z) |
+        input$sigma_z <= 0 | input$sigma_alpha <= 0 | input$sigma_beta <= 0 |
+        input$sigma_xstar <= 0 | input$sigma_sigma <= 0)
+      return(NULL)
+    
+    plot_samples(input$diag_var)
+    
+  }) ## sample_plot
+  
+  output$density_plot = renderPlot({
+    
+    ## Skip plotting if no data is loaded
+    if (is.null(data()) | ! input$x %in% names(data()) |
+        is.na(input$z) | is.na(input$sigma_z) |
+        input$sigma_z <= 0 | input$sigma_alpha <= 0 | input$sigma_beta <= 0 |
+        input$sigma_xstar <= 0 | input$sigma_sigma <= 0)
+      return(NULL)
+    
+    plot_density(input$diag_var)
+    
+  }) ## density_plot
 
   output$log_posterior_plot = renderPlot({
     
@@ -1093,5 +1121,31 @@ server = function(input, output, session) {
     title(ylab = "Autocorrelation")
     
   }) ## autocorrelation_plot
+ 
+  output$log_posterior_samples = renderPlot({
+    
+    ## Skip plotting if no data is loaded
+    if (is.null(data()) | ! input$x %in% names(data()) |
+        is.na(input$z) | is.na(input$sigma_z) |
+        input$sigma_z <= 0 | input$sigma_alpha <= 0 | input$sigma_beta <= 0 |
+        input$sigma_xstar <= 0 | input$sigma_sigma <= 0)
+      return(NULL)
+    
+    plot_samples("lp__")
+    
+  }) ## log_posterior_samples
+
+  output$log_posterior_density = renderPlot({
+    
+    ## Skip plotting if no data is loaded
+    if (is.null(data()) | ! input$x %in% names(data()) |
+        is.na(input$z) | is.na(input$sigma_z) |
+        input$sigma_z <= 0 | input$sigma_alpha <= 0 | input$sigma_beta <= 0 |
+        input$sigma_xstar <= 0 | input$sigma_sigma <= 0)
+      return(NULL)
+    
+    plot_density("lp__")
+    
+  }) ## log_posterior_density
   
 }
