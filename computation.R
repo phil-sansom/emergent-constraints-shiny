@@ -144,8 +144,8 @@ discrepancy = reactive({
   ## Sample discrepancies
   mu    = c(input$mu_delta_alpha,input$mu_delta_beta)
   Sigma = matrix(c(input$sigma_delta_alpha^2,
-                   input$rho_star*input$sigma_delta_alpha*input$sigma_delta_beta,
-                   input$rho_star*input$sigma_delta_alpha*input$sigma_delta_beta,
+                   input$rho_delta*input$sigma_delta_alpha*input$sigma_delta_beta,
+                   input$rho_delta*input$sigma_delta_alpha*input$sigma_delta_beta,
                    input$sigma_delta_beta^2),
                  2, 2)
   delta = mvrnorm(input$N, mu, Sigma)

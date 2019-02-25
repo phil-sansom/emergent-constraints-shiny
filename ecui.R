@@ -23,29 +23,70 @@ ui = navbarPage(
                          \\text{Observations} \\\\ ~ \\\\
 
                        \\text{Discrepancies} \\\\
-                       \\alpha_\\star & = \\alpha + \\delta_\\alpha &
-                          \\delta_\\alpha & \\sim \\text{Normal}
-                            (\\mu_{\\delta_\\alpha},
-                              \\sigma_{\\delta_\\alpha}^2) &
-                         \\text{Real world Intercept} \\\\
-                       \\beta_\\star & = \\beta + \\delta_\\beta &
-                          \\delta_\\beta & \\sim \\text{Normal}
-                            (\\mu_{\\delta_\\beta},
-                              \\sigma_{\\delta_\\beta}^2) &
-                         \\text{Real world slope} \\\\
+                       \\begin{bmatrix} 
+                         \\alpha_\\star \\\\ \\beta_\\star 
+                       \\end{bmatrix} 
+                         & = \\begin{bmatrix} \\alpha \\\\ \\beta \\end{bmatrix} 
+                           + \\begin{bmatrix} \\delta_\\alpha \\\\ 
+                                              \\delta_\\beta 
+                             \\end{bmatrix} &
+                       \\begin{bmatrix} \\delta_\\alpha \\\\ 
+                                        \\delta_\\beta 
+                       \\end{bmatrix} & \\sim \\text{Normal} \\left(
+                       \\begin{bmatrix} \\mu_{\\delta_\\alpha} \\\\ 
+                                        \\mu_{\\delta_\\beta}
+                       \\end{bmatrix},
+                       \\begin{bmatrix} \\sigma_{\\delta_\\alpha}^2 & 
+                                        \\rho_\\delta \\sigma_{\\delta_\\alpha} 
+                                          \\sigma_{\\delta_\\beta} \\\\
+                                        \\rho_\\delta \\sigma_{\\delta_\\alpha} 
+                                          \\sigma_{\\delta_\\beta} &
+                                        \\sigma_{\\delta_\\beta}^2 
+                       \\end{bmatrix}
+                       \\right) &
+                       \\begin{array}{r}
+                         \\text{Real world intercept} \\\\ 
+                         \\text{Real world slope}
+                       \\end{array} \\\\
                        \\sigma_\\star^2 & =
                            \\sigma^2 + \\sigma_{\\sigma_\\star}^2 & & &
                          \\text{Real world response uncertainty} \\\\ ~ \\\\
 
-                       \\text{Priors} \\\\
+                       \\text{Reference priors} \\\\
                        & &
-                       \\alpha  & \\sim \\text{Normal}
-                         (\\mu_\\alpha, \\sigma_\\alpha^2 ) &
-                         \\text{Ensemble intercept} \\\\
+                       \\alpha & \\sim \\text{Uniform} 
+                         \\left( -\\infty, +\\infty \\right) &
+                         \\text{Ensemble intercept} \\\\                       
                        & &
-                       \\beta   & \\sim \\text{Normal}
-                         (\\mu_\\beta , \\sigma_\\beta^2  ) &
-                         \\text{Ensemble slope} \\\\
+                       \\beta  & \\sim \\text{Uniform}
+                         \\left( -\\infty, +\\infty \\right) &
+                         \\text{Ensemble slope} \\\\                       
+                       & &
+                       \\log \\sigma & \\sim \\text{Uniform}
+                         \\left( -\\infty, +\\infty \\right) &
+                         \\text{Ensemble response uncertainty} \\\\
+                       & &
+                       X_\\star & \\sim \\text{Uniform}
+                         \\left( -\\infty, +\\infty \\right) &
+                         \\text{Real world predictor} \\\\ ~ \\\\
+
+                       \\text{Informative priors} \\\\
+                       & &
+                       \\begin{bmatrix} \\alpha \\\\ \\beta \\end{bmatrix} & 
+                       \\sim \\text{Normal} \\left(
+                       \\begin{bmatrix} 
+                         \\mu_\\alpha \\\\ \\mu_\\beta
+                       \\end{bmatrix},
+                       \\begin{bmatrix} \\sigma_\\alpha^2 & 
+                                        \\rho \\sigma_\\alpha \\sigma_\\beta \\\\
+                                        \\rho \\sigma_\\alpha \\sigma_\\beta &
+                                        \\sigma_\\beta^2 
+                       \\end{bmatrix}
+                       \\right) &
+                       \\begin{array}{r}
+                         \\text{Ensemble intercept} \\\\ 
+                         \\text{Ensemble slope}
+                       \\end{array} \\\\                       
                        & &
                        \\sigma  & \\sim \\text{Half-Normal}
                          (\\mu_\\sigma, \\sigma_\\sigma^2 ) &
@@ -321,10 +362,10 @@ ui = navbarPage(
                            ticks   = FALSE
                ), ## sliderInput
                hr(),
-               h5("Correlation \\(\\rho_\\star\\)"),
+               h5("Correlation \\(\\rho_\\delta\\)"),
                sliderInput(
-                 inputId = "rho_star",
-                 label   = "Corr(\\(\\alpha_\\star,\\beta_\\star\\))",
+                 inputId = "rho_delta",
+                 label   = "Corr(\\(\\alpha_\\delta,\\beta_\\delta\\))",
                  value   =  0,
                  min     = -1,
                  max     = +1,
@@ -462,3 +503,4 @@ ui = navbarPage(
   ) ## tabPanel
 
 ) ## ui
+
