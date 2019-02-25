@@ -100,7 +100,7 @@ output$predictive_intervals = renderTable({
     return(NULL)
   
   ## Extract data
-  ystar1 = posterior()  [,,"ystar"]
+  ystar1 = reference_posterior()[,,"ystar"]
   ystar2 = discrepancy()[,,"ystar"]
   
   ## Interval width
