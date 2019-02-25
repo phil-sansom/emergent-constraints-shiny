@@ -17,5 +17,5 @@ server = function(input, output, session) {
   source("priors_tab.R"     , local = TRUE)  ## Priors tab
   source("projections_tab.R", local = TRUE)  ## Projections tab
   source("diagnostics_tab.R", local = TRUE)  ## Diagnostics tab
-  
+
 }

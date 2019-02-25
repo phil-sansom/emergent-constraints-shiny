@@ -192,6 +192,15 @@ ui = navbarPage(
                         ) ## numericInput
                  ) ## column
                ), ## fluidRow
+               h5("Correlation \\(\\rho\\)"),
+               sliderInput(
+                 inputId = "rho",
+                 label   = "Corr(\\(\\alpha,\\beta\\))",
+                 value   =  0,
+                 min     = -1,
+                 max     = +1,
+                 step    = 0.05
+               ),
                h5("Response spread \\(\\sigma\\)"),
                fluidRow(
                  column(width = 6,
@@ -312,6 +321,16 @@ ui = navbarPage(
                            ticks   = FALSE
                ), ## sliderInput
                hr(),
+               h5("Correlation \\(\\rho_\\star\\)"),
+               sliderInput(
+                 inputId = "rho_star",
+                 label   = "Corr(\\(\\alpha_\\star,\\beta_\\star\\))",
+                 value   =  0,
+                 min     = -1,
+                 max     = +1,
+                 step    = 0.05
+               ),
+               hr(),
                h5("Spread \\(\\sigma_\\star\\)"),
                sliderInput(inputId = "sigma_sigma_star",
                            label   = "Uncertainty
@@ -403,7 +422,7 @@ ui = navbarPage(
              ) ## mainPanel
            ) ## sidebarLayout
   ), ## tabPanel
-  
+
   ## Diagnostics tab
   tabPanel(
     title = "Diagnostics",
@@ -441,5 +460,5 @@ ui = navbarPage(
       )
     ) ## navlistPanel
   ) ## tabPanel
-  
+
 ) ## ui
