@@ -142,81 +142,93 @@ discrepancy = reactive({
   dimnames(samples)$parameters = c("alphastar","betastar","sigmastar",
                                    "xstar","ystar")
   
-  ## Set flags
-  new_mean = FALSE
-  new_sd   = FALSE
-  
-  ## Alpha bias
-  if (input$mu_delta_alpha != 0) {
-    samples[,,"alphastar"] = samples[,,"alphastar"] + input$mu_delta_alpha
-    new_mean = TRUE
-  }
-  
-  ## Beta bias
-  if (input$mu_delta_beta != 0) {
-    samples[,,"betastar" ] = samples[,,"betastar" ] + input$mu_delta_beta
-    new_mean = TRUE
-  }
-
-  ## Alpha/Beta uncertainty
-  if (input$sigma_delta_alpha > 0 | input$sigma_delta_beta > 0 | 
-      input$rho_delta != 0) {
+  ## Check discrepancy parameters
+  if (! any(is.null(input$mu_delta_alpha) | is.null(input$sigma_delta_alpha) |
+            is.null(input$mu_delta_beta ) | is.null(input$sigma_delta_beta ) |
+            is.null(input$mu_delta_sigma) | is.null(input$sigma_delta_sigma) |
+            is.null(input$rho_delta)) &
+      ! any(is.na(input$mu_delta_alpha) | is.na(input$sigma_delta_alpha) |
+            is.na(input$mu_delta_beta ) | is.na(input$sigma_delta_beta ) |
+            is.na(input$mu_delta_sigma) | is.na(input$sigma_delta_sigma) |
+            is.na(input$rho_delta))) {
     
-    ## If discrepancy uncertainty non-zero then sample discrepancies
-    Sigma = matrix(c(input$sigma_delta_alpha^2,
-                     input$rho_delta*
-                       input$sigma_delta_alpha*input$sigma_delta_beta,
-                     input$rho_delta*
-                       input$sigma_delta_alpha*input$sigma_delta_beta,
-                     input$sigma_delta_beta^2),
-                   nrow = 2, 
-                   ncol = 2
-    )
-    delta = mvrnorm(input$N, c(0,0), Sigma)
-    samples[,,"alphastar"] = samples[,,"alphastar"] + delta[,1]
-    samples[,,"betastar" ] = samples[,,"betastar" ] + delta[,2]
+    ## Set flags
+    new_mean = FALSE
+    new_sd   = FALSE
     
-    new_mean = TRUE
+    ## Alpha bias
+    if (input$mu_delta_alpha != 0) {
+      samples[,,"alphastar"] = samples[,,"alphastar"] + input$mu_delta_alpha
+      new_mean = TRUE
+    }
     
-  } ## Alpha/Beta uncertainty
-  
-  ## Sigma bias and uncertainty
-  if (input$mu_delta_sigma != 0 | input$sigma_delta_sigma > 0) {
+    ## Beta bias
+    if (input$mu_delta_beta != 0) {
+      samples[,,"betastar" ] = samples[,,"betastar" ] + input$mu_delta_beta
+      new_mean = TRUE
+    }
     
-    samples[,,"sigmastar"] = samples[,,"sigmastar"]^2
+    ## Alpha/Beta uncertainty
+    if (input$sigma_delta_alpha > 0 | input$sigma_delta_beta > 0 | 
+        input$rho_delta != 0) {
+      
+      ## If discrepancy uncertainty non-zero then sample discrepancies
+      Sigma = matrix(c(input$sigma_delta_alpha^2,
+                       input$rho_delta*
+                         input$sigma_delta_alpha*input$sigma_delta_beta,
+                       input$rho_delta*
+                         input$sigma_delta_alpha*input$sigma_delta_beta,
+                       input$sigma_delta_beta^2),
+                     nrow = 2, 
+                     ncol = 2
+      )
+      delta = mvrnorm(input$N, c(0,0), Sigma)
+      samples[,,"alphastar"] = samples[,,"alphastar"] + delta[,1]
+      samples[,,"betastar" ] = samples[,,"betastar" ] + delta[,2]
+      
+      new_mean = TRUE
+      
+    } ## Alpha/Beta uncertainty
     
-    if (input$mu_delta_sigma != 0)
-      samples[,,"sigmastar"] = 
-        samples[,,"sigmastar"] + input$mu_delta_sigma^2
+    ## Sigma bias and uncertainty
+    if (input$mu_delta_sigma != 0 | input$sigma_delta_sigma  > 0) {
+      
+      samples[,,"sigmastar"] = samples[,,"sigmastar"]^2
+      
+      if (input$mu_delta_sigma != 0)
+        samples[,,"sigmastar"] = 
+          samples[,,"sigmastar"] + input$mu_delta_sigma^2
+      
+      if (input$sigma_delta_sigma > 0)
+        samples[,,"sigmastar"] = 
+          samples[,,"sigmastar"] + (input$sigma_delta_sigma * rnorm(input$N))^2
+      
+      samples[,,"sigmastar"] = sqrt(samples[,,"sigmastar"])
+      
+      new_sd = TRUE
+      
+    } ## Sigma bias and uncertainty
     
-    if (input$sigma_delta_sigma > 0)
-      samples[,,"sigmastar"] = 
-        samples[,,"sigmastar"] + (input$sigma_delta_sigma * rnorm(input$N))^2
-    
-    samples[,,"sigmastar"] = sqrt(samples[,,"sigmastar"])
-    
-    new_sd = TRUE
-    
-  } ## Sigma bias and uncertainty
-
-  ## Posterior predictive distribution
-  if (new_mean | new_sd) {
-  
-    samples[,,"ystar"] = posterior()[,,"alpha"] + 
-      posterior()[,,"beta"] * posterior()[,,"xstar"]
-    epsilon = posterior()[,,"ystar"] - samples[,,"ystar"]
-
-    if (new_mean)
-      samples[,,"ystar"] = samples[,,"alphastar"] + 
+    ## Posterior predictive distribution
+    if (new_mean | new_sd) {
+      
+      samples[,,"ystar"] = posterior()[,,"alpha"] + 
+        posterior()[,,"beta"] * posterior()[,,"xstar"]
+      epsilon = posterior()[,,"ystar"] - samples[,,"ystar"]
+      
+      if (new_mean)
+        samples[,,"ystar"] = samples[,,"alphastar"] + 
         samples[,,"betastar"] * samples[,,"xstar"]
+      
+      if (new_sd)
+        epsilon = epsilon * samples[,,"sigmastar"] / posterior()[,,"sigma"]
+      
+      samples[,,"ystar"] =  samples[,,"ystar"] + epsilon
+      
+    }    
 
-    if (new_sd)
-      epsilon = epsilon * samples[,,"sigmastar"] / posterior()[,,"sigma"]
-
-    samples[,,"ystar"] =  samples[,,"ystar"] + epsilon
+  } ## Check discrepancy parameters
     
-  }    
-
   ## Return predictions
   return(samples)
   

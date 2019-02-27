@@ -340,75 +340,28 @@ ui = navbarPage(
            sidebarLayout(
              sidebarPanel(
                title = "Discrepancy parameters",
-               h5("Intercept \\(\\alpha_\\star\\)"),
-               sliderInput(inputId = "mu_delta_alpha",
-                           label   = "Bias \\(\\mu_{\\delta_\\alpha}\\)",
-                           min     = -1,
-                           max     = +1,
-                           value   = 0,
-                           step    = 0.1,
-                           ticks   = FALSE
-               ), ## sliderInput
-               sliderInput(inputId = "sigma_delta_alpha",
-                           label   = "Uncertainty
-                           \\(\\sigma_{\\delta_\\alpha}\\)",
-                           min     = 0,
-                           max     = 1,
-                           value   = 0,
-                           step    = 0.1,
-                           ticks   = FALSE
-               ), ## sliderInput
-               hr(),
-               h5("Slope \\(\\beta_\\star\\)"),
-               sliderInput(inputId = "mu_delta_beta",
-                           label   = "Bias
-                           \\(\\mu_{\\delta_\\beta}\\)",
-                           min     = -1,
-                           max     = +1,
-                           value   = 0,
-                           step    = 0.1,
-                           ticks   = FALSE
-               ), ## sliderInput
-               sliderInput(inputId = "sigma_delta_beta",
-                           label   = "Uncertainty
-                           \\(\\sigma_{\\delta_\\beta}\\)",
-                           min     = 0,
-                           max     = 1,
-                           value   = 0,
-                           step    = 0.1,
-                           ticks   = FALSE
-               ), ## sliderInput
-               hr(),
-               h5("Correlation \\(\\rho_\\delta\\)"),
-               sliderInput(
-                 inputId = "rho_delta",
-                 label   = "Corr(\\(\\alpha_\\delta,\\beta_\\delta\\))",
-                 value   =  0,
-                 min     = -1,
-                 max     = +1,
-                 step    = 0.01,
-                 ticks   = FALSE
+               radioButtons(
+                 inputId  = "discrepancy_inputs",
+                 label    = "Select inputs",
+                 choices  = list(Sliders = "sliders", Numerical = "numerical"),
+                 selected = "sliders",
+                 inline   = TRUE
                ),
                hr(),
+               h5("Intercept \\(\\alpha_\\star\\)"),
+               uiOutput(outputId = "mu_delta_alpha"),
+               uiOutput(outputId = "sigma_delta_alpha"),
+               hr(),
+               h5("Slope \\(\\beta_\\star\\)"),
+               uiOutput(outputId = "mu_delta_beta"),
+               uiOutput(outputId = "sigma_delta_beta"),
+               hr(),
+               h5("Correlation \\(\\rho_\\delta\\)"),
+               uiOutput(outputId = "rho_delta"),
+               hr(),
                h5("Spread \\(\\sigma_\\star\\)"),
-               sliderInput(inputId = "mu_delta_sigma",
-                           label   = "Bias
-                           \\(\\mu_{\\delta_\\sigma}\\)",
-                           min     = 0,
-                           max     = 1,
-                           value   = 0,
-                           step    = 0.1,
-                           ticks   = FALSE
-               ), ## sliderInput
-               sliderInput(inputId = "sigma_delta_sigma",
-                           label   = "Uncertainty
-                           \\(\\sigma_{\\delta_\\sigma}\\)",
-                           min     = 0,
-                           max     = 1,
-                           value   = 0,
-                           step    = 0.1,
-                           ticks   = FALSE
-               ), ## sliderInput
+               uiOutput(outputId = "mu_delta_sigma"),
+               uiOutput(outputId = "sigma_delta_sigma"),
                hr(),
                numericInput(inputId = "N",
                             label   = "Number of samples",

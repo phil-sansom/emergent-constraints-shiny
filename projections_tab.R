@@ -2,6 +2,306 @@
 ## Projections tab ##
 #####################
 
+## Intercept bias
+output$mu_delta_alpha = renderUI({
+  
+  inputId = "mu_delta_alpha"
+  label   = "Bias \\(\\mu_{\\delta_\\alpha}\\)"
+  value   = 0
+  
+  if (no_data()) {
+    min  = -1.0
+    max  = +1.0
+    step =  0.1
+  } else {
+    x    = c(ylim()$min,ylim()$max)
+    diff = diff(x)
+    step = 10^(floor(log10(diff))-1)
+    min  = - diff / 2
+    max  = + diff / 2
+    min  = floor  (min / step) * step
+    max  = ceiling(max / step) * step
+  }
+  
+  tagList(
+    withMathJax(),
+    if (input$discrepancy_inputs == "numerical") {
+      numericInput(inputId = inputId,
+                   label   = label,
+                   value   = value,
+                   min     = NA,
+                   max     = NA,
+                   step    = step
+      ) ## numericInput
+    } else {
+      sliderInput(inputId = inputId,
+                  label   = label,
+                  min     = min,
+                  max     = max,
+                  value   = value,
+                  step    = step,
+                  ticks   = FALSE
+      ) ## sliderInput
+    }
+  ) ## tagList
+  
+}) ## mu_delta_alpha
+
+## Intercept uncertainty
+output$sigma_delta_alpha = renderUI({
+  
+  inputId = "sigma_delta_alpha"
+  label   = "Uncertainty \\(\\sigma_{\\delta_\\alpha}\\)"
+  value   = 0
+  min     = 0
+  
+  if (no_data()) {
+    max     = 1.0
+    step    = 0.1
+  } else {
+    x     = c(ylim()$min,ylim()$max)
+    diff  = diff(x)
+    step  = 10^(floor(log10(diff))-1)
+    max   = diff / 2
+    max   = ceiling(max / step) * step
+  }
+  
+  tagList(
+    withMathJax(),
+    if (input$discrepancy_inputs == "numerical") {
+      numericInput(inputId = inputId,
+                   label   = label,
+                   value   = value,
+                   min     = min,
+                   max     = NA,
+                   step    = step
+      )
+    } else {
+      sliderInput(inputId = inputId,
+                  label   = label,
+                  min     = min,
+                  max     = max,
+                  value   = value,
+                  step    = step,
+                  ticks   = FALSE
+      )
+    }
+  ) ## tagList
+  
+}) ## sigma_delta_alpha
+
+## Slope bias
+output$mu_delta_beta = renderUI({
+
+  inputId = "mu_delta_beta"
+  label   = "Bias \\(\\mu_{\\delta_\\beta}\\)"
+  value   = 0
+
+  if (no_data()) {
+    min  = -1
+    max  = +1
+    step = 0.1
+  } else {
+    x     = c(xlim()$min,xlim()$max)
+    y     = c(ylim()$min,ylim()$max)
+    diff = diff(y)/diff(x)
+    step = 10^(floor(log10(diff))-1)
+    min  = - diff / 2
+    max  = + diff / 2
+    min  = floor  (min / step) * step
+    max  = ceiling(max / step) * step
+  } 
+  
+  tagList(
+    withMathJax(),
+    if (input$discrepancy_inputs == "numerical") {
+      numericInput(inputId = inputId,
+                   label   = label,
+                   value   = value,
+                   min     = NA,
+                   max     = NA,
+                   step    = step
+      )
+    } else {
+      sliderInput(inputId = inputId,
+                  label   = label,
+                  min     = min,
+                  max     = max,
+                  value   = value,
+                  step    = step,
+                  ticks   = FALSE
+      )
+    }
+  ) ## tagList
+  
+}) ## mu_delta_beta
+
+## Slope uncertainty
+output$sigma_delta_beta = renderUI({
+
+  inputId = "sigma_delta_beta"
+  label   = "Uncertainty \\(\\sigma_{\\delta_\\beta}\\)"
+  value   = 0
+  min     = 0
+  
+  if (no_data()) {
+    max  = 1.0
+    step = 0.1
+  } else {
+    x     = c(xlim()$min,xlim()$max)
+    y     = c(ylim()$min,ylim()$max)
+    diff = diff(y)/diff(x)
+    step = 10^(floor(log10(diff))-1)
+    max  = diff / 2
+    max  = ceiling(max / step) * step
+  }
+  
+  tagList(
+    withMathJax(),
+    if (input$discrepancy_inputs == "numerical") {
+      numericInput(inputId = inputId,
+                   label   = label,
+                   value   = value,
+                   min     = min,
+                   max     = NA,
+                   step    = step
+      )
+    } else {
+      sliderInput(inputId = inputId,
+                  label   = label,
+                  min     = min,
+                  max     = max,
+                  value   = value,
+                  step    = step,
+                  ticks   = FALSE
+      )
+    }
+  ) ## tagList
+  
+}) ## sigma_delta_beta
+
+## Discrepancy correlation
+output$rho_delta = renderUI({
+  
+  inputId = "rho_delta"
+  label   = "Correlation \\(\\rho_\\delta\\)"
+  value   =  0
+  min     = -1
+  max     = +1
+  step    = 0.01
+  
+  tagList(
+    withMathJax(),
+    if (input$discrepancy_inputs == "numerical") {
+      numericInput(inputId = inputId,
+                   label   = label,
+                   value   = value,
+                   min     = min,
+                   max     = NA,
+                   step    = step
+      )
+    } else {
+      sliderInput(inputId = inputId,
+                  label   = label,
+                  min     = min,
+                  max     = max,
+                  value   = value,
+                  step    = step,
+                  ticks   = FALSE
+      )
+    }
+  ) ## tagList
+  
+}) ## rho_delta
+
+## Response spread bias
+output$mu_delta_sigma = renderUI({
+
+  inputId = "mu_delta_sigma"
+  label   = "Bias \\(\\mu_{\\delta_\\sigma}\\)"
+  value   = 0
+  
+  if (no_data()) {
+    min  = -1
+    max  = +1
+    step = 0.1
+  } else {
+    x    = c(ylim()$min,ylim()$max)
+    diff = diff(x)
+    step = 10^(floor(log10(diff))-1)
+    min  = - diff / 2
+    max  = + diff / 2
+    min  = floor  (min / step) * step
+    max  = ceiling(max / step) * step
+  }
+  
+  tagList(
+    withMathJax(),
+    if (input$discrepancy_inputs == "numerical") {
+      numericInput(inputId = inputId,
+                   label   = label,
+                   value   = value,
+                   min     = NA,
+                   max     = NA,
+                   step    = step
+      )
+    } else {
+      sliderInput(inputId = inputId,
+                  label   = label,
+                  min     = min,
+                  max     = max,
+                  value   = value,
+                  step    = step,
+                  ticks   = FALSE
+      )
+    }
+  ) ## tagList
+  
+}) ## mu_delta_sigma
+
+## Response spread uncertainty
+output$sigma_delta_sigma = renderUI({
+
+  inputId = "sigma_delta_sigma"
+  label   = "Uncertainty \\(\\sigma_{\\delta_\\sigma}\\)"
+  value   = 0
+  min     = 0
+  
+  if (no_data()) {
+    max  = 1.0
+    step = 0.1
+  } else {
+    x    = c(ylim()$min,ylim()$max)
+    diff = diff(x)
+    step = 10^(floor(log10(diff))-1)
+    max  = diff / 2
+    max  = ceiling(max / step) * step
+  }
+  
+  tagList(
+    withMathJax(),
+    if (input$discrepancy_inputs == "numerical") {
+      numericInput(inputId = inputId,
+                   label   = label,
+                   value   = value,
+                   min     = min,
+                   max     = NA,
+                   step    = step
+      )
+    } else {
+      sliderInput(inputId = inputId,
+                  label   = label,
+                  min     = min,
+                  max     = max,
+                  value   = value,
+                  step    = step,
+                  ticks   = FALSE
+      )
+    }
+  ) ## tagList
+  
+}) ## sigma_delta_sigma
+
 ## Custom interval width
 output$gamma_custom = renderUI({
   tagList(
