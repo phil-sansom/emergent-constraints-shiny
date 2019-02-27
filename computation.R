@@ -48,11 +48,14 @@ reference_posterior = reactive({
   ## Model
   model = lm(y ~ x)
 
+  ## Sample size
+  cores = getOption("mc.cores")
+  n     = input$N %/% cores
+  N     = n * cores
+  
   ## Initialise storage
   samples = array(data     = NA,
-                  dim      = c(input$N/getOption("mc.cores"),
-                               getOption("mc.cores"),
-                               7),
+                  dim      = c(n, cores, 7),
                   dimnames = list(iterations = NULL,
                                   chains     = paste("chain:",
                                                      1:getOption("mc.cores"),
@@ -64,16 +67,15 @@ reference_posterior = reactive({
   ) ## samples
 
   ## Sample posterior
-  theta = mvrnorm(input$N, model$coef, vcov(model))
+  theta = mvrnorm(N, model$coef, vcov(model))
   samples[,,"alpha"]     = theta[,1]
   samples[,,"beta" ]     = theta[,2]
   samples[,,"sigma"]     = sqrt(sum(model$residuals^2) /
-                                  rchisq(input$N, df.residual(model)))
+                                  rchisq(N, df.residual(model)))
   samples[,,"log_sigma"] = log(samples[,,"sigma"])
-  samples[,,"xstar"]     = rnorm(input$N, z, sigma_z)
+  samples[,,"xstar"]     = rnorm(N, z, sigma_z)
   samples[,,"ystar"]     = samples[,,"alpha"] +
-    samples[,,"beta" ] * samples[,,"xstar"] +
-    samples[,,"sigma"] * rnorm(input$N)
+    samples[,,"beta" ] * samples[,,"xstar"] +  samples[,,"sigma"] * rnorm(N)
 
   ## Compute log posterior probability
   samples[,,"lp__"] = apply(samples, c(1,2), function(s)
@@ -94,7 +96,12 @@ informative_posterior = reactive({
   y       = data()[,input$y]
   z       = input$z
   sigma_z = input$sigma_z
-
+  
+  ## Sample size
+  cores = getOption("mc.cores")
+  n     = input$N %/% cores
+  N     = n * cores
+  
   ## Package data
   data = list(M = length(x), x = x, y = y, z = z, sigma_z = sigma_z,
               mu_alpha = input$mu_alpha, sigma_alpha = input$sigma_alpha,
@@ -105,8 +112,8 @@ informative_posterior = reactive({
 
   ## Fit STAN model
   buffer = sampling(model, data = data, chains = getOption("mc.cores"),
-                    iter = 2*input$N/getOption("mc.cores"),
-                    warmup = input$N/getOption("mc.cores"),
+                    iter = 2*N/getOption("mc.cores"),
+                    warmup = N/getOption("mc.cores"),
                     verbose = FALSE, show_messages = FALSE)
 
   ## Extract posterior samples

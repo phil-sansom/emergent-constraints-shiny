@@ -222,9 +222,21 @@ observe ({
 
 })
 
+## Check sample number
+observe ({
+  
+  if (input$N %% getOption("mc.cores") != 0)
+    updateNumericInput(session = session, 
+                       inputId = "N",
+                       value   = input$N %/% getOption("mc.cores") *
+                         getOption("mc.cores")
+    )
+    
+})
+
 ## Disable informative priors
 observeEvent(input$reference, {
-  # print("Observers 11: Toggle reference")
+  # print("Observers 12: Toggle reference")
   toggleState(id = "mu_alpha")
   toggleState(id = "sigma_alpha")
   toggleState(id = "mu_beta")
