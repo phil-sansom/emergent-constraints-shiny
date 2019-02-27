@@ -194,19 +194,23 @@ discrepancy = reactive({
       
     }    
     
-    ## Sigma discrepancy
+    ## Sigma discrepancy and posterior predictive distribution
+    epsilon = posterior()[,,"ystar"] - posterior()[,,"alpha"] - 
+      posterior()[,,"beta"] * posterior()[,,"xstar"]
     if (input$sigma_sigma_star == 0) {
-      samples[,,"sigmastar"] =      posterior()[,,"sigma"] 
+      
+      samples[,,"sigmastar"] = posterior()[,,"sigma"] 
+
     } else {
+      
       samples[,,"sigmastar"] = sqrt(posterior()[,,"sigma"]^2 +
                                       input$sigma_sigma_star^2)
+      epsilon = epsilon * samples[,,"sigmastar"] / posterior()[,,"sigma"]
+      
     }
-    
-    ## Posterior predictive distribution
-    samples[,,"ystar"] = samples[,,"alphastar"] +
-      samples[,,"betastar"] * samples[,,"xstar"] +
-      samples[,,"sigmastar"] * rnorm(input$N)
-    
+    samples[,,"ystar"] = samples[,,"alphastar"] + 
+      samples[,,"betastar"] * samples[,,"xstar"] + epsilon
+
   }
 
   ## Return predictions
