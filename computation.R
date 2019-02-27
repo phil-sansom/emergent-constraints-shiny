@@ -126,10 +126,10 @@ informative_posterior = reactive({
 ## Posterior distribution
 posterior = reactive({
   # print("Computation 6: posterior")
-  if (input$reference) {
-    reference_posterior()
-  } else {
+  if (input$priors == "informative") {
     informative_posterior()
+  } else {
+    reference_posterior()
   }
 })
 

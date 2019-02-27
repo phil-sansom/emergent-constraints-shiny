@@ -7,7 +7,7 @@ output$alpha_prior = renderPlot({
 
   ## Skip plotting if bad prior or reference prior
   if (is.na(input$mu_alpha) | is.na(input$sigma_alpha) |
-      input$sigma_alpha <= 0 | input$reference)
+      input$sigma_alpha <= 0 | input$priors == "reference")
     return(NULL)
 
   normal_plot(mu    = input$mu_alpha,
@@ -24,7 +24,7 @@ output$beta_prior = renderPlot({
 
   ## Skip plotting if bad prior or reference prior
   if (is.na(input$mu_beta) | is.na(input$sigma_beta) |
-      input$sigma_beta <= 0 | input$reference)
+      input$sigma_beta <= 0 | input$priors == "reference")
     return(NULL)
 
   normal_plot(mu    = input$mu_beta,
@@ -41,7 +41,7 @@ output$sigma_prior = renderPlot({
 
   ## Skip plotting if bad prior or reference prior
   if (is.na(input$mu_sigma) | is.na(input$sigma_sigma) |
-      input$sigma_sigma <= 0 | input$reference)
+      input$sigma_sigma <= 0 | input$priors == "reference")
     return(NULL)
 
   folded_normal_plot(mu    = input$mu_sigma,
@@ -58,7 +58,7 @@ output$xstar_prior = renderPlot({
 
   ## Skip plotting if bad prior or reference prior
   if (is.na(input$mu_xstar) | is.na(input$sigma_xstar) |
-      input$sigma_xstar <= 0 | input$reference)
+      input$sigma_xstar <= 0 | input$priors == "reference")
     return(NULL)
 
   normal_plot(mu    = input$mu_xstar,
@@ -74,7 +74,7 @@ output$xstar_prior = renderPlot({
 output$prior_predictive = renderPlot({
 
   ## Skip plotting if error condition
-  if(no_data() | input$reference | bad_prior())
+  if(no_data() | input$priors == "reference" | bad_prior())
     return(NULL)
 
   ## Simulate from parameter priors

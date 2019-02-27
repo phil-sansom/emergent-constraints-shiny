@@ -20,7 +20,7 @@ bad_obs = reactive({
 ## Check prior parameters
 bad_prior = reactive({
   # print("Handlers: bad_prior")
-  if (input$reference) {
+  if (input$priors == "reference") {
     FALSE
   } else {
     any(

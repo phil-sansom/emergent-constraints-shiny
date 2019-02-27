@@ -208,11 +208,15 @@ ui = navbarPage(
            useShinyjs(),
            sidebarLayout(
              sidebarPanel(
-               h4("Reference priors"),
-               checkboxInput(inputId = "reference",
-                             label   = "Use reference priors",
-                             value   = TRUE
-               ), ## checkboxInput
+               h4("Priors"),
+               radioButtons(
+                 inputId  = "priors",
+                 label    = "Select priors",
+                 choices  = list(Reference   = "reference", 
+                                 Informative = "informative"),
+                 selected = "reference",
+                 inline   = TRUE
+               ),
                hr(),
                h4("Informative priors"),
                h5("Intercept \\(\\alpha\\)"),
