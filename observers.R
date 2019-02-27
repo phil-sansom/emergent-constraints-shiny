@@ -160,27 +160,49 @@ observe({
 
 ## Update response uncertainty range
 observe({
-  # print("Observers 9: sigma_sigma_star")
+  # print("Observers 9: mu_delta_sigma")
 
+  v     = c(ylim()$min,ylim()$max)
+  vdiff = diff(v)
+  vstep = 10^(floor(log10(vdiff))-1)
+  vmin  = - vdiff / 2
+  vmax  = + vdiff / 2
+  vmin  = floor  (vmin / vstep) * vstep
+  vmax  = ceiling(vmax / vstep) * vstep
+
+  updateSliderInput(session = session,
+                    inputId = "mu_delta_sigma",
+                    value   = 0,
+                    min     = vmin,
+                    max     = vmax,
+                    step    = vstep
+  ) ## mu_delta_sigma
+
+}) ## observe
+
+## Update response uncertainty range
+observe({
+  # print("Observers 10: sigma_delta_sigma")
+  
   v     = c(ylim()$min,ylim()$max)
   vdiff = diff(v)
   vstep = 10^(floor(log10(vdiff))-1)
   vmax  = vdiff / 2
   vmax  = ceiling(vmax / vstep) * vstep
-
+  
   updateSliderInput(session = session,
-                    inputId = "sigma_sigma_star",
+                    inputId = "sigma_delta_sigma",
                     value   = 0,
                     min     = 0,
                     max     = vmax,
                     step    = vstep
-  ) ## sigma_sigma_star
-
+  ) ## sigma_delta_sigma
+  
 }) ## observe
 
 ## Update posterior plot limits
 observe ({
-  # print("Observers 10: xlim_marginal,xlim_joint,ylim_joint")
+  # print("Observers 11: xlim_marginal,xlim_joint,ylim_joint")
 
   if (no_data() | bad_obs() | bad_prior()) {
 

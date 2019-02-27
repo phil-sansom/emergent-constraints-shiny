@@ -137,88 +137,85 @@ posterior = reactive({
 discrepancy = reactive({
   # print("Computation 7: discrepancy")
 
-  ## Check for non-zero discrepacny
-  if (input$mu_delta_alpha == 0 & input$sigma_delta_alpha == 0 &
-      input$mu_delta_beta  == 0 & input$sigma_delta_beta  == 0 &
-      input$rho_delta      == 0 & input$sigma_sigma_star  == 0) {
-    
-    ## If no discrepancy, return posterior samples
-    samples = posterior()[,,c("alpha","beta","sigma","xstar","ystar")]
-    dimnames(samples)$parameters = c("alphastar","betastar","sigmastar",
-                                     "xstar","ystar")
-    
-  } else {
-    
-    ## If any discrepancy, initialise storagage for new samples
-    samples = array(data     = NA,
-                    dim      = c(input$N/getOption("mc.cores"),
-                                 getOption("mc.cores"),
-                                 5),
-                    dimnames = list(iterations = NULL,
-                                    chains     = paste("chain:",
-                                                       1:getOption("mc.cores"),
-                                                       sep = ""),
-                                    parameters = c("alphastar","betastar",
-                                                   "sigmastar","xstar","ystar")
-                    ) ## dimnames
-    ) ## samples
-    samples[,,"xstar"] = posterior()[,,"xstar"]
-    
-    ## Sample discrepancies
-    if (input$sigma_delta_alpha > 0 | input$sigma_delta_beta > 0 | 
-        input$rho_delta != 0) {
-      
-      ## If discrepancy uncertainty non-zero then sample discrepancies
-      mu    = c(input$mu_delta_alpha,input$mu_delta_beta)
-      Sigma = matrix(c(input$sigma_delta_alpha^2,
-                       input$rho_delta*
-                         input$sigma_delta_alpha*input$sigma_delta_beta,
-                       input$rho_delta*
-                         input$sigma_delta_alpha*input$sigma_delta_beta,
-                       input$sigma_delta_beta^2),
-                     nrow = 2, 
-                     ncol = 2
-      )
-      delta = mvrnorm(input$N, mu, Sigma)
-      samples[,,"alphastar"] = posterior()[,,"alpha"] + delta[,1]
-      samples[,,"betastar" ] = posterior()[,,"beta" ] + delta[,2]
-      
-    } else {
-      
-      ## Check alpha bias
-      if (input$mu_delta_alpha == 0) {
-        samples[,,"alphastar"] = posterior()[,,"alpha"]
-      } else {
-        samples[,,"alphastar"] = posterior()[,,"alpha"] + input$mu_delta_alpha
-      }
-      
-      ## Check beta bias
-      if (input$mu_delta_beta == 0) {
-        samples[,,"betastar" ] = posterior()[,,"beta" ]
-      } else {
-        samples[,,"betastar" ] = posterior()[,,"beta" ] + input$mu_delta_beta
-      }
-      
-    }    
-    
-    ## Sigma discrepancy and posterior predictive distribution
-    epsilon = posterior()[,,"ystar"] - posterior()[,,"alpha"] - 
-      posterior()[,,"beta"] * posterior()[,,"xstar"]
-    if (input$sigma_sigma_star == 0) {
-      
-      samples[,,"sigmastar"] = posterior()[,,"sigma"] 
-
-    } else {
-      
-      samples[,,"sigmastar"] = sqrt(posterior()[,,"sigma"]^2 +
-                                      input$sigma_sigma_star^2)
-      epsilon = epsilon * samples[,,"sigmastar"] / posterior()[,,"sigma"]
-      
-    }
-    samples[,,"ystar"] = samples[,,"alphastar"] + 
-      samples[,,"betastar"] * samples[,,"xstar"] + epsilon
-
+  ## Initialise storage
+  samples = posterior()[,,c("alpha","beta","sigma","xstar","ystar")]
+  dimnames(samples)$parameters = c("alphastar","betastar","sigmastar",
+                                   "xstar","ystar")
+  
+  ## Set flags
+  new_mean = FALSE
+  new_sd   = FALSE
+  
+  ## Alpha bias
+  if (input$mu_delta_alpha != 0) {
+    samples[,,"alphastar"] = samples[,,"alphastar"] + input$mu_delta_alpha
+    new_mean = TRUE
   }
+  
+  ## Beta bias
+  if (input$mu_delta_beta != 0) {
+    samples[,,"betastar" ] = samples[,,"betastar" ] + input$mu_delta_beta
+    new_mean = TRUE
+  }
+
+  ## Alpha/Beta uncertainty
+  if (input$sigma_delta_alpha > 0 | input$sigma_delta_beta > 0 | 
+      input$rho_delta != 0) {
+    
+    ## If discrepancy uncertainty non-zero then sample discrepancies
+    Sigma = matrix(c(input$sigma_delta_alpha^2,
+                     input$rho_delta*
+                       input$sigma_delta_alpha*input$sigma_delta_beta,
+                     input$rho_delta*
+                       input$sigma_delta_alpha*input$sigma_delta_beta,
+                     input$sigma_delta_beta^2),
+                   nrow = 2, 
+                   ncol = 2
+    )
+    delta = mvrnorm(input$N, c(0,0), Sigma)
+    samples[,,"alphastar"] = samples[,,"alphastar"] + delta[,1]
+    samples[,,"betastar" ] = samples[,,"betastar" ] + delta[,2]
+    
+    new_mean = TRUE
+    
+  } ## Alpha/Beta uncertainty
+  
+  ## Sigma bias and uncertainty
+  if (input$mu_delta_sigma != 0 | input$sigma_delta_sigma > 0) {
+    
+    samples[,,"sigmastar"] = samples[,,"sigmastar"]^2
+    
+    if (input$mu_delta_sigma != 0)
+      samples[,,"sigmastar"] = 
+        samples[,,"sigmastar"] + input$mu_delta_sigma^2
+    
+    if (input$sigma_delta_sigma > 0)
+      samples[,,"sigmastar"] = 
+        samples[,,"sigmastar"] + (input$sigma_delta_sigma * rnorm(input$N))^2
+    
+    samples[,,"sigmastar"] = sqrt(samples[,,"sigmastar"])
+    
+    new_sd = TRUE
+    
+  } ## Sigma bias and uncertainty
+
+  ## Posterior predictive distribution
+  if (new_mean | new_sd) {
+  
+    samples[,,"ystar"] = posterior()[,,"alpha"] + 
+      posterior()[,,"beta"] * posterior()[,,"xstar"]
+    epsilon = posterior()[,,"ystar"] - samples[,,"ystar"]
+
+    if (new_mean)
+      samples[,,"ystar"] = samples[,,"alphastar"] + 
+        samples[,,"betastar"] * samples[,,"xstar"]
+
+    if (new_sd)
+      epsilon = epsilon * samples[,,"sigmastar"] / posterior()[,,"sigma"]
+
+    samples[,,"ystar"] =  samples[,,"ystar"] + epsilon
+    
+  }    
 
   ## Return predictions
   return(samples)

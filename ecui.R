@@ -12,16 +12,17 @@ ui = navbarPage(
                        \\text{Statistical model} \\\\
                        Y_m & = \\alpha + \\beta X_m + \\epsilon_m &
                          \\epsilon_m & \\sim
-                           \\text{Normal} ( 0, \\sigma^2 ) \\quad
+                           \\text{Normal} \\left( 0, \\sigma^2 \\right) \\quad
                          (m = 1,\\ldots,M) &
                          \\text{Multi-model ensemble} \\\\
                        Y_\\star & = \\alpha_\\star + \\beta_\\star X_\\star +
                            \\epsilon_\\star &
                          \\epsilon_\\star & \\sim
-                           \\text{Normal} ( 0, \\sigma_\\star^2 ) &
+                           \\text{Normal} \\left( 0, \\sigma_\\star^2 \\right) &
                          \\text{Real world} \\\\
                        Z & = X_\\star + \\omega &
-                         \\omega & \\sim \\text{Normal} ( 0, \\sigma_Z^2 ) &
+                         \\omega & \\sim 
+                           \\text{Normal} \\left( 0, \\sigma_Z^2 \\right) &
                          \\text{Observations} \\\\ ~ \\\\
 
                        \\text{Discrepancies} \\\\
@@ -51,8 +52,12 @@ ui = navbarPage(
                          \\text{Real world slope}
                        \\end{array} \\\\
                        \\sigma_\\star^2 & =
-                           \\sigma^2 + \\sigma_{\\sigma_\\star}^2 & & &
-                         \\text{Real world response uncertainty} \\\\ ~ \\\\
+                           \\sigma^2 + \\delta_\\sigma^2 & 
+                       \\delta_\\sigma & \\sim
+                       \\text{Half-Normal} \\left( 
+                           \\mu_{\\delta_\\sigma}, \\sigma_{\\delta_\\sigma}^2
+                       \\right) &
+                       \\text{Real world response uncertainty} \\\\ ~ \\\\
 
                        \\text{Reference priors} \\\\
                        & &
@@ -91,11 +96,11 @@ ui = navbarPage(
                        \\end{array} \\\\
                        & &
                        \\sigma  & \\sim \\text{Half-Normal}
-                         (\\mu_\\sigma, \\sigma_\\sigma^2 ) &
+                         \\left( \\mu_\\sigma, \\sigma_\\sigma^2 \\right) &
                          \\text{Ensemble response uncertainty} \\\\
                        & &
                        X_\\star & \\sim \\text{Normal}
-                         (\\mu_{X_\\star} , \\sigma_{X_\\star}^2  ) &
+                         \\left( \\mu_{X_\\star} , \\sigma_{X_\\star}^2 \\right) &
                          \\text{Real world predictor}
 
                      \\end{align} $$")
@@ -244,7 +249,8 @@ ui = navbarPage(
                  value   =  0,
                  min     = -1,
                  max     = +1,
-                 step    = 0.01
+                 step    = 0.01,
+                 ticks   = FALSE
                ),
                h5("Response spread \\(\\sigma\\)"),
                fluidRow(
@@ -373,13 +379,23 @@ ui = navbarPage(
                  value   =  0,
                  min     = -1,
                  max     = +1,
-                 step    = 0.01
+                 step    = 0.01,
+                 ticks   = FALSE
                ),
                hr(),
                h5("Spread \\(\\sigma_\\star\\)"),
-               sliderInput(inputId = "sigma_sigma_star",
+               sliderInput(inputId = "mu_delta_sigma",
+                           label   = "Bias
+                           \\(\\mu_{\\delta_\\sigma}\\)",
+                           min     = 0,
+                           max     = 1,
+                           value   = 0,
+                           step    = 0.1,
+                           ticks   = FALSE
+               ), ## sliderInput
+               sliderInput(inputId = "sigma_delta_sigma",
                            label   = "Uncertainty
-                           \\(\\sigma_{\\sigma_\\star}\\)",
+                           \\(\\sigma_{\\delta_\\sigma}\\)",
                            min     = 0,
                            max     = 1,
                            value   = 0,
