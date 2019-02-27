@@ -26,26 +26,30 @@ ui = navbarPage(
                          \\text{Observations} \\\\ ~ \\\\
 
                        \\text{Discrepancies} \\\\
-                       \\begin{bmatrix}
+                       \\left[ \\begin{array}{c}
                          \\alpha_\\star \\\\ \\beta_\\star
-                       \\end{bmatrix}
-                         & = \\begin{bmatrix} \\alpha \\\\ \\beta \\end{bmatrix}
-                           + \\begin{bmatrix} \\delta_\\alpha \\\\
-                                              \\delta_\\beta
-                             \\end{bmatrix} &
-                       \\begin{bmatrix} \\delta_\\alpha \\\\
-                                        \\delta_\\beta
-                       \\end{bmatrix} & \\sim \\text{Normal} \\left(
-                       \\begin{bmatrix} \\mu_{\\delta_\\alpha} \\\\
-                                        \\mu_{\\delta_\\beta}
-                       \\end{bmatrix},
-                       \\begin{bmatrix} \\sigma_{\\delta_\\alpha}^2 &
-                                        \\rho_\\delta \\sigma_{\\delta_\\alpha}
-                                          \\sigma_{\\delta_\\beta} \\\\
-                                        \\rho_\\delta \\sigma_{\\delta_\\alpha}
-                                          \\sigma_{\\delta_\\beta} &
-                                        \\sigma_{\\delta_\\beta}^2
-                       \\end{bmatrix}
+                       \\end{array} \\right]
+                         & = \\left[ \\begin{array}{c} 
+                               \\alpha \\\\ \\beta 
+                             \\end{array} \\right]
+                           + \\left[ \\begin{array}{c} 
+                               \\delta_\\alpha \\\\ \\delta_\\beta
+                             \\end{array} \\right] &
+                       \\left[ \\begin{array}{c} 
+                         \\delta_\\alpha \\\\ \\delta_\\beta
+                       \\end{array} \\right] & 
+                       \\sim \\text{Normal} \\left(
+                         \\left[ \\begin{array}{c} 
+                           \\mu_{\\delta_\\alpha} \\\\ \\mu_{\\delta_\\beta}
+                         \\end{array} \\right],
+                         \\left[ \\begin{array}{cc} 
+                           \\sigma_{\\delta_\\alpha}^2 &
+                             \\rho_\\delta \\sigma_{\\delta_\\alpha}
+                               \\sigma_{\\delta_\\beta} \\\\
+                           \\rho_\\delta \\sigma_{\\delta_\\alpha}
+                             \\sigma_{\\delta_\\beta} &
+                               \\sigma_{\\delta_\\beta}^2
+                         \\end{array} \\right]
                        \\right) &
                        \\begin{array}{r}
                          \\text{Real world intercept} \\\\
@@ -79,16 +83,19 @@ ui = navbarPage(
 
                        \\text{Informative priors} \\\\
                        & &
-                       \\begin{bmatrix} \\alpha \\\\ \\beta \\end{bmatrix} &
+                       \\left[ \\begin{array}{c} 
+                         \\alpha \\\\ \\beta 
+                       \\end{array} \\right] &
                        \\sim \\text{Normal} \\left(
-                       \\begin{bmatrix}
-                         \\mu_\\alpha \\\\ \\mu_\\beta
-                       \\end{bmatrix},
-                       \\begin{bmatrix} \\sigma_\\alpha^2 &
-                                        \\rho \\sigma_\\alpha \\sigma_\\beta \\\\
-                                        \\rho \\sigma_\\alpha \\sigma_\\beta &
-                                        \\sigma_\\beta^2
-                       \\end{bmatrix}
+                         \\left[ \\begin{array}{c}
+                           \\mu_\\alpha \\\\ \\mu_\\beta
+                         \\end{array} \\right],
+                         \\left[ \\begin{array}{cc} 
+                           \\sigma_\\alpha^2 &
+                             \\rho \\sigma_\\alpha \\sigma_\\beta \\\\
+                           \\rho \\sigma_\\alpha \\sigma_\\beta &
+                             \\sigma_\\beta^2
+                         \\end{array} \\right]
                        \\right) &
                        \\begin{array}{r}
                          \\text{Ensemble intercept} \\\\
