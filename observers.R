@@ -189,8 +189,10 @@ observe ({
 
   } else {
 
-    xlims = posterior_limits(data()[,input$x], discrepancy()[,,"xstar"])
-    ylims = posterior_limits(data()[,input$y], discrepancy()[,,"ystar"])
+    xlims = posterior_limits(data()[,input$x], posterior()[,,"xstar"],
+                             discrepancy()[,,"xstar"])
+    ylims = posterior_limits(data()[,input$y], posterior()[,,"ystar"],
+                             discrepancy()[,,"ystar"])
 
   }
 
