@@ -393,14 +393,22 @@ ui = navbarPage(
                             min     = 1000,
                             step    = 1000
                ), ## numericInput
-               selectInput(inputId  = "gamma",
-                           label    = "Interval width",
-                           choices  = list("68% (1 sd)" = 0.68,
-                                           "90%"        = 0.90,
-                                           "95% (2 sd)" = 0.95,
-                                           "99%"        = 0.99),
-                           selected = 0.90
-               ) ## selectInput
+               fluidRow(
+                 column(width = 8,
+                        selectInput(inputId  = "gamma",
+                                    label    = "Interval width",
+                                    choices  = list("68% (1 sd)" = 0.68,
+                                                    "90%"        = 0.90,
+                                                    "95% (2 sd)" = 0.95,
+                                                    "99%"        = 0.99,
+                                                    "Custom"     = "custom"),
+                                    selected = 0.90
+                        ) ## selectInput
+                 ), ## column
+                 column(width = 4,
+                        uiOutput(outputId = "gamma_custom")
+                 ) ## column
+               ) ## fluidRow
              ), ## sidebarPanel
              mainPanel(
                tabsetPanel(

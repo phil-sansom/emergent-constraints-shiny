@@ -233,7 +233,7 @@ predictive = reactive({
                        alpha = posterior()[,,"alpha"],
                        beta  = posterior()[,,"beta" ],
                        sigma = posterior()[,,"sigma"],
-                       gamma = as.numeric(input$gamma)
+                       gamma = gamma()
   )
 
 })
@@ -246,7 +246,7 @@ discrepancy_predictive = reactive({
                        alpha = discrepancy()[,,"alphastar"],
                        beta  = discrepancy()[,,"betastar" ],
                        sigma = discrepancy()[,,"sigmastar"],
-                       gamma = as.numeric(input$gamma)
+                       gamma = gamma()
   )
 
 })
@@ -259,7 +259,7 @@ reference_predictive = reactive({
                        alpha = reference_posterior()[,,"alpha"],
                        beta  = reference_posterior()[,,"beta" ],
                        sigma = reference_posterior()[,,"sigma"],
-                       gamma = as.numeric(input$gamma)
+                       gamma = gamma()
   )
 
 })

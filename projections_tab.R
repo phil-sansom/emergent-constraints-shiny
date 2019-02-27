@@ -2,6 +2,35 @@
 ## Projections tab ##
 #####################
 
+## Custom interval width
+output$gamma_custom = renderUI({
+  tagList(
+    if (input$gamma == "custom") {
+      numericInput(inputId = "gamma_custom", 
+                   label   = "Custom", 
+                   value   = 0.66,
+                   min     = 0, 
+                   max     = 1, 
+                   step    = 0.01) 
+    } else {
+      NULL
+    }
+  )
+})
+
+## Update gamma
+gamma = reactive({
+  if (input$gamma == "custom") {
+    if (is.null(input$gamma_custom)) {
+      0.90
+    } else {
+      input$gamma_custom
+    }
+  } else {
+    as.numeric(input$gamma)
+  }
+})
+
 ## Marginal posterior predictive plot
 marginal_plot = function() {
 
@@ -13,7 +42,7 @@ marginal_plot = function() {
   y      = data()[,input$y]
   ystar1 = reference_posterior()[,,"ystar"]
   ystar2 = discrepancy()[,,"ystar"]
-  probs  = 0.5*(1 + c(-1,+1)*as.numeric(input$gamma))
+  probs  = 0.5*(1 + c(-1,+1)*gamma())
 
   ## Reference predictive density interval
   dens1 = density (ystar1)
@@ -105,7 +134,7 @@ output$predictive_intervals = renderTable({
   ystar2 = discrepancy()[,,"ystar"]
 
   ## Interval width
-  probs = 0.5*(1 + c(-1,+1)*as.numeric(input$gamma))
+  probs = 0.5*(1 + c(-1,+1)*gamma())
 
   ## Initialise storage
   pred_int = data.frame(numeric(2),numeric(2),numeric(2))
@@ -152,8 +181,7 @@ joint_plot = function() {
   mask = mask()
 
   ## Interval width
-  gamma = as.numeric(input$gamma)
-  probs = 0.5*(1 + c(-1,+1)*gamma)
+  probs = 0.5*(1 + c(-1,+1)*gamma())
 
   ## Compute joint density under reference priors
   reference_density = kde2d(x = xstar_ref, y = ystar_ref, n = 25)
@@ -203,12 +231,12 @@ joint_plot = function() {
 
   ## Add reference density
   contour(reference_density$x, reference_density$y, reference_density$z,
-          levels = gamma, drawlabels = FALSE,
+          levels = gamma(), drawlabels = FALSE,
           lwd = 2, col = "black", lty = "dotted", add = TRUE)
 
   ## Add discrepancy density
   contour(discrepancy_density$x, discrepancy_density$y, discrepancy_density$z,
-          levels = gamma, drawlabels = FALSE,
+          levels = gamma(), drawlabels = FALSE,
           lwd = 2, col = "red", lty = "dotted", add = TRUE)
 
   ## Add labels

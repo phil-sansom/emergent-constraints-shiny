@@ -80,7 +80,7 @@ posterior_predictive = function(x, alpha, beta, sigma, gamma, N) {
 }
 
 ## Function to plot a normal distribution
-normal_plot = function(mu, sigma, xlab, ylab, ...) {
+normal_plot = function(mu, sigma, gamma, xlab, ylab, ...) {
   
   ## Compute plotting limits and probability density
   xmin  = qnorm(pnorm(-4), mu, sigma)
@@ -90,8 +90,8 @@ normal_plot = function(mu, sigma, xlab, ylab, ...) {
   ymax  = 1.04*max(yy)
   
   ## Compute limits of prior interval
-  xp = seq(from       = qnorm(0.5*(1 - as.numeric(input$gamma)), mu, sigma),
-           to         = qnorm(0.5*(1 + as.numeric(input$gamma)), mu, sigma), 
+  xp = seq(from       = qnorm(0.5*(1 - gamma), mu, sigma),
+           to         = qnorm(0.5*(1 + gamma), mu, sigma), 
            length.out = 101)
   yp = dnorm(xp, mu, sigma)
   
@@ -116,7 +116,7 @@ normal_plot = function(mu, sigma, xlab, ylab, ...) {
 } ## normal_plot
 
 ## Function to plot a folded normal distribution
-folded_normal_plot = function(mu, sigma, xlab, ylab, ...) {
+folded_normal_plot = function(mu, sigma, gamma, xlab, ylab, ...) {
   
   ## Compute plotting limits and probability density
   xmax  = qnorm(pnorm(+4), mu, sigma)
@@ -126,8 +126,8 @@ folded_normal_plot = function(mu, sigma, xlab, ylab, ...) {
   
   ## Compute limits of prior interval
   cdf   = pnorm(xx, mu, sigma) + pnorm(xx, -mu, sigma) - 1
-  xp    = seq(max(which(cdf < 0.5*(1 - as.numeric(input$gamma)))),
-              min(which(cdf > 0.5*(1 + as.numeric(input$gamma)))), 1)
+  xp    = seq(max(which(cdf < 0.5*(1 - gamma))),
+              min(which(cdf > 0.5*(1 + gamma))), 1)
   
   ## Graphical parameters
   graphical_parameters()

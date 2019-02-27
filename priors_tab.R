@@ -12,6 +12,7 @@ output$alpha_prior = renderPlot({
 
   normal_plot(mu    = input$mu_alpha,
               sigma = input$sigma_alpha,
+              gamma = gamma(),
               xlab  = parameter_labels["alpha"],
               ylab  = "Density",
               par   = list(mar = c(2.5,4.0,1,1)+0.1))
@@ -28,6 +29,7 @@ output$beta_prior = renderPlot({
 
   normal_plot(mu    = input$mu_beta,
               sigma = input$sigma_beta,
+              gamma = gamma(),
               xlab  = parameter_labels["beta"],
               ylab  = "Density",
               par   = list(mar = c(2.5,4.0,1,1)+0.1))
@@ -44,6 +46,7 @@ output$sigma_prior = renderPlot({
 
   folded_normal_plot(mu    = input$mu_sigma,
                      sigma = input$sigma_sigma,
+                     gamma = gamma(),
                      xlab  = parameter_labels["sigma"],
                      ylab  = "Density",
                      par   = list(mar = c(2.5,4.0,1,1)+0.1))
@@ -60,6 +63,7 @@ output$xstar_prior = renderPlot({
 
   normal_plot(mu    = input$mu_xstar,
               sigma = input$sigma_xstar,
+              gamma = gamma(),
               xlab  = parameter_labels["xstar"],
               ylab  = "Density",
               par   = list(mar = c(2.5,4.0,1,1)+0.1))
@@ -93,7 +97,7 @@ output$prior_predictive = renderPlot({
     buffer = theta[,1] + theta[,2] * xx[i] + sigma * rnorm(input$N)
     pp[i,"fit"]          = mean(buffer)
     pp[i,c("lwr","upr")] =
-      quantile(buffer, 0.5*(1 + c(-1,+1)*as.numeric(input$gamma)))
+      quantile(buffer, 0.5*(1 + c(-1,+1)*gamma()))
   }
 
   ## Graphical parameters
