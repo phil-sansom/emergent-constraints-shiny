@@ -4,6 +4,7 @@
 
 ## Read user data
 data = reactive({
+  # print("Computation 1: data")
 
   input_file = input$file
 
@@ -20,21 +21,23 @@ data = reactive({
 
 })
 
-
 ## Subset samples for plotting
-mask = reactive(
+mask = reactive({
+  # print("Computation 2: mask")
   sample.int(input$N, 1e3)
-)
+})
 
 ## Predictor points for plotting
-xx = reactive(
+xx = reactive({
+  # print("Computation 3: xx")
   seq(from       = xlim()$min,
       to         = xlim()$max,
       length.out = 101)
-)
+})
 
 ## Sample posterior with reference priors
 reference_posterior = reactive({
+  # print("Computation 4: reference_posterior")
 
   ## Extract data
   x       = data()[,input$x]
@@ -84,6 +87,7 @@ reference_posterior = reactive({
 
 ## Sample posterior with informative priors
 informative_posterior = reactive({
+  # print("Computation 5: informative_posterior")
 
   ## Extract data
   x       = data()[,input$x]
@@ -113,16 +117,18 @@ informative_posterior = reactive({
 })
 
 ## Posterior distribution
-posterior = reactive(
+posterior = reactive({
+  # print("Computation 6: posterior")
   if (input$reference) {
     reference_posterior()
   } else {
     informative_posterior()
   }
-)
+})
 
 ## Compute discrepancy
 discrepancy = reactive({
+  # print("Computation 7: discrepancy")
 
   ## Initialise storage
   samples = array(data     = NA,
@@ -165,7 +171,8 @@ discrepancy = reactive({
 })
 
 ## Sample posterior predictive
-predictive = reactive(
+predictive = reactive({
+  # print("Computation 8: predictive")
 
   posterior_predictive(x     = xx(),
                        alpha = posterior()[,,"alpha"],
@@ -174,10 +181,11 @@ predictive = reactive(
                        gamma = as.numeric(input$gamma)
   )
 
-)
+})
 
 ## Sample posterior predictive discrepancy
-discrepancy_predictive = reactive(
+discrepancy_predictive = reactive({
+  # print("Computation 9: discrepancy_predictive")
 
   posterior_predictive(x     = xx(),
                        alpha = discrepancy()[,,"alphastar"],
@@ -186,10 +194,11 @@ discrepancy_predictive = reactive(
                        gamma = as.numeric(input$gamma)
   )
 
-)
+})
 
 ## Sample posterior predictive from basic model with reference priors
-reference_predictive = reactive(
+reference_predictive = reactive({
+  # print("Computation 10: reference_predictive")
 
   posterior_predictive(x     = xx(),
                        alpha = reference_posterior()[,,"alpha"],
@@ -198,4 +207,5 @@ reference_predictive = reactive(
                        gamma = as.numeric(input$gamma)
   )
 
-)
+})
+

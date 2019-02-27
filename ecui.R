@@ -1,8 +1,10 @@
 ui = navbarPage(
   title = "Uncertainty quantification for emergent constraints",
+  id    = "page",
 
   ## Overview tab
   tabPanel(title = "Overview",
+           value = "overview",
            withMathJax(),
            mainPanel(
              p("$$ \\begin{align}
@@ -23,29 +25,29 @@ ui = navbarPage(
                          \\text{Observations} \\\\ ~ \\\\
 
                        \\text{Discrepancies} \\\\
-                       \\begin{bmatrix} 
-                         \\alpha_\\star \\\\ \\beta_\\star 
-                       \\end{bmatrix} 
-                         & = \\begin{bmatrix} \\alpha \\\\ \\beta \\end{bmatrix} 
-                           + \\begin{bmatrix} \\delta_\\alpha \\\\ 
-                                              \\delta_\\beta 
+                       \\begin{bmatrix}
+                         \\alpha_\\star \\\\ \\beta_\\star
+                       \\end{bmatrix}
+                         & = \\begin{bmatrix} \\alpha \\\\ \\beta \\end{bmatrix}
+                           + \\begin{bmatrix} \\delta_\\alpha \\\\
+                                              \\delta_\\beta
                              \\end{bmatrix} &
-                       \\begin{bmatrix} \\delta_\\alpha \\\\ 
-                                        \\delta_\\beta 
+                       \\begin{bmatrix} \\delta_\\alpha \\\\
+                                        \\delta_\\beta
                        \\end{bmatrix} & \\sim \\text{Normal} \\left(
-                       \\begin{bmatrix} \\mu_{\\delta_\\alpha} \\\\ 
+                       \\begin{bmatrix} \\mu_{\\delta_\\alpha} \\\\
                                         \\mu_{\\delta_\\beta}
                        \\end{bmatrix},
-                       \\begin{bmatrix} \\sigma_{\\delta_\\alpha}^2 & 
-                                        \\rho_\\delta \\sigma_{\\delta_\\alpha} 
+                       \\begin{bmatrix} \\sigma_{\\delta_\\alpha}^2 &
+                                        \\rho_\\delta \\sigma_{\\delta_\\alpha}
                                           \\sigma_{\\delta_\\beta} \\\\
-                                        \\rho_\\delta \\sigma_{\\delta_\\alpha} 
+                                        \\rho_\\delta \\sigma_{\\delta_\\alpha}
                                           \\sigma_{\\delta_\\beta} &
-                                        \\sigma_{\\delta_\\beta}^2 
+                                        \\sigma_{\\delta_\\beta}^2
                        \\end{bmatrix}
                        \\right) &
                        \\begin{array}{r}
-                         \\text{Real world intercept} \\\\ 
+                         \\text{Real world intercept} \\\\
                          \\text{Real world slope}
                        \\end{array} \\\\
                        \\sigma_\\star^2 & =
@@ -54,13 +56,13 @@ ui = navbarPage(
 
                        \\text{Reference priors} \\\\
                        & &
-                       \\alpha & \\sim \\text{Uniform} 
+                       \\alpha & \\sim \\text{Uniform}
                          \\left( -\\infty, +\\infty \\right) &
-                         \\text{Ensemble intercept} \\\\                       
+                         \\text{Ensemble intercept} \\\\
                        & &
                        \\beta  & \\sim \\text{Uniform}
                          \\left( -\\infty, +\\infty \\right) &
-                         \\text{Ensemble slope} \\\\                       
+                         \\text{Ensemble slope} \\\\
                        & &
                        \\log \\sigma & \\sim \\text{Uniform}
                          \\left( -\\infty, +\\infty \\right) &
@@ -72,21 +74,21 @@ ui = navbarPage(
 
                        \\text{Informative priors} \\\\
                        & &
-                       \\begin{bmatrix} \\alpha \\\\ \\beta \\end{bmatrix} & 
+                       \\begin{bmatrix} \\alpha \\\\ \\beta \\end{bmatrix} &
                        \\sim \\text{Normal} \\left(
-                       \\begin{bmatrix} 
+                       \\begin{bmatrix}
                          \\mu_\\alpha \\\\ \\mu_\\beta
                        \\end{bmatrix},
-                       \\begin{bmatrix} \\sigma_\\alpha^2 & 
+                       \\begin{bmatrix} \\sigma_\\alpha^2 &
                                         \\rho \\sigma_\\alpha \\sigma_\\beta \\\\
                                         \\rho \\sigma_\\alpha \\sigma_\\beta &
-                                        \\sigma_\\beta^2 
+                                        \\sigma_\\beta^2
                        \\end{bmatrix}
                        \\right) &
                        \\begin{array}{r}
-                         \\text{Ensemble intercept} \\\\ 
+                         \\text{Ensemble intercept} \\\\
                          \\text{Ensemble slope}
-                       \\end{array} \\\\                       
+                       \\end{array} \\\\
                        & &
                        \\sigma  & \\sim \\text{Half-Normal}
                          (\\mu_\\sigma, \\sigma_\\sigma^2 ) &
@@ -102,6 +104,7 @@ ui = navbarPage(
 
   ## Data tab
   tabPanel(title = "Data",
+           value = "data",
            sidebarLayout(
              sidebarPanel(
                title = "Data and observations",
@@ -189,6 +192,7 @@ ui = navbarPage(
 
   ## Prior panel
   tabPanel("Priors",
+           value = "priors",
            useShinyjs(),
            sidebarLayout(
              sidebarPanel(
@@ -240,7 +244,7 @@ ui = navbarPage(
                  value   =  0,
                  min     = -1,
                  max     = +1,
-                 step    = 0.05
+                 step    = 0.01
                ),
                h5("Response spread \\(\\sigma\\)"),
                fluidRow(
@@ -334,7 +338,7 @@ ui = navbarPage(
                ), ## sliderInput
                sliderInput(inputId = "sigma_delta_alpha",
                            label   = "Uncertainty
-                                         \\(\\sigma_{\\delta_\\alpha}\\)",
+                           \\(\\sigma_{\\delta_\\alpha}\\)",
                            min     = 0,
                            max     = 1,
                            value   = 0,
@@ -345,7 +349,7 @@ ui = navbarPage(
                h5("Slope \\(\\beta_\\star\\)"),
                sliderInput(inputId = "mu_delta_beta",
                            label   = "Bias
-                                         \\(\\mu_{\\delta_\\beta}\\)",
+                           \\(\\mu_{\\delta_\\beta}\\)",
                            min     = -1,
                            max     = +1,
                            value   = 0,
@@ -354,7 +358,7 @@ ui = navbarPage(
                ), ## sliderInput
                sliderInput(inputId = "sigma_delta_beta",
                            label   = "Uncertainty
-                                         \\(\\sigma_{\\delta_\\beta}\\)",
+                           \\(\\sigma_{\\delta_\\beta}\\)",
                            min     = 0,
                            max     = 1,
                            value   = 0,
@@ -375,7 +379,7 @@ ui = navbarPage(
                h5("Spread \\(\\sigma_\\star\\)"),
                sliderInput(inputId = "sigma_sigma_star",
                            label   = "Uncertainty
-                                         \\(\\sigma_{\\sigma_\\star}\\)",
+                           \\(\\sigma_{\\sigma_\\star}\\)",
                            min     = 0,
                            max     = 1,
                            value   = 0,
@@ -467,6 +471,7 @@ ui = navbarPage(
   ## Diagnostics tab
   tabPanel(
     title = "Diagnostics",
+    value = "diagnostics",
     navlistPanel(
       tabPanel(
         title = "Posterior summary statistics",
