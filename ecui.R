@@ -58,7 +58,7 @@ ui = navbarPage(
                        \\sigma_\\star^2 & =
                            \\sigma^2 + \\delta_\\sigma^2 & 
                        \\delta_\\sigma & \\sim
-                       \\text{Half-Normal} \\left( 
+                       \\text{Folded-Normal} \\left( 
                            \\mu_{\\delta_\\sigma}, \\sigma_{\\delta_\\sigma}^2
                        \\right) &
                        \\text{Real world response uncertainty} \\\\ ~ \\\\
@@ -102,7 +102,7 @@ ui = navbarPage(
                          \\text{Ensemble slope}
                        \\end{array} \\\\
                        & &
-                       \\sigma  & \\sim \\text{Half-Normal}
+                       \\sigma  & \\sim \\text{Folded-Normal}
                          \\left( \\mu_\\sigma, \\sigma_\\sigma^2 \\right) &
                          \\text{Ensemble response uncertainty} \\\\
                        & &
@@ -334,6 +334,10 @@ ui = navbarPage(
                      ) ## column
                    ) ## fluidRow
                   ),
+                 tabPanel(
+                   title = "Prior predictive distribution",
+                   plotOutput(outputId = "prior_discrepancy_plot")
+                 ),
                  tabPanel(
                    title = "Marginal projections",
                    plotOutput(outputId = "marginal_plot"),

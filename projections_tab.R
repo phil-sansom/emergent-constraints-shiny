@@ -344,6 +344,87 @@ output$sigma_discrepancy_plot = renderPlot({
   
 }) ## sigma_discrepancy_plot
 
+## Plot prior discrepancy
+output$prior_discrepancy_plot = renderPlot({
+  
+  ## Skip plotting if error condition
+  if(no_data() | input$priors == "reference" | bad_prior())
+    return(NULL)
+  
+  ## Simulate from parameter priors
+  mu    = c(input$mu_alpha,input$mu_beta)
+  Sigma = matrix(c(input$sigma_alpha^2,
+                   input$rho*input$sigma_alpha*input$sigma_beta,
+                   input$rho*input$sigma_alpha*input$sigma_beta,
+                   input$sigma_beta^2),
+                 2, 2)
+  theta = mvrnorm(input$N, mu, Sigma)
+  alpha = theta[,1]
+  beta  = theta[,2]
+  sigma = abs(rnorm(input$N, input$mu_sigma, input$sigma_sigma))
+
+  ## Simulate from discrepancies
+  mu    = c(input$mu_delta_alpha,input$mu_delta_beta)
+  Sigma = matrix(c(input$sigma_delta_alpha^2,
+                   input$rho_delta*input$sigma_delta_alpha*input$sigma_delta_beta,
+                   input$rho_delta*input$sigma_delta_alpha*input$sigma_delta_beta,
+                   input$sigma_delta_beta^2),
+                 2, 2)
+  delta = mvrnorm(input$N, mu, Sigma)
+  alphastar = alpha + delta[,1]
+  betastar  = beta  + delta[,2] 
+  sigmastar = sqrt(sigma^2 + rnorm(input$N, input$mu_delta_sigma, input$sigma_delta_sigma)^2)
+
+  ## Simulate from real world predictor
+  xstar = input$mu_xstar + input$sigma_xstar * rnorm(input$N)
+
+  ## Plotting points
+  range = range(xstar)
+  diff  = diff(range)
+  step  = 10^floor(log10(diff))
+  min   = floor  (range[1] / step)*step
+  max   = ceiling(range[2] / step)*step
+  xx    = seq(min, max, length.out = 101)
+  nn    = length(xx)
+  
+  ## Simulate from prior predictive distribution
+  pp = matrix(NA, nn, 3, dimnames = list(NULL, c("fit","lwr","upr")))
+  dp = matrix(NA, nn, 3, dimnames = list(NULL, c("fit","lwr","upr")))
+  for (i in 1:nn) {
+    buffer = alpha + beta * xx[i] + sigma * rnorm(input$N)
+    pp[i,"fit"]          = mean(buffer)
+    pp[i,c("lwr","upr")] = quantile(buffer, 0.5*(1 + c(-1,+1)*gamma()))
+    buffer = alphastar + betastar * xx[i] + sigmastar * rnorm(input$N)
+    dp[i,"fit"]          = mean(buffer)
+    dp[i,c("lwr","upr")] = quantile(buffer, 0.5*(1 + c(-1,+1)*gamma()))
+  }
+  
+  ## Graphical parameters
+  graphical_parameters()
+  
+  ## Plot prior predictive mean
+  plot(xx, pp[,"fit"], type = "l", lty = "dotdash", lwd = 2,
+       xlim = range(xx), ylim = range(pp,dp), yaxs = "r")
+  
+  ## Add prior predictive interval
+  lines(xx, pp[,"lwr"], lty = "dashed", lwd = 2)
+  lines(xx, pp[,"upr"], lty = "dashed", lwd = 2)
+  
+  ## Add discrepancy predictive distribution
+  lines(xx, dp[,"fit"], col = "red", lty = "dotdash" , lwd = 2)
+  lines(xx, dp[,"lwr"], col = "red", lty = "dashed", lwd = 2)
+  lines(xx, dp[,"upr"], col = "red", lty = "dashed", lwd = 2)
+
+  ## Add labels
+  title(xlab = input$xlab)
+  title(ylab = input$ylab)
+  
+  ## Add legend
+  legend("topright", legend = c("Models","Real world"), col = c("black", "red"),
+         lty = c("solid","solid"), lwd = c(2,2), bty = "n")
+  
+}) ## prior_discrepancy_plot
+
 ## Marginal posterior predictive plot
 marginal_plot = function() {
 
