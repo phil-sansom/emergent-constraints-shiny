@@ -4,6 +4,7 @@
 
 ## Input selection
 output$prior_input_select = renderUI({
+  
   if (input$priors == "informative") {
     radioButtons(
       inputId  = "prior_input_select",
@@ -15,14 +16,14 @@ output$prior_input_select = renderUI({
   } else {
     return(NULL)
   }
+  
 })
 
-## Intercept mean
-output$mu_alpha = renderUI({
-  
-  inputId = "mu_alpha"
-  label   = "Mean \\(\\mu_\\alpha\\)"
-  value   = 0
+## Intercept prior
+output$alpha_prior = renderUI({
+
+  if (input$priors == "reference" | is.null(input$prior_input_select))
+    return (NULL)
   
   if (no_data()) {
     min  = -1.0
@@ -37,88 +38,62 @@ output$mu_alpha = renderUI({
     min  = floor  (min / step) * step
     max  = ceiling(max / step) * step
   }
-  
-  tagList(
-    withMathJax(),
-    if (input$priors == "reference" | is.null(input$prior_input_select)) {
-      NULL
-    } else {
-      if (input$prior_input_select == "numerical") {
-        numericInput(inputId = inputId,
-                     label   = label,
-                     value   = value,
-                     min     = NA,
-                     max     = NA,
-                     step    = step
-        ) ## numericInput
-      } else {
-        sliderInput(inputId = inputId,
-                    label   = label,
-                    min     = min,
-                    max     = max,
-                    value   = value,
-                    step    = step,
-                    ticks   = FALSE
-        ) ## sliderInput
-      }
-    }
-  ) ## tagList
-  
-}) ## mu_alpha
 
-## Intercept SD
-output$sigma_alpha = renderUI({
-  
-  inputId = "sigma_alpha"
-  label   = "Standard deviation \\(\\sigma_\\alpha\\)"
-  value   = 1
-  min     = 0
-  
-  if (no_data()) {
-    max     = 1.0
-    step    = 0.1
+  if (input$prior_input_select == "numerical") {
+    tagList(
+      withMathJax(),
+      h5("Intercept \\(\\alpha\\)"),
+      fluidRow(
+        column(width = 6,
+               numericInput(inputId = "mu_alpha",
+                            label   = "Mean \\(\\mu_\\alpha\\)",
+                            value   = 0.5 * (min + max),
+                            min     = NA,
+                            max     = NA,
+                            step    = step
+               ) ## mu_alpha
+        ), ## column
+        column(width = 6,
+               numericInput(inputId = "sigma_alpha",
+                            label   = "Standard deviation \\(\\sigma_\\alpha\\)",
+                            value   = max,
+                            min     = 0,
+                            max     = NA,
+                            step    = step
+               ) ## sigma_alpha
+        ) ## column
+      ) ## fluidRow
+    ) ## tagList
   } else {
-    x     = c(ylim()$min,ylim()$max)
-    diff  = diff(x)
-    step  = 10^(floor(log10(diff))-1)
-    max   = diff / 2
-    max   = ceiling(max / step) * step
+    tagList(
+      withMathJax(),
+      h5("Intercept \\(\\alpha\\)"),
+      sliderInput(inputId = "mu_alpha",
+                  label   = "Mean \\(\\mu_\\alpha\\)",
+                  value   = 0.5 * (min + max),
+                  min     = min,
+                  max     = max,
+                  step    = step,
+                  ticks   = FALSE
+      ), ## mu_alpha
+      sliderInput(inputId = "sigma_alpha",
+                  label   = "Standard deviation \\(\\sigma_\\alpha\\)",
+                  value   = max,
+                  min     = 0,
+                  max     = max,
+                  step    = step,
+                  ticks   = FALSE
+      ) ## sigma_alpha
+    ) ## tagList
   }
   
-  tagList(
-    withMathJax(),
-    if (input$priors == "reference" | is.null(input$prior_input_select)) {
-      NULL
-    } else {
-      if (input$prior_input_select == "numerical") {
-        numericInput(inputId = inputId,
-                     label   = label,
-                     value   = value,
-                     min     = min,
-                     max     = NA,
-                     step    = step
-        )
-      } else {
-        sliderInput(inputId = inputId,
-                    label   = label,
-                    min     = min,
-                    max     = max,
-                    value   = value,
-                    step    = step,
-                    ticks   = FALSE
-        )
-      }
-    }
-  ) ## tagList
-  
-}) ## sigma_alpha
+}) ## alpha_prior
 
-## Slope mean
-output$mu_beta = renderUI({
+## Slope prior
+output$beta_prior = renderUI({
   
-  inputId = "mu_beta"
-  label   = "Mean \\(\\mu_\\beta\\)"
-  value   = 0
+  if (input$priors == "reference" | is.null(input$prior_input_select))
+    return (NULL)
   
   if (no_data()) {
     min  = -1
@@ -135,84 +110,61 @@ output$mu_beta = renderUI({
     max  = ceiling(max / step) * step
   } 
   
-  tagList(
-    withMathJax(),
-    if (input$priors == "reference" | is.null(input$prior_input_select)) {
-      NULL
-    } else {
-      if (input$prior_input_select == "numerical") {
-        numericInput(inputId = inputId,
-                     label   = label,
-                     value   = value,
-                     min     = NA,
-                     max     = NA,
-                     step    = step
-        )
-      } else {
-        sliderInput(inputId = inputId,
-                    label   = label,
-                    min     = min,
-                    max     = max,
-                    value   = value,
-                    step    = step,
-                    ticks   = FALSE
-        )
-      }
-    }
-  ) ## tagList
-  
-}) ## mu_beta
-
-## Slope SD
-output$sigma_beta = renderUI({
-  
-  inputId = "sigma_beta"
-  label   = "Standard deviation \\(\\sigma_\\beta\\)"
-  value   = 1
-  min     = 0
-  
-  if (no_data()) {
-    max  = 1.0
-    step = 0.1
+  if (input$prior_input_select == "numerical") {
+    tagList(
+      withMathJax(),
+      h5("Slope \\(\\beta\\)"),
+      fluidRow(
+        column(width = 6,
+               numericInput(inputId = "mu_beta",
+                            label   = "Mean \\(\\mu_\\beta\\)",
+                            value   = 0,
+                            min     = NA,
+                            max     = NA,
+                            step    = step
+               ) ## mu_beta
+        ), ## column
+        column(width = 6,
+               numericInput(inputId = "sigma_beta",
+                            label   = "Standard deviation \\(\\sigma_\\beta\\)",
+                            value   = max,
+                            min     = 0,
+                            max     = NA,
+                            step    = step
+               ) ## sigma_beta
+        ) ## column
+      ) ## fluidRow
+    ) ## tagList
   } else {
-    x     = c(xlim()$min,xlim()$max)
-    y     = c(ylim()$min,ylim()$max)
-    diff = diff(y)/diff(x)
-    step = 10^(floor(log10(diff))-1)
-    max  = diff / 2
-    max  = ceiling(max / step) * step
+    tagList(
+      withMathJax(),
+      h5("Slope \\(\\beta\\)"),
+      sliderInput(inputId = "mu_beta",
+                  label   = "Mean \\(\\mu_\\beta\\)",
+                  value   = 0,
+                  min     = min,
+                  max     = max,
+                  step    = step,
+                  ticks   = FALSE
+      ), ## mu_beta
+      sliderInput(inputId = "sigma_beta",
+                  label   = "Standard deviation \\(\\sigma_\\beta\\)",
+                  value   = max,
+                  min     = 0,
+                  max     = max,
+                  step    = step,
+                  ticks   = FALSE
+      ) ## sigma_beta
+    ) ## tagList
   }
   
-  tagList(
-    withMathJax(),
-    if (input$priors == "reference" | is.null(input$prior_input_select)) {
-      NULL
-    } else {
-      if (input$prior_input_select == "numerical") {
-        numericInput(inputId = inputId,
-                     label   = label,
-                     value   = value,
-                     min     = min,
-                     max     = NA,
-                     step    = step
-        )
-      } else {
-        sliderInput(inputId = inputId,
-                    label   = label,
-                    min     = min,
-                    max     = max,
-                    value   = value,
-                    step    = step,
-                    ticks   = FALSE
-        )
-      }
-    }
-  ) ## tagList
-  
-}) ## sigma_beta
+}) ## beta_prior
 
 ## Prior correlation
-output$rho = renderUI({
+output$rho_prior = renderUI({
+  
+  if (input$priors == "reference" | is.null(input$prior_input_select))
+    return(NULL)
   
   inputId = "rho"
   label   = "Corr(\\(\\alpha,\\beta\\))"
@@ -221,40 +173,40 @@ output$rho = renderUI({
   max     = +1
   step    = 0.01
   
-  tagList(
-    withMathJax(),
-    if (input$priors == "reference" | is.null(input$prior_input_select)) {
-      NULL
-    } else {
-      if (input$prior_input_select == "numerical") {
-        numericInput(inputId = inputId,
-                     label   = label,
-                     value   = value,
-                     min     = min,
-                     max     = NA,
-                     step    = step
-        )
-      } else {
-        sliderInput(inputId = inputId,
-                    label   = label,
-                    min     = min,
-                    max     = max,
-                    value   = value,
-                    step    = step,
-                    ticks   = FALSE
-        )
-      }
-    }
-  ) ## tagList
-  
+  if (input$prior_input_select == "numerical") {
+    tagList(
+      withMathJax(),
+      h5("Correlation \\(\\rho\\)"),
+      numericInput(inputId = inputId,
+                   label   = label,
+                   value   = value,
+                   min     = min,
+                   max     = NA,
+                   step    = step
+      )
+    ) ## tagList
+  } else {
+    tagList(
+      withMathJax(),
+      h5("Correlation \\(\\rho\\)"),
+      sliderInput(inputId = inputId,
+                  label   = label,
+                  value   = value,
+                  min     = min,
+                  max     = max,
+                  step    = step,
+                  ticks   = FALSE
+      )
+    ) ## tagList
+  }
+
 }) ## rho
 
-## Response spread mean
-output$mu_sigma = renderUI({
+## Response uncertainty prior
+output$sigma_prior = renderUI({
   
-  inputId = "mu_sigma"
-  label   = "Mean \\(\\mu_\\sigma\\)"
-  value   = 0
+  if (input$priors == "reference" | is.null(input$prior_input_select))
+    return (NULL)
   
   if (no_data()) {
     min  = -1
@@ -270,88 +222,62 @@ output$mu_sigma = renderUI({
     max  = ceiling(max / step) * step
   }
   
-  tagList(
-    withMathJax(),
-    if (input$priors == "reference" | is.null(input$prior_input_select)) {
-      NULL
-    } else {
-      if (input$prior_input_select == "numerical") {
-        numericInput(inputId = inputId,
-                     label   = label,
-                     value   = value,
-                     min     = NA,
-                     max     = NA,
-                     step    = step
-        )
-      } else {
-        sliderInput(inputId = inputId,
-                    label   = label,
-                    min     = min,
-                    max     = max,
-                    value   = value,
-                    step    = step,
-                    ticks   = FALSE
-        )
-      }
-    }
-  ) ## tagList
-  
-}) ## mu_sigma
-
-## Response spread SD
-output$sigma_sigma = renderUI({
-  
-  inputId = "sigma_sigma"
-  label   = "Standard deviation \\(\\sigma_\\sigma\\)"
-  value   = 1
-  min     = 0
-  
-  if (no_data()) {
-    max  = 1.0
-    step = 0.1
+  if (input$prior_input_select == "numerical") {
+    tagList(
+      withMathJax(),
+      h5("Response spread \\(\\sigma\\)"),
+      fluidRow(
+        column(width = 6,
+               numericInput(inputId = "mu_sigma",
+                            label   = "Mean \\(\\mu_\\sigma\\)",
+                            value   = 0,
+                            min     = NA,
+                            max     = NA,
+                            step    = step
+               ) ## mu_sigma
+        ), ## column
+        column(width = 6,
+               numericInput(inputId = "sigma_sigma",
+                            label   = "Standard deviation \\(\\sigma_\\sigma\\)",
+                            value   = max,
+                            min     = 0,
+                            max     = NA,
+                            step    = step
+               ) ## sigma_sigma
+        ) ## column
+      ) ## fluidRow
+    ) ## tagList
   } else {
-    x    = c(ylim()$min,ylim()$max)
-    diff = diff(x)
-    step = 10^(floor(log10(diff))-1)
-    max  = diff / 2
-    max  = ceiling(max / step) * step
+    tagList(
+      withMathJax(),
+      h5("Response spread \\(\\sigma\\)"),
+      sliderInput(inputId = "mu_sigma",
+                  label   = "Mean \\(\\mu_\\sigma\\)",
+                  value   = 0,
+                  min     = min,
+                  max     = max,
+                  step    = step,
+                  ticks   = FALSE
+      ), ## mu_sigma
+      sliderInput(inputId = "sigma_sigma",
+                  label   = "Standard deviation \\(\\sigma_\\sigma\\)",
+                  value   = max,
+                  min     = 0,
+                  max     = max,
+                  step    = step,
+                  ticks   = FALSE
+      ) ## sigma_sigma
+    ) ## tagList
   }
   
-  tagList(
-    withMathJax(),
-    if (input$priors == "reference" | is.null(input$prior_input_select)) {
-      NULL
-    } else {
-      if (input$prior_input_select == "numerical") {
-        numericInput(inputId = inputId,
-                     label   = label,
-                     value   = value,
-                     min     = min,
-                     max     = NA,
-                     step    = step
-        )
-      } else {
-        sliderInput(inputId = inputId,
-                    label   = label,
-                    min     = min,
-                    max     = max,
-                    value   = value,
-                    step    = step,
-                    ticks   = FALSE
-        )
-      }
-    }
-  ) ## tagList
+}) ## sigma_prior
+
+## Real world predictor prior
+output$xstar_prior = renderUI({
   
-}) ## sigma_sigma
-
-## Real world predictor mean
-output$mu_xstar = renderUI({
-
-  inputId = "mu_xstar"
-  label   = "Mean \\(\\mu_{X_\\star}\\)"
-  value   = 0
-
+  if (input$priors == "reference" | is.null(input$prior_input_select))
+    return (NULL)
+  
   if (no_data()) {
     min  = -1.0
     max  = +1.0
@@ -365,84 +291,59 @@ output$mu_xstar = renderUI({
     min  = floor  (min / step) * step
     max  = ceiling(max / step) * step
   }
-
-  tagList(
-    withMathJax(),
-    if (input$priors == "reference" | is.null(input$prior_input_select)) {
-      NULL
-    } else {
-      if (input$prior_input_select == "numerical") {
-        numericInput(inputId = inputId,
-                     label   = label,
-                     value   = value,
-                     min     = NA,
-                     max     = NA,
-                     step    = step
-        ) ## numericInput
-      } else {
-        sliderInput(inputId = inputId,
-                    label   = label,
-                    min     = min,
-                    max     = max,
-                    value   = value,
-                    step    = step,
-                    ticks   = FALSE
-        ) ## sliderInput
-      }
-    }
-  ) ## tagList
-
-}) ## mu_xstar
-
-## Real world predictor SD
-output$sigma_xstar = renderUI({
-
-  inputId = "sigma_xstar"
-  label   = "Standard deviation \\(\\sigma_{X_\\star}\\)"
-  value   = 1
-  min     = 0
-
-  if (no_data()) {
-    max     = 1.0
-    step    = 0.1
+  
+  if (input$prior_input_select == "numerical") {
+    tagList(
+      withMathJax(),
+      h5("Real world predictor \\(X_\\star\\)"),
+      fluidRow(
+        column(width = 6,
+               numericInput(inputId = "mu_xstar",
+                            label   = "Mean \\(\\mu_{X_\\star}\\)",
+                            value   = 0.5 * (min + max),
+                            min     = NA,
+                            max     = NA,
+                            step    = step
+               ) ## mu_xstar
+        ), ## column
+        column(width = 6,
+               numericInput(inputId = "sigma_xstar",
+                            label   = "Standard deviation \\(\\sigma_{X_\\star}\\)",
+                            value   = max,
+                            min     = 0,
+                            max     = NA,
+                            step    = step
+               ) ## sigma_xstar
+        ) ## column
+      ) ## fluidRow
+    ) ## tagList
   } else {
-    x     = c(ylim()$min,ylim()$max)
-    diff  = diff(x)
-    step  = 10^(floor(log10(diff))-1)
-    max   = diff / 2
-    max   = ceiling(max / step) * step
+    tagList(
+      withMathJax(),
+      h5("Real world predictor \\(X_\\star\\)"),
+      sliderInput(inputId = "mu_xstar",
+                  label   = "Mean \\(\\mu_{X_\\star}\\)",
+                  value   = 0.5 * (min + max),
+                  min     = min,
+                  max     = max,
+                  step    = step,
+                  ticks   = FALSE
+      ), ## mu_xstar
+      sliderInput(inputId = "sigma_xstar",
+                  label   = "Standard deviation \\(\\sigma_{X_\\star}\\)",
+                  value   = max,
+                  min     = 0,
+                  max     = max,
+                  step    = step,
+                  ticks   = FALSE
+      ) ## sigma_xstar
+    ) ## tagList
   }
-
-  tagList(
-    withMathJax(),
-    if (input$priors == "reference" | is.null(input$prior_input_select)) {
-      NULL
-    } else {
-      if (input$prior_input_select == "numerical") {
-        numericInput(inputId = inputId,
-                     label   = label,
-                     value   = value,
-                     min     = min,
-                     max     = NA,
-                     step    = step
-        )
-      } else {
-        sliderInput(inputId = inputId,
-                    label   = label,
-                    min     = min,
-                    max     = max,
-                    value   = value,
-                    step    = step,
-                    ticks   = FALSE
-        )
-      }
-    }
-  ) ## tagList
-
-}) ## sigma_xstar
+  
+}) ## xstar_prior
 
 ## Plot intercept prior
-output$alpha_prior = renderPlot({
+output$alpha_prior_plot = renderPlot({
 
   ## Skip plotting if bad prior or reference prior
   if(input$priors == "reference" | is.null(input$prior_input_select))
@@ -461,10 +362,10 @@ output$alpha_prior = renderPlot({
               ylab  = "Density",
               par   = list(mar = c(2.5,4.0,1,1)+0.1))
 
-}) ## alpha_prior
+}) ## alpha_prior_plot
 
 ## Plot slope prior
-output$beta_prior = renderPlot({
+output$beta_prior_plot = renderPlot({
 
   ## Skip plotting if bad prior or reference prior
   if(input$priors == "reference" | is.null(input$prior_input_select))
@@ -483,10 +384,10 @@ output$beta_prior = renderPlot({
               ylab  = "Density",
               par   = list(mar = c(2.5,4.0,1,1)+0.1))
 
-}) ## beta_prior
+}) ## beta_prior_plot
 
 ## Plot spread prior
-output$sigma_prior = renderPlot({
+output$sigma_prior_plot = renderPlot({
 
   ## Skip plotting if bad prior or reference prior
   if(input$priors == "reference" | is.null(input$prior_input_select))
@@ -505,10 +406,10 @@ output$sigma_prior = renderPlot({
                      ylab  = "Density",
                      par   = list(mar = c(2.5,4.0,1,1)+0.1))
 
-}) ## sigma_prior
+}) ## sigma_prior_plot
 
 ## Plot predictor prior
-output$xstar_prior = renderPlot({
+output$xstar_prior_plot = renderPlot({
 
   ## Skip plotting if bad prior or reference prior
   if(input$priors == "reference" | is.null(input$prior_input_select))
@@ -527,10 +428,10 @@ output$xstar_prior = renderPlot({
               ylab  = "Density",
               par   = list(mar = c(2.5,4.0,1,1)+0.1))
 
-}) ## xstar_prior
+}) ## xstar_prior_plot
 
 ## Plot prior predictive
-output$prior_predictive = renderPlot({
+output$prior_predictive_plot = renderPlot({
 
   ## Skip plotting if error condition
   if(no_data() | input$priors == "reference" | bad_prior())

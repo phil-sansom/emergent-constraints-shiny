@@ -226,22 +226,11 @@ ui = navbarPage(
                ),
                hr(),
                # h4("Informative priors"),
-               h5("Intercept \\(\\alpha\\)"),
-               uiOutput(outputId = "mu_alpha"),
-               uiOutput(outputId = "sigma_alpha"),
-               h5("Slope \\(\\beta\\)"),
-               uiOutput(outputId = "mu_beta"),
-               uiOutput(outputId = "sigma_beta"),
-               h5("Correlation \\(\\rho\\)"),
-               uiOutput(outputId = "rho"),
-               h5("Response spread \\(\\sigma\\)"),
-               uiOutput(outputId = "mu_sigma"),
-               uiOutput(outputId = "sigma_sigma"),
-               # hr(),
-               # h4("Real world"),
-               h5("Real world predictor \\(X_\\star\\)"),
-               uiOutput(outputId = "mu_xstar"),
-               uiOutput(outputId = "sigma_xstar")
+               uiOutput(outputId = "alpha_prior"),
+               uiOutput(outputId = "beta_prior"),
+               uiOutput(outputId = "rho_prior"),
+               uiOutput(outputId = "sigma_prior"),
+               uiOutput(outputId = "xstar_prior")
              ), ## sidePanel
 
              mainPanel(
@@ -250,24 +239,24 @@ ui = navbarPage(
                    title = "Marginal priors",
                    fluidRow(
                      column(width = 6,
-                            plotOutput(outputId = "alpha_prior",
+                            plotOutput(outputId = "alpha_prior_plot",
                                        height   = 200
                             ) ## plotOutput
                      ), ## column
                      column(width = 6,
-                            plotOutput(outputId = "beta_prior",
+                            plotOutput(outputId = "beta_prior_plot",
                                        height   = 200
                             ) ## plotOutput
                      ) ## column
                    ), ## fluidRow
                    fluidRow(
                      column(width = 6,
-                            plotOutput(outputId = "sigma_prior",
+                            plotOutput(outputId = "sigma_prior_plot",
                                        height   = 200
                             ) ## plotOutput
                      ), ## column
                      column(width = 6,
-                            plotOutput(outputId = "xstar_prior",
+                            plotOutput(outputId = "xstar_prior_plot",
                                        height   = 200
                             ) ## plotOutput
                      ) ## column
