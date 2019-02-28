@@ -2,6 +2,21 @@
 ## Priors tab ##
 ################
 
+## Input selection
+output$prior_inputs = renderUI({
+  if (input$priors == "informative") {
+    radioButtons(
+      inputId  = "prior_inputs",
+      label    = "Select inputs",
+      choices  = list(Sliders = "sliders", Numerical = "numerical"),
+      selected = "sliders",
+      inline   = FALSE
+    )
+  } else {
+    return(NULL)
+  }
+})
+
 ## Intercept mean
 output$mu_alpha = renderUI({
   
@@ -25,7 +40,7 @@ output$mu_alpha = renderUI({
   
   tagList(
     withMathJax(),
-    if (input$priors == "reference") {
+    if (input$priors == "reference" | is.null(input$prior_inputs)) {
       NULL
     } else {
       if (input$prior_inputs == "numerical") {
@@ -72,7 +87,7 @@ output$sigma_alpha = renderUI({
   
   tagList(
     withMathJax(),
-    if (input$priors == "reference") {
+    if (input$priors == "reference" | is.null(input$prior_inputs)) {
       NULL
     } else {
       if (input$prior_inputs == "numerical") {
@@ -122,7 +137,7 @@ output$mu_beta = renderUI({
   
   tagList(
     withMathJax(),
-    if (input$priors == "reference") {
+    if (input$priors == "reference" | is.null(input$prior_inputs)) {
       NULL
     } else {
       if (input$prior_inputs == "numerical") {
@@ -170,7 +185,7 @@ output$sigma_beta = renderUI({
   
   tagList(
     withMathJax(),
-    if (input$priors == "reference") {
+    if (input$priors == "reference" | is.null(input$prior_inputs)) {
       NULL
     } else {
       if (input$prior_inputs == "numerical") {
@@ -208,7 +223,7 @@ output$rho = renderUI({
   
   tagList(
     withMathJax(),
-    if (input$priors == "reference") {
+    if (input$priors == "reference" | is.null(input$prior_inputs)) {
       NULL
     } else {
       if (input$prior_inputs == "numerical") {
@@ -257,7 +272,7 @@ output$mu_sigma = renderUI({
   
   tagList(
     withMathJax(),
-    if (input$priors == "reference") {
+    if (input$priors == "reference" | is.null(input$prior_inputs)) {
       NULL
     } else {
       if (input$prior_inputs == "numerical") {
@@ -304,7 +319,7 @@ output$sigma_sigma = renderUI({
   
   tagList(
     withMathJax(),
-    if (input$priors == "reference") {
+    if (input$priors == "reference" | is.null(input$prior_inputs)) {
       NULL
     } else {
       if (input$prior_inputs == "numerical") {
@@ -353,7 +368,7 @@ output$mu_xstar = renderUI({
 
   tagList(
     withMathJax(),
-    if (input$priors == "reference") {
+    if (input$priors == "reference" | is.null(input$prior_inputs)) {
       NULL
     } else {
       if (input$prior_inputs == "numerical") {
@@ -400,7 +415,7 @@ output$sigma_xstar = renderUI({
 
   tagList(
     withMathJax(),
-    if (input$priors == "reference") {
+    if (input$priors == "reference" | is.null(input$prior_inputs)) {
       NULL
     } else {
       if (input$prior_inputs == "numerical") {
@@ -430,7 +445,7 @@ output$sigma_xstar = renderUI({
 output$alpha_prior = renderPlot({
 
   ## Skip plotting if bad prior or reference prior
-  if(input$priors == "reference")
+  if(input$priors == "reference" | is.null(input$prior_inputs))
     return(NULL)
   if (is.null(input$mu_alpha) | is.null(input$sigma_alpha))
     return(NULL)
@@ -452,7 +467,7 @@ output$alpha_prior = renderPlot({
 output$beta_prior = renderPlot({
 
   ## Skip plotting if bad prior or reference prior
-  if(input$priors == "reference")
+  if(input$priors == "reference" | is.null(input$prior_inputs))
     return(NULL)
   if (is.null(input$mu_beta) | is.null(input$sigma_beta))
     return(NULL)
@@ -474,7 +489,7 @@ output$beta_prior = renderPlot({
 output$sigma_prior = renderPlot({
 
   ## Skip plotting if bad prior or reference prior
-  if(input$priors == "reference")
+  if(input$priors == "reference" | is.null(input$prior_inputs))
     return(NULL)
   if (is.null(input$mu_sigma) | is.null(input$sigma_sigma))
     return(NULL)
@@ -496,7 +511,7 @@ output$sigma_prior = renderPlot({
 output$xstar_prior = renderPlot({
 
   ## Skip plotting if bad prior or reference prior
-  if(input$priors == "reference")
+  if(input$priors == "reference" | is.null(input$prior_inputs))
     return(NULL)
   if (is.null(input$mu_xstar) | is.null(input$sigma_xstar))
     return(NULL)

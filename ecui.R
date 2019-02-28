@@ -208,25 +208,24 @@ ui = navbarPage(
            useShinyjs(),
            sidebarLayout(
              sidebarPanel(
-               h4("Priors"),
-               radioButtons(
-                 inputId  = "priors",
-                 label    = "Select priors",
-                 choices  = list(Reference   = "reference", 
-                                 Informative = "informative"),
-                 selected = "reference",
-                 inline   = TRUE
+               # h4("Priors"),
+               fluidRow(
+                 column(width = 6,
+                        radioButtons(
+                          inputId  = "priors",
+                          label    = "Select priors",
+                          choices  = list(Reference   = "reference", 
+                                          Informative = "informative"),
+                          selected = "reference",
+                          inline   = FALSE
+                        ) ## priors
+                 ),
+                 column(width = 6,
+                        uiOutput(outputId = "prior_inputs")
+                 )
                ),
                hr(),
-               radioButtons(
-                 inputId  = "prior_inputs",
-                 label    = "Select inputs",
-                 choices  = list(Sliders = "sliders", Numerical = "numerical"),
-                 selected = "sliders",
-                 inline   = TRUE
-               ),
-               hr(),
-               h4("Informative priors"),
+               # h4("Informative priors"),
                h5("Intercept \\(\\alpha\\)"),
                uiOutput(outputId = "mu_alpha"),
                uiOutput(outputId = "sigma_alpha"),
