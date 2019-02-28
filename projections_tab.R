@@ -156,13 +156,17 @@ output$rho_discrepancy = renderUI({
       withMathJax(),
       hr(),
       h5("Correlation \\(\\rho_\\delta\\)"),
-      numericInput(inputId = inputId,
-                   label   = label,
-                   value   = value,
-                   min     = min,
-                   max     = NA,
-                   step    = step
-      )
+      fluidRow(
+        column(width = 6,
+               numericInput(inputId = inputId,
+                            label   = label,
+                            value   = value,
+                            min     = min,
+                            max     = NA,
+                            step    = step
+               )
+        ) ## column
+      ) ## fluidRow
     ) ## tagList
   } else {
     tagList(
@@ -279,6 +283,66 @@ gamma = reactive({
     as.numeric(input$gamma)
   }
 })
+
+## Plot intercept discrepancy
+output$alpha_discrepancy_plot = renderPlot({
+  
+  ## Skip plotting if discrepancy not defined
+  if (is.null(input$mu_delta_alpha) | is.null(input$sigma_delta_alpha))
+    return(NULL)
+  if (is.na  (input$mu_delta_alpha) | is.na  (input$sigma_delta_alpha))
+    return(NULL)
+  if (input$sigma_delta_alpha <= 0)
+    return(NULL)
+  
+  normal_plot(mu    = input$mu_delta_alpha,
+              sigma = input$sigma_delta_alpha,
+              gamma = gamma(),
+              xlab  = parameter_labels["alphastar"],
+              ylab  = "Density",
+              par   = list(mar = c(2.5,4.0,1,1)+0.1))
+  
+}) ## alpha_prior_plot
+
+## Plot discrepancy prior
+output$beta_discrepancy_plot = renderPlot({
+  
+  ## Skip plotting if discrepancy not defined
+  if (is.null(input$mu_delta_beta) | is.null(input$sigma_delta_beta))
+    return(NULL)
+  if (is.na  (input$mu_delta_beta) | is.na  (input$sigma_delta_beta))
+    return(NULL)
+  if (input$sigma_delta_beta <= 0)
+    return(NULL)
+  
+  normal_plot(mu    = input$mu_delta_beta,
+              sigma = input$sigma_delta_beta,
+              gamma = gamma(),
+              xlab  = parameter_labels["betastar"],
+              ylab  = "Density",
+              par   = list(mar = c(2.5,4.0,1,1)+0.1))
+  
+}) ## beta_discrepancy_plot
+
+## Plot spread discrepancy
+output$sigma_discrepancy_plot = renderPlot({
+  
+  ## Skip plotting if discrepancy not defined
+  if (is.null(input$mu_delta_sigma) | is.null(input$sigma_delta_sigma))
+    return(NULL)
+  if (is.na  (input$mu_delta_sigma) | is.na  (input$sigma_delta_sigma))
+    return(NULL)
+  if (input$sigma_delta_sigma <= 0)
+    return(NULL)
+  
+  folded_normal_plot(mu    = input$mu_delta_sigma,
+                     sigma = input$sigma_delta_sigma,
+                     gamma = gamma(),
+                     xlab  = parameter_labels["sigmastar"],
+                     ylab  = "Density",
+                     par   = list(mar = c(2.5,4.0,1,1)+0.1))
+  
+}) ## sigma_discrepancy_plot
 
 ## Marginal posterior predictive plot
 marginal_plot = function() {

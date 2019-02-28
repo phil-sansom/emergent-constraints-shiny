@@ -182,13 +182,17 @@ output$rho_prior = renderUI({
       withMathJax(),
       hr(),
       h5("Correlation \\(\\rho\\)"),
-      numericInput(inputId = inputId,
-                   label   = label,
-                   value   = value,
-                   min     = min,
-                   max     = NA,
-                   step    = step
-      )
+      fluidRow(
+        column(width = 6,
+               numericInput(inputId = inputId,
+                            label   = label,
+                            value   = value,
+                            min     = min,
+                            max     = NA,
+                            step    = step
+               )
+        ) ## column
+      ) ## fluidRow
     ) ## tagList
   } else {
     tagList(

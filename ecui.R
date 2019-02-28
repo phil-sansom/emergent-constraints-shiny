@@ -311,6 +311,29 @@ ui = navbarPage(
              ), ## sidebarPanel
              mainPanel(
                tabsetPanel(
+                 selected = "Marginal projections",
+                 tabPanel(
+                   title = "Discrepancies",
+                   fluidRow(
+                     column(
+                       width = 6,
+                       plotOutput(outputId = "alpha_discrepancy_plot")
+                     ), ## column
+                     column(
+                       width = 6,
+                       plotOutput(outputId =  "beta_discrepancy_plot")
+                     ) ## column
+                   ), ## fluidRow
+                   fluidRow(
+                     column(
+                       width = 6,
+                       plotOutput(outputId = "sigma_discrepancy_plot")
+                     ), ## column
+                     column(
+                       width = 6
+                     ) ## column
+                   ) ## fluidRow
+                  ),
                  tabPanel(
                    title = "Marginal projections",
                    plotOutput(outputId = "marginal_plot"),
