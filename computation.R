@@ -35,9 +35,19 @@ xx = reactive({
       length.out = 101)
 })
 
+## Posterior distribution
+posterior = reactive({
+  # print("Computation 4: posterior")
+  if (input$priors == "informative" & ! bad_prior()) {
+    informative_posterior()
+  } else {
+    reference_posterior()
+  }
+})
+
 ## Sample posterior with reference priors
 reference_posterior = reactive({
-  # print("Computation 4: reference_posterior")
+  # print("Computation 5: reference_posterior")
 
   ## Extract data
   x       = data()[,input$x]
@@ -89,7 +99,7 @@ reference_posterior = reactive({
 
 ## Sample posterior with informative priors
 informative_posterior = reactive({
-  # print("Computation 5: informative_posterior")
+  # print("Computation 6: informative_posterior")
 
   ## Extract data
   x       = data()[,input$x]
@@ -121,16 +131,6 @@ informative_posterior = reactive({
   dimnames(buffer)$parameters = c("alpha","beta","sigma","xstar","ystar","lp__")
   return(buffer)
 
-})
-
-## Posterior distribution
-posterior = reactive({
-  # print("Computation 6: posterior")
-  if (input$priors == "informative") {
-    informative_posterior()
-  } else {
-    reference_posterior()
-  }
 })
 
 ## Compute discrepancy
