@@ -119,7 +119,7 @@ normal_plot = function(mu, sigma, gamma, xlab, ylab, ...) {
 folded_normal_plot = function(mu, sigma, gamma, xlab, ylab, ...) {
   
   ## Compute plotting limits and probability density
-  xmax  = qnorm(pnorm(+4), mu, sigma)
+  xmax  = quantile(abs(rnorm(1e6, mu, sigma)), pnorm(+4))
   xx    = seq(0, xmax, length.out = 101)
   yy    = dnorm(xx, mu, sigma) + dnorm(xx, -mu, sigma)
   ymax  = 1.04*max(yy)
@@ -183,7 +183,7 @@ plot_density = function(diag_var){
   ## Compute limits for credible intervals
   xx = list()
   for (i in 1:ncol(x)) {
-    qq = quantile(x[,i], 0.5 + c(-0.5,+0.5)*as.numeric(input$gamma))
+    qq = quantile(x[,i], 0.5 + c(-0.5,+0.5)*gamma())
     xx[[i]] = seq(from = max(which(dd[[i]]$x < qq[1])), 
                   to   = min(which(dd[[i]]$x > qq[2])), 
                   by   = 1)

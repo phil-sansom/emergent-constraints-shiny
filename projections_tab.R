@@ -287,60 +287,175 @@ gamma = reactive({
 ## Plot intercept discrepancy
 output$alpha_discrepancy_plot = renderPlot({
   
+  ## Skip plotting if no data is loaded
+  if (no_data() | bad_obs() | bad_prior())
+    return(NULL)
+  
   ## Skip plotting if discrepancy not defined
   if (is.null(input$mu_delta_alpha) | is.null(input$sigma_delta_alpha))
     return(NULL)
   if (is.na  (input$mu_delta_alpha) | is.na  (input$sigma_delta_alpha))
     return(NULL)
-  if (input$sigma_delta_alpha <= 0)
+  if (input$sigma_delta_alpha < 0)
     return(NULL)
+
+  ## Posterior and predictive
+  alpha     = as.numeric(posterior()[,,"alpha"])
+  alphastar = alpha + input$mu_delta_alpha + 
+    input$sigma_delta_alpha * rnorm(input$N)
+
+  ## Compute densities
+  da  = density(alpha)
+  das = density(alphastar)
   
-  normal_plot(mu    = input$mu_delta_alpha,
-              sigma = input$sigma_delta_alpha,
-              gamma = gamma(),
-              xlab  = parameter_labels["alphastar"],
-              ylab  = "Density",
-              par   = list(mar = c(2.5,4.0,1,1)+0.1))
+  ## Compute limits for credible intervals
+  qa  = quantile(alpha, 0.5 + c(-0.5,+0.5)*gamma())
+  xa  = seq(max(which(da$x < qa[1])), min(which(da$x > qa[2])), 1)
+  qas = quantile(alphastar, 0.5 + c(-0.5,+0.5)*gamma())
+  xas = seq(max(which(das$x < qas[1])), min(which(das$x > qas[2])), 1)
+  
+  ## Plotting limits
+  xlim = range(alpha,alphastar)
+  ylim = c(0, 1.04*max(da$y))
+    
+  ## Graphical parameters
+  graphical_parameters()
+  
+  ## Plot posterior and predictive densities
+  plot (NA, type = "n", xlim = xlim, ylim = ylim)
+  polygon(x = c(da$x[xa[1]],da$x[xa],da$x[xa[length(xa)]]),
+          y = c(0,da$y[xa],0), border = NA, col = alpha_black)
+  lines(da, col = "black", lwd = 2)
+  polygon(x = c(das$x[xas[1]],das$x[xas],das$x[xas[length(xas)]]),
+          y = c(0,das$y[xas],0), border = NA, col = alpha_red)
+  lines(das, col = "red", lwd = 2)
+  
+  ## Add labels
+  title(xlab = parameter_labels["alphastar"])
+  title(ylab = "Density")
+  
+  ## Add legend
+  legend("topright", 
+         legend = c(parameter_labels["alpha"],parameter_labels["alphastar"]),
+         col = c("black","red"), lty = c("solid","solid"), lwd = c(2,2),
+         bty = "n")
   
 }) ## alpha_prior_plot
 
-## Plot discrepancy prior
+## Plot slope discrepancy
 output$beta_discrepancy_plot = renderPlot({
+  
+  ## Skip plotting if no data is loaded
+  if (no_data() | bad_obs() | bad_prior())
+    return(NULL)
   
   ## Skip plotting if discrepancy not defined
   if (is.null(input$mu_delta_beta) | is.null(input$sigma_delta_beta))
     return(NULL)
   if (is.na  (input$mu_delta_beta) | is.na  (input$sigma_delta_beta))
     return(NULL)
-  if (input$sigma_delta_beta <= 0)
+  if (input$sigma_delta_beta < 0)
     return(NULL)
   
-  normal_plot(mu    = input$mu_delta_beta,
-              sigma = input$sigma_delta_beta,
-              gamma = gamma(),
-              xlab  = parameter_labels["betastar"],
-              ylab  = "Density",
-              par   = list(mar = c(2.5,4.0,1,1)+0.1))
+  ## Posterior and predictive
+  beta     = as.numeric(posterior()[,,"beta"])
+  betastar = beta + input$mu_delta_beta + 
+    input$sigma_delta_beta * rnorm(input$N)
   
-}) ## beta_discrepancy_plot
+  ## Compute densities
+  da  = density(beta)
+  das = density(betastar)
+  
+  ## Compute limits for credible intervals
+  qa  = quantile(beta, 0.5 + c(-0.5,+0.5)*gamma())
+  xa  = seq(max(which(da$x < qa[1])), min(which(da$x > qa[2])), 1)
+  qas = quantile(betastar, 0.5 + c(-0.5,+0.5)*gamma())
+  xas = seq(max(which(das$x < qas[1])), min(which(das$x > qas[2])), 1)
+  
+  ## Plotting limits
+  xlim = range(beta,betastar)
+  ylim = c(0, 1.04*max(da$y))
+  
+  ## Graphical parameters
+  graphical_parameters()
+  
+  ## Plot posterior and predictive densities
+  plot (NA, type = "n", xlim = xlim, ylim = ylim)
+  polygon(x = c(da$x[xa[1]],da$x[xa],da$x[xa[length(xa)]]),
+          y = c(0,da$y[xa],0), border = NA, col = alpha_black)
+  lines(da, col = "black", lwd = 2)
+  polygon(x = c(das$x[xas[1]],das$x[xas],das$x[xas[length(xas)]]),
+          y = c(0,das$y[xas],0), border = NA, col = alpha_red)
+  lines(das, col = "red", lwd = 2)
+  
+  ## Add labels
+  title(xlab = parameter_labels["betastar"])
+  title(ylab = "Density")
+  
+  ## Add legend
+  legend("topright", 
+         legend = c(parameter_labels["beta"],parameter_labels["betastar"]),
+         col = c("black","red"), lty = c("solid","solid"), lwd = c(2,2),
+         bty = "n")
+  
+}) ## beta_prior_plot
 
 ## Plot spread discrepancy
 output$sigma_discrepancy_plot = renderPlot({
+  
+  ## Skip plotting if no data is loaded
+  if (no_data() | bad_obs() | bad_prior())
+    return(NULL)
   
   ## Skip plotting if discrepancy not defined
   if (is.null(input$mu_delta_sigma) | is.null(input$sigma_delta_sigma))
     return(NULL)
   if (is.na  (input$mu_delta_sigma) | is.na  (input$sigma_delta_sigma))
     return(NULL)
-  if (input$sigma_delta_sigma <= 0)
+  if (input$sigma_delta_sigma < 0)
     return(NULL)
   
-  folded_normal_plot(mu    = input$mu_delta_sigma,
-                     sigma = input$sigma_delta_sigma,
-                     gamma = gamma(),
-                     xlab  = parameter_labels["sigmastar"],
-                     ylab  = "Density",
-                     par   = list(mar = c(2.5,4.0,1,1)+0.1))
+  ## Posterior and predictive
+  sigma     = as.numeric(posterior()[,,"sigma"])
+  sigmastar = sqrt(sigma^2 + rnorm(input$N, input$mu_delta_sigma, input$sigma_delta_sigma)^2)
+  
+  ## Compute densities
+  bw  = bw.nrd0(sigma)
+  bws = bw.nrd0(sigmastar)
+  da  = density(sigma    , bw = bw , from = max(0,min(sigma    )-3*bw ))
+  das = density(sigmastar, bw = bws, from = max(0,min(sigmastar)-3*bws))
+  
+  ## Compute limits for credible intervals
+  qa  = quantile(sigma, 0.5 + c(-0.5,+0.5)*gamma())
+  xa  = seq(max(which(da$x < qa[1])), min(which(da$x > qa[2])), 1)
+  qas = quantile(sigmastar, 0.5 + c(-0.5,+0.5)*gamma())
+  xas = seq(max(which(das$x < qas[1])), min(which(das$x > qas[2])), 1)
+  
+  ## Plotting limits
+  xlim = range(sigma,sigmastar)
+  ylim = c(0, 1.04*max(da$y))
+  
+  ## Graphical parameters
+  graphical_parameters()
+  
+  ## Plot posterior and predictive densities
+  plot (NA, type = "n", xlim = xlim, ylim = ylim)
+  polygon(x = c(da$x[xa[1]],da$x[xa],da$x[xa[length(xa)]]),
+          y = c(0,da$y[xa],0), border = NA, col = alpha_black)
+  lines(da, col = "black", lwd = 2)
+  polygon(x = c(das$x[xas[1]],das$x[xas],das$x[xas[length(xas)]]),
+          y = c(0,das$y[xas],0), border = NA, col = alpha_red)
+  lines(das, col = "red", lwd = 2)
+  
+  ## Add labels
+  title(xlab = parameter_labels["sigmastar"])
+  title(ylab = "Density")
+  
+  ## Add legend
+  legend("topright", 
+         legend = c(parameter_labels["sigma"],parameter_labels["sigmastar"]),
+         col = c("black","red"), lty = c("solid","solid"), lwd = c(2,2),
+         bty = "n")
   
 }) ## sigma_discrepancy_plot
 
