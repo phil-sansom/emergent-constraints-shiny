@@ -20,14 +20,26 @@ bad_obs = reactive({
 ## Check prior parameters
 bad_prior = reactive({
   # print("Handlers: bad_prior")
-  if (input$priors == "reference") {
-    FALSE
+  if (input$priors == "reference")
+    return(FALSE)
+  if (is.null(input$mu_alpha) | is.null(input$sigma_alpha) |
+      is.null(input$mu_beta ) | is.null(input$sigma_beta ) |
+      is.null(input$mu_sigma) | is.null(input$sigma_sigma) |
+      is.null(input$mu_xstar) | is.null(input$sigma_xstar) |
+      is.null(input$rho))
+    return(FALSE)
+  if (is.na(input$mu_alpha) | is.na(input$sigma_alpha) |
+      is.na(input$mu_beta ) | is.na(input$sigma_beta ) |
+      is.na(input$mu_sigma) | is.na(input$sigma_sigma) |
+      is.na(input$mu_xstar) | is.na(input$sigma_xstar) |
+      is.na(input$rho))
+    return(FALSE)
+  if (input$sigma_alpha <=  0 | input$sigma_beta  <=  0 | 
+      input$sigma_sigma <=  0 | input$sigma_xstar <=  0 |
+      input$rho         <  -1 | input$rho          > +1 ) {
+    return(FALSE)
   } else {
-    any(
-      is.na(input$mu_alpha), is.na(input$sigma_alpha), input$sigma_alpha <= 0,
-      is.na(input$mu_beta ), is.na(input$sigma_beta ), input$sigma_beta  <= 0,
-      is.na(input$mu_sigma), is.na(input$sigma_sigma), input$sigma_sigma <= 0,
-      is.na(input$mu_xstar), is.na(input$sigma_xstar), input$sigma_xstar <= 0
-    )
+    return(TRUE)
   }
+  
 })

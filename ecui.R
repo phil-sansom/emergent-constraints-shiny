@@ -218,87 +218,31 @@ ui = navbarPage(
                  inline   = TRUE
                ),
                hr(),
+               radioButtons(
+                 inputId  = "prior_inputs",
+                 label    = "Select inputs",
+                 choices  = list(Sliders = "sliders", Numerical = "numerical"),
+                 selected = "sliders",
+                 inline   = TRUE
+               ),
+               hr(),
                h4("Informative priors"),
                h5("Intercept \\(\\alpha\\)"),
-               fluidRow(
-                 column(width = 6,
-                        numericInput(inputId = "mu_alpha",
-                                     label   = "Mean \\(\\mu_\\alpha\\)",
-                                     value   = 0
-                        ) ## numericInput
-                 ), ## column
-                 column(width = 6,
-                        numericInput(inputId = "sigma_alpha",
-                                     label   = "Standard deviation
-                                                \\(\\sigma_\\alpha\\)",
-                                     value   = 1e3,
-                                     min     = 0
-                        ) ## numericInput
-                 ) ## column
-               ), ## fluidRow
+               uiOutput(outputId = "mu_alpha"),
+               uiOutput(outputId = "sigma_alpha"),
                h5("Slope \\(\\beta\\)"),
-               fluidRow(
-                 column(width = 6,
-                        numericInput(inputId = "mu_beta",
-                                     label   = "Mean \\(\\mu_\\beta\\)",
-                                     value   = 0
-                        ) ## numericInput
-                 ), ## column
-                 column(width = 6,
-                        numericInput(inputId = "sigma_beta",
-                                     label   = "Standard deviation
-                                                \\(\\sigma_\\beta\\)",
-                                     value   = 1e3,
-                                     min     = 0
-                        ) ## numericInput
-                 ) ## column
-               ), ## fluidRow
+               uiOutput(outputId = "mu_beta"),
+               uiOutput(outputId = "sigma_beta"),
                h5("Correlation \\(\\rho\\)"),
-               sliderInput(
-                 inputId = "rho",
-                 label   = "Corr(\\(\\alpha,\\beta\\))",
-                 value   =  0,
-                 min     = -1,
-                 max     = +1,
-                 step    = 0.01,
-                 ticks   = FALSE
-               ),
+               uiOutput(outputId = "rho"),
                h5("Response spread \\(\\sigma\\)"),
-               fluidRow(
-                 column(width = 6,
-                        numericInput(inputId = "mu_sigma",
-                                     label   = "Location \\(\\mu_\\sigma\\)",
-                                     value   = 0,
-                                     min     = 0
-                        ) ## numericInput
-                 ), ## column
-                 column(width = 6,
-                        numericInput(inputId = "sigma_sigma",
-                                     label   = "Scale \\(\\sigma_\\sigma\\)",
-                                     value   = 1e3,
-                                     min     = 0
-                        ) ## numericInput
-                 ) ## column
-               ), ## fluidRow
+               uiOutput(outputId = "mu_sigma"),
+               uiOutput(outputId = "sigma_sigma"),
                # hr(),
                # h4("Real world"),
                h5("Real world predictor \\(X_\\star\\)"),
-               fluidRow(
-                 column(width = 6,
-                        numericInput(inputId = "mu_xstar",
-                                     label   = "Mean \\(\\mu_{X_\\star}\\)",
-                                     value   = 0
-                        ) ## numericInput
-                 ), ## column
-                 column(width = 6,
-                        numericInput(inputId = "sigma_xstar",
-                                     label   = "Standard deviation
-                                                \\(\\sigma_{X_\\star}\\)",
-                                     value   = 1e3,
-                                     min     = 0
-                        ) ## numericInput
-                 ) ## column
-               ) ## fluidRow
+               uiOutput(outputId = "mu_xstar"),
+               uiOutput(outputId = "sigma_xstar")
              ), ## sidePanel
 
              mainPanel(

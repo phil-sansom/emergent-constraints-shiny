@@ -2,14 +2,407 @@
 ## Priors tab ##
 ################
 
+## Intercept mean
+output$mu_alpha = renderUI({
+  
+  inputId = "mu_alpha"
+  label   = "Mean \\(\\mu_\\alpha\\)"
+  value   = 0
+  
+  if (no_data()) {
+    min  = -1.0
+    max  = +1.0
+    step =  0.1
+  } else {
+    x    = c(ylim()$min,ylim()$max)
+    diff = diff(x)
+    step = 10^(floor(log10(diff))-1)
+    min  = - diff / 2
+    max  = + diff / 2
+    min  = floor  (min / step) * step
+    max  = ceiling(max / step) * step
+  }
+  
+  tagList(
+    withMathJax(),
+    if (input$prior_inputs == "numerical") {
+      numericInput(inputId = inputId,
+                   label   = label,
+                   value   = value,
+                   min     = NA,
+                   max     = NA,
+                   step    = step
+      ) ## numericInput
+    } else {
+      sliderInput(inputId = inputId,
+                  label   = label,
+                  min     = min,
+                  max     = max,
+                  value   = value,
+                  step    = step,
+                  ticks   = FALSE
+      ) ## sliderInput
+    }
+  ) ## tagList
+  
+}) ## mu_alpha
+
+## Intercept SD
+output$sigma_alpha = renderUI({
+  
+  inputId = "sigma_alpha"
+  label   = "Standard deviation \\(\\sigma_\\alpha\\)"
+  value   = 1
+  min     = 0
+  
+  if (no_data()) {
+    max     = 1.0
+    step    = 0.1
+  } else {
+    x     = c(ylim()$min,ylim()$max)
+    diff  = diff(x)
+    step  = 10^(floor(log10(diff))-1)
+    max   = diff / 2
+    max   = ceiling(max / step) * step
+  }
+  
+  tagList(
+    withMathJax(),
+    if (input$prior_inputs == "numerical") {
+      numericInput(inputId = inputId,
+                   label   = label,
+                   value   = value,
+                   min     = min,
+                   max     = NA,
+                   step    = step
+      )
+    } else {
+      sliderInput(inputId = inputId,
+                  label   = label,
+                  min     = min,
+                  max     = max,
+                  value   = value,
+                  step    = step,
+                  ticks   = FALSE
+      )
+    }
+  ) ## tagList
+  
+}) ## sigma_alpha
+
+## Slope mean
+output$mu_beta = renderUI({
+  
+  inputId = "mu_beta"
+  label   = "Mean \\(\\mu_\\beta\\)"
+  value   = 0
+  
+  if (no_data()) {
+    min  = -1
+    max  = +1
+    step = 0.1
+  } else {
+    x     = c(xlim()$min,xlim()$max)
+    y     = c(ylim()$min,ylim()$max)
+    diff = diff(y)/diff(x)
+    step = 10^(floor(log10(diff))-1)
+    min  = - diff / 2
+    max  = + diff / 2
+    min  = floor  (min / step) * step
+    max  = ceiling(max / step) * step
+  } 
+  
+  tagList(
+    withMathJax(),
+    if (input$prior_inputs == "numerical") {
+      numericInput(inputId = inputId,
+                   label   = label,
+                   value   = value,
+                   min     = NA,
+                   max     = NA,
+                   step    = step
+      )
+    } else {
+      sliderInput(inputId = inputId,
+                  label   = label,
+                  min     = min,
+                  max     = max,
+                  value   = value,
+                  step    = step,
+                  ticks   = FALSE
+      )
+    }
+  ) ## tagList
+  
+}) ## mu_beta
+
+## Slope SD
+output$sigma_beta = renderUI({
+  
+  inputId = "sigma_beta"
+  label   = "Standard deviation \\(\\sigma_\\beta\\)"
+  value   = 1
+  min     = 0
+  
+  if (no_data()) {
+    max  = 1.0
+    step = 0.1
+  } else {
+    x     = c(xlim()$min,xlim()$max)
+    y     = c(ylim()$min,ylim()$max)
+    diff = diff(y)/diff(x)
+    step = 10^(floor(log10(diff))-1)
+    max  = diff / 2
+    max  = ceiling(max / step) * step
+  }
+  
+  tagList(
+    withMathJax(),
+    if (input$prior_inputs == "numerical") {
+      numericInput(inputId = inputId,
+                   label   = label,
+                   value   = value,
+                   min     = min,
+                   max     = NA,
+                   step    = step
+      )
+    } else {
+      sliderInput(inputId = inputId,
+                  label   = label,
+                  min     = min,
+                  max     = max,
+                  value   = value,
+                  step    = step,
+                  ticks   = FALSE
+      )
+    }
+  ) ## tagList
+  
+}) ## sigma_beta
+
+## Prior correlation
+output$rho = renderUI({
+  
+  inputId = "rho"
+  label   = "Corr(\\(\\alpha,\\beta\\))"
+  value   =  0
+  min     = -1
+  max     = +1
+  step    = 0.01
+  
+  tagList(
+    withMathJax(),
+    if (input$prior_inputs == "numerical") {
+      numericInput(inputId = inputId,
+                   label   = label,
+                   value   = value,
+                   min     = min,
+                   max     = NA,
+                   step    = step
+      )
+    } else {
+      sliderInput(inputId = inputId,
+                  label   = label,
+                  min     = min,
+                  max     = max,
+                  value   = value,
+                  step    = step,
+                  ticks   = FALSE
+      )
+    }
+  ) ## tagList
+  
+}) ## rho
+
+## Response spread mean
+output$mu_sigma = renderUI({
+  
+  inputId = "mu_sigma"
+  label   = "Mean \\(\\mu_\\sigma\\)"
+  value   = 0
+  
+  if (no_data()) {
+    min  = -1
+    max  = +1
+    step = 0.1
+  } else {
+    x    = c(ylim()$min,ylim()$max)
+    diff = diff(x)
+    step = 10^(floor(log10(diff))-1)
+    min  = - diff / 2
+    max  = + diff / 2
+    min  = floor  (min / step) * step
+    max  = ceiling(max / step) * step
+  }
+  
+  tagList(
+    withMathJax(),
+    if (input$prior_inputs == "numerical") {
+      numericInput(inputId = inputId,
+                   label   = label,
+                   value   = value,
+                   min     = NA,
+                   max     = NA,
+                   step    = step
+      )
+    } else {
+      sliderInput(inputId = inputId,
+                  label   = label,
+                  min     = min,
+                  max     = max,
+                  value   = value,
+                  step    = step,
+                  ticks   = FALSE
+      )
+    }
+  ) ## tagList
+  
+}) ## mu_sigma
+
+## Response spread SD
+output$sigma_sigma = renderUI({
+  
+  inputId = "sigma_sigma"
+  label   = "Standard deviation \\(\\sigma_\\sigma\\)"
+  value   = 1
+  min     = 0
+  
+  if (no_data()) {
+    max  = 1.0
+    step = 0.1
+  } else {
+    x    = c(ylim()$min,ylim()$max)
+    diff = diff(x)
+    step = 10^(floor(log10(diff))-1)
+    max  = diff / 2
+    max  = ceiling(max / step) * step
+  }
+  
+  tagList(
+    withMathJax(),
+    if (input$prior_inputs == "numerical") {
+      numericInput(inputId = inputId,
+                   label   = label,
+                   value   = value,
+                   min     = min,
+                   max     = NA,
+                   step    = step
+      )
+    } else {
+      sliderInput(inputId = inputId,
+                  label   = label,
+                  min     = min,
+                  max     = max,
+                  value   = value,
+                  step    = step,
+                  ticks   = FALSE
+      )
+    }
+  ) ## tagList
+  
+}) ## sigma_sigma
+
+## Real world predictor mean
+output$mu_xstar = renderUI({
+
+  inputId = "mu_xstar"
+  label   = "Mean \\(\\mu_{X_\\star}\\)"
+  value   = 0
+
+  if (no_data()) {
+    min  = -1.0
+    max  = +1.0
+    step =  0.1
+  } else {
+    x    = c(ylim()$min,ylim()$max)
+    diff = diff(x)
+    step = 10^(floor(log10(diff))-1)
+    min  = - diff / 2
+    max  = + diff / 2
+    min  = floor  (min / step) * step
+    max  = ceiling(max / step) * step
+  }
+
+  tagList(
+    withMathJax(),
+    if (input$prior_inputs == "numerical") {
+      numericInput(inputId = inputId,
+                   label   = label,
+                   value   = value,
+                   min     = NA,
+                   max     = NA,
+                   step    = step
+      ) ## numericInput
+    } else {
+      sliderInput(inputId = inputId,
+                  label   = label,
+                  min     = min,
+                  max     = max,
+                  value   = value,
+                  step    = step,
+                  ticks   = FALSE
+      ) ## sliderInput
+    }
+  ) ## tagList
+
+}) ## mu_xstar
+
+## Real world predictor SD
+output$sigma_xstar = renderUI({
+
+  inputId = "sigma_xstar"
+  label   = "Standard deviation \\(\\sigma_{X_\\star}\\)"
+  value   = 1
+  min     = 0
+
+  if (no_data()) {
+    max     = 1.0
+    step    = 0.1
+  } else {
+    x     = c(ylim()$min,ylim()$max)
+    diff  = diff(x)
+    step  = 10^(floor(log10(diff))-1)
+    max   = diff / 2
+    max   = ceiling(max / step) * step
+  }
+
+  tagList(
+    withMathJax(),
+    if (input$prior_inputs == "numerical") {
+      numericInput(inputId = inputId,
+                   label   = label,
+                   value   = value,
+                   min     = min,
+                   max     = NA,
+                   step    = step
+      )
+    } else {
+      sliderInput(inputId = inputId,
+                  label   = label,
+                  min     = min,
+                  max     = max,
+                  value   = value,
+                  step    = step,
+                  ticks   = FALSE
+      )
+    }
+  ) ## tagList
+
+}) ## sigma_xstar
+
 ## Plot intercept prior
 output$alpha_prior = renderPlot({
 
   ## Skip plotting if bad prior or reference prior
-  if (is.na(input$mu_alpha) | is.na(input$sigma_alpha) |
-      input$sigma_alpha <= 0 | input$priors == "reference")
+  if(input$priors == "reference")
     return(NULL)
-
+  if (is.null(input$mu_alpha) | is.null(input$sigma_alpha))
+    return(NULL)
+  if (is.na  (input$mu_alpha) | is.na  (input$sigma_alpha))
+    return(NULL)
+  if (input$sigma_alpha <= 0)
+    return(NULL)
+  
   normal_plot(mu    = input$mu_alpha,
               sigma = input$sigma_alpha,
               gamma = gamma(),
@@ -23,10 +416,15 @@ output$alpha_prior = renderPlot({
 output$beta_prior = renderPlot({
 
   ## Skip plotting if bad prior or reference prior
-  if (is.na(input$mu_beta) | is.na(input$sigma_beta) |
-      input$sigma_beta <= 0 | input$priors == "reference")
+  if(input$priors == "reference")
     return(NULL)
-
+  if (is.null(input$mu_beta) | is.null(input$sigma_beta))
+    return(NULL)
+  if (is.na  (input$mu_beta) | is.na  (input$sigma_beta))
+    return(NULL)
+  if (input$sigma_beta <= 0)
+    return(NULL)
+  
   normal_plot(mu    = input$mu_beta,
               sigma = input$sigma_beta,
               gamma = gamma(),
@@ -40,8 +438,13 @@ output$beta_prior = renderPlot({
 output$sigma_prior = renderPlot({
 
   ## Skip plotting if bad prior or reference prior
-  if (is.na(input$mu_sigma) | is.na(input$sigma_sigma) |
-      input$sigma_sigma <= 0 | input$priors == "reference")
+  if(input$priors == "reference")
+    return(NULL)
+  if (is.null(input$mu_sigma) | is.null(input$sigma_sigma))
+    return(NULL)
+  if (is.na  (input$mu_sigma) | is.na  (input$sigma_sigma))
+    return(NULL)
+  if (input$sigma_sigma <= 0)
     return(NULL)
 
   folded_normal_plot(mu    = input$mu_sigma,
@@ -57,10 +460,15 @@ output$sigma_prior = renderPlot({
 output$xstar_prior = renderPlot({
 
   ## Skip plotting if bad prior or reference prior
-  if (is.na(input$mu_xstar) | is.na(input$sigma_xstar) |
-      input$sigma_xstar <= 0 | input$priors == "reference")
+  if(input$priors == "reference")
     return(NULL)
-
+  if (is.null(input$mu_xstar) | is.null(input$sigma_xstar))
+    return(NULL)
+  if (is.na  (input$mu_xstar) | is.na  (input$sigma_xstar))
+    return(NULL)
+  if (input$sigma_xstar <= 0)
+    return(NULL)
+  
   normal_plot(mu    = input$mu_xstar,
               sigma = input$sigma_xstar,
               gamma = gamma(),
