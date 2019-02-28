@@ -25,23 +25,27 @@ output$mu_alpha = renderUI({
   
   tagList(
     withMathJax(),
-    if (input$prior_inputs == "numerical") {
-      numericInput(inputId = inputId,
-                   label   = label,
-                   value   = value,
-                   min     = NA,
-                   max     = NA,
-                   step    = step
-      ) ## numericInput
+    if (input$priors == "reference") {
+      NULL
     } else {
-      sliderInput(inputId = inputId,
-                  label   = label,
-                  min     = min,
-                  max     = max,
-                  value   = value,
-                  step    = step,
-                  ticks   = FALSE
-      ) ## sliderInput
+      if (input$prior_inputs == "numerical") {
+        numericInput(inputId = inputId,
+                     label   = label,
+                     value   = value,
+                     min     = NA,
+                     max     = NA,
+                     step    = step
+        ) ## numericInput
+      } else {
+        sliderInput(inputId = inputId,
+                    label   = label,
+                    min     = min,
+                    max     = max,
+                    value   = value,
+                    step    = step,
+                    ticks   = FALSE
+        ) ## sliderInput
+      }
     }
   ) ## tagList
   
@@ -68,23 +72,27 @@ output$sigma_alpha = renderUI({
   
   tagList(
     withMathJax(),
-    if (input$prior_inputs == "numerical") {
-      numericInput(inputId = inputId,
-                   label   = label,
-                   value   = value,
-                   min     = min,
-                   max     = NA,
-                   step    = step
-      )
+    if (input$priors == "reference") {
+      NULL
     } else {
-      sliderInput(inputId = inputId,
-                  label   = label,
-                  min     = min,
-                  max     = max,
-                  value   = value,
-                  step    = step,
-                  ticks   = FALSE
-      )
+      if (input$prior_inputs == "numerical") {
+        numericInput(inputId = inputId,
+                     label   = label,
+                     value   = value,
+                     min     = min,
+                     max     = NA,
+                     step    = step
+        )
+      } else {
+        sliderInput(inputId = inputId,
+                    label   = label,
+                    min     = min,
+                    max     = max,
+                    value   = value,
+                    step    = step,
+                    ticks   = FALSE
+        )
+      }
     }
   ) ## tagList
   
@@ -114,23 +122,27 @@ output$mu_beta = renderUI({
   
   tagList(
     withMathJax(),
-    if (input$prior_inputs == "numerical") {
-      numericInput(inputId = inputId,
-                   label   = label,
-                   value   = value,
-                   min     = NA,
-                   max     = NA,
-                   step    = step
-      )
+    if (input$priors == "reference") {
+      NULL
     } else {
-      sliderInput(inputId = inputId,
-                  label   = label,
-                  min     = min,
-                  max     = max,
-                  value   = value,
-                  step    = step,
-                  ticks   = FALSE
-      )
+      if (input$prior_inputs == "numerical") {
+        numericInput(inputId = inputId,
+                     label   = label,
+                     value   = value,
+                     min     = NA,
+                     max     = NA,
+                     step    = step
+        )
+      } else {
+        sliderInput(inputId = inputId,
+                    label   = label,
+                    min     = min,
+                    max     = max,
+                    value   = value,
+                    step    = step,
+                    ticks   = FALSE
+        )
+      }
     }
   ) ## tagList
   
@@ -158,23 +170,27 @@ output$sigma_beta = renderUI({
   
   tagList(
     withMathJax(),
-    if (input$prior_inputs == "numerical") {
-      numericInput(inputId = inputId,
-                   label   = label,
-                   value   = value,
-                   min     = min,
-                   max     = NA,
-                   step    = step
-      )
+    if (input$priors == "reference") {
+      NULL
     } else {
-      sliderInput(inputId = inputId,
-                  label   = label,
-                  min     = min,
-                  max     = max,
-                  value   = value,
-                  step    = step,
-                  ticks   = FALSE
-      )
+      if (input$prior_inputs == "numerical") {
+        numericInput(inputId = inputId,
+                     label   = label,
+                     value   = value,
+                     min     = min,
+                     max     = NA,
+                     step    = step
+        )
+      } else {
+        sliderInput(inputId = inputId,
+                    label   = label,
+                    min     = min,
+                    max     = max,
+                    value   = value,
+                    step    = step,
+                    ticks   = FALSE
+        )
+      }
     }
   ) ## tagList
   
@@ -192,23 +208,27 @@ output$rho = renderUI({
   
   tagList(
     withMathJax(),
-    if (input$prior_inputs == "numerical") {
-      numericInput(inputId = inputId,
-                   label   = label,
-                   value   = value,
-                   min     = min,
-                   max     = NA,
-                   step    = step
-      )
+    if (input$priors == "reference") {
+      NULL
     } else {
-      sliderInput(inputId = inputId,
-                  label   = label,
-                  min     = min,
-                  max     = max,
-                  value   = value,
-                  step    = step,
-                  ticks   = FALSE
-      )
+      if (input$prior_inputs == "numerical") {
+        numericInput(inputId = inputId,
+                     label   = label,
+                     value   = value,
+                     min     = min,
+                     max     = NA,
+                     step    = step
+        )
+      } else {
+        sliderInput(inputId = inputId,
+                    label   = label,
+                    min     = min,
+                    max     = max,
+                    value   = value,
+                    step    = step,
+                    ticks   = FALSE
+        )
+      }
     }
   ) ## tagList
   
@@ -237,23 +257,27 @@ output$mu_sigma = renderUI({
   
   tagList(
     withMathJax(),
-    if (input$prior_inputs == "numerical") {
-      numericInput(inputId = inputId,
-                   label   = label,
-                   value   = value,
-                   min     = NA,
-                   max     = NA,
-                   step    = step
-      )
+    if (input$priors == "reference") {
+      NULL
     } else {
-      sliderInput(inputId = inputId,
-                  label   = label,
-                  min     = min,
-                  max     = max,
-                  value   = value,
-                  step    = step,
-                  ticks   = FALSE
-      )
+      if (input$prior_inputs == "numerical") {
+        numericInput(inputId = inputId,
+                     label   = label,
+                     value   = value,
+                     min     = NA,
+                     max     = NA,
+                     step    = step
+        )
+      } else {
+        sliderInput(inputId = inputId,
+                    label   = label,
+                    min     = min,
+                    max     = max,
+                    value   = value,
+                    step    = step,
+                    ticks   = FALSE
+        )
+      }
     }
   ) ## tagList
   
@@ -280,23 +304,27 @@ output$sigma_sigma = renderUI({
   
   tagList(
     withMathJax(),
-    if (input$prior_inputs == "numerical") {
-      numericInput(inputId = inputId,
-                   label   = label,
-                   value   = value,
-                   min     = min,
-                   max     = NA,
-                   step    = step
-      )
+    if (input$priors == "reference") {
+      NULL
     } else {
-      sliderInput(inputId = inputId,
-                  label   = label,
-                  min     = min,
-                  max     = max,
-                  value   = value,
-                  step    = step,
-                  ticks   = FALSE
-      )
+      if (input$prior_inputs == "numerical") {
+        numericInput(inputId = inputId,
+                     label   = label,
+                     value   = value,
+                     min     = min,
+                     max     = NA,
+                     step    = step
+        )
+      } else {
+        sliderInput(inputId = inputId,
+                    label   = label,
+                    min     = min,
+                    max     = max,
+                    value   = value,
+                    step    = step,
+                    ticks   = FALSE
+        )
+      }
     }
   ) ## tagList
   
@@ -325,23 +353,27 @@ output$mu_xstar = renderUI({
 
   tagList(
     withMathJax(),
-    if (input$prior_inputs == "numerical") {
-      numericInput(inputId = inputId,
-                   label   = label,
-                   value   = value,
-                   min     = NA,
-                   max     = NA,
-                   step    = step
-      ) ## numericInput
+    if (input$priors == "reference") {
+      NULL
     } else {
-      sliderInput(inputId = inputId,
-                  label   = label,
-                  min     = min,
-                  max     = max,
-                  value   = value,
-                  step    = step,
-                  ticks   = FALSE
-      ) ## sliderInput
+      if (input$prior_inputs == "numerical") {
+        numericInput(inputId = inputId,
+                     label   = label,
+                     value   = value,
+                     min     = NA,
+                     max     = NA,
+                     step    = step
+        ) ## numericInput
+      } else {
+        sliderInput(inputId = inputId,
+                    label   = label,
+                    min     = min,
+                    max     = max,
+                    value   = value,
+                    step    = step,
+                    ticks   = FALSE
+        ) ## sliderInput
+      }
     }
   ) ## tagList
 
@@ -368,23 +400,27 @@ output$sigma_xstar = renderUI({
 
   tagList(
     withMathJax(),
-    if (input$prior_inputs == "numerical") {
-      numericInput(inputId = inputId,
-                   label   = label,
-                   value   = value,
-                   min     = min,
-                   max     = NA,
-                   step    = step
-      )
+    if (input$priors == "reference") {
+      NULL
     } else {
-      sliderInput(inputId = inputId,
-                  label   = label,
-                  min     = min,
-                  max     = max,
-                  value   = value,
-                  step    = step,
-                  ticks   = FALSE
-      )
+      if (input$prior_inputs == "numerical") {
+        numericInput(inputId = inputId,
+                     label   = label,
+                     value   = value,
+                     min     = min,
+                     max     = NA,
+                     step    = step
+        )
+      } else {
+        sliderInput(inputId = inputId,
+                    label   = label,
+                    min     = min,
+                    max     = max,
+                    value   = value,
+                    step    = step,
+                    ticks   = FALSE
+        )
+      }
     }
   ) ## tagList
 

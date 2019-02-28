@@ -27,19 +27,19 @@ bad_prior = reactive({
       is.null(input$mu_sigma) | is.null(input$sigma_sigma) |
       is.null(input$mu_xstar) | is.null(input$sigma_xstar) |
       is.null(input$rho))
-    return(FALSE)
+    return(TRUE)
   if (is.na(input$mu_alpha) | is.na(input$sigma_alpha) |
       is.na(input$mu_beta ) | is.na(input$sigma_beta ) |
       is.na(input$mu_sigma) | is.na(input$sigma_sigma) |
       is.na(input$mu_xstar) | is.na(input$sigma_xstar) |
       is.na(input$rho))
-    return(FALSE)
+    return(TRUE)
   if (input$sigma_alpha <=  0 | input$sigma_beta  <=  0 | 
       input$sigma_sigma <=  0 | input$sigma_xstar <=  0 |
       input$rho         <  -1 | input$rho          > +1 ) {
-    return(FALSE)
-  } else {
     return(TRUE)
+  } else {
+    return(FALSE)
   }
   
 })

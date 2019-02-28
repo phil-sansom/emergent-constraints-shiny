@@ -121,18 +121,3 @@ observe ({
     )
     
 })
-
-## Disable informative priors
-observe({
-  # print("Observers 12: Toggle reference")
-  condition = input$priors != "reference"
-  toggleState(id = "mu_alpha"   , condition = condition)
-  toggleState(id = "sigma_alpha", condition = condition)
-  toggleState(id = "mu_beta"    , condition = condition)
-  toggleState(id = "sigma_beta" , condition = condition)
-  toggleState(id = "rho"        , condition = condition)
-  toggleState(id = "mu_sigma"   , condition = condition)
-  toggleState(id = "sigma_sigma", condition = condition)
-  toggleState(id = "mu_xstar"   , condition = condition)
-  toggleState(id = "sigma_xstar", condition = condition)
-})
