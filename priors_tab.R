@@ -485,4 +485,4 @@ output$prior_predictive_plot = renderPlot({
   title(xlab = input$xlab)
   title(ylab = input$ylab)
 
-}) ## prior_predictive
+}) ## prior_predictive_plot

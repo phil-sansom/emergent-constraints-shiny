@@ -262,7 +262,7 @@ ui = navbarPage(
                  ), ## tabPanel
                  tabPanel(
                    title = "Ensemble prior predictive",
-                   plotOutput(outputId = "prior_predictive")
+                   plotOutput(outputId = "prior_predictive_plot")
                  ) ## tabPanel
                ) ## tabsetPanel
              ) ## mainPanel
