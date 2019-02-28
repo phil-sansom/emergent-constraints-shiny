@@ -221,7 +221,7 @@ ui = navbarPage(
                         ) ## priors
                  ),
                  column(width = 6,
-                        uiOutput(outputId = "prior_inputs")
+                        uiOutput(outputId = "prior_input_select")
                  )
                ),
                hr(),

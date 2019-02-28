@@ -20,7 +20,7 @@ bad_obs = reactive({
 ## Check prior parameters
 bad_prior = reactive({
   # print("Handlers: bad_prior")
-  if (input$priors == "reference" | is.null(input$prior_inputs))
+  if (input$priors == "reference" | is.null(input$prior_input_select))
     return(FALSE)
   if (is.null(input$mu_alpha) | is.null(input$sigma_alpha) |
       is.null(input$mu_beta ) | is.null(input$sigma_beta ) |
