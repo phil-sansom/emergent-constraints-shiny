@@ -8,7 +8,7 @@ output$prior_input_select = renderUI({
   if (input$priors == "informative") {
     radioButtons(
       inputId  = "prior_input_select",
-      label    = "Select inputs",
+      label    = "Input style",
       choices  = list(Sliders = "sliders", Numerical = "numerical"),
       selected = "sliders",
       inline   = FALSE
@@ -42,6 +42,7 @@ output$alpha_prior = renderUI({
   if (input$prior_input_select == "numerical") {
     tagList(
       withMathJax(),
+      hr(),
       h5("Intercept \\(\\alpha\\)"),
       fluidRow(
         column(width = 6,
@@ -67,6 +68,7 @@ output$alpha_prior = renderUI({
   } else {
     tagList(
       withMathJax(),
+      hr(),
       h5("Intercept \\(\\alpha\\)"),
       sliderInput(inputId = "mu_alpha",
                   label   = "Mean \\(\\mu_\\alpha\\)",
@@ -113,6 +115,7 @@ output$beta_prior = renderUI({
   if (input$prior_input_select == "numerical") {
     tagList(
       withMathJax(),
+      hr(),
       h5("Slope \\(\\beta\\)"),
       fluidRow(
         column(width = 6,
@@ -138,6 +141,7 @@ output$beta_prior = renderUI({
   } else {
     tagList(
       withMathJax(),
+      hr(),
       h5("Slope \\(\\beta\\)"),
       sliderInput(inputId = "mu_beta",
                   label   = "Mean \\(\\mu_\\beta\\)",
@@ -176,6 +180,7 @@ output$rho_prior = renderUI({
   if (input$prior_input_select == "numerical") {
     tagList(
       withMathJax(),
+      hr(),
       h5("Correlation \\(\\rho\\)"),
       numericInput(inputId = inputId,
                    label   = label,
@@ -188,6 +193,7 @@ output$rho_prior = renderUI({
   } else {
     tagList(
       withMathJax(),
+      hr(),
       h5("Correlation \\(\\rho\\)"),
       sliderInput(inputId = inputId,
                   label   = label,
@@ -225,6 +231,7 @@ output$sigma_prior = renderUI({
   if (input$prior_input_select == "numerical") {
     tagList(
       withMathJax(),
+      hr(),
       h5("Response spread \\(\\sigma\\)"),
       fluidRow(
         column(width = 6,
@@ -250,6 +257,7 @@ output$sigma_prior = renderUI({
   } else {
     tagList(
       withMathJax(),
+      hr(),
       h5("Response spread \\(\\sigma\\)"),
       sliderInput(inputId = "mu_sigma",
                   label   = "Mean \\(\\mu_\\sigma\\)",
@@ -295,6 +303,7 @@ output$xstar_prior = renderUI({
   if (input$prior_input_select == "numerical") {
     tagList(
       withMathJax(),
+      hr(),
       h5("Real world predictor \\(X_\\star\\)"),
       fluidRow(
         column(width = 6,
@@ -320,6 +329,7 @@ output$xstar_prior = renderUI({
   } else {
     tagList(
       withMathJax(),
+      hr(),
       h5("Real world predictor \\(X_\\star\\)"),
       sliderInput(inputId = "mu_xstar",
                   label   = "Mean \\(\\mu_{X_\\star}\\)",

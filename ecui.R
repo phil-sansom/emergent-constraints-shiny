@@ -224,11 +224,9 @@ ui = navbarPage(
                         uiOutput(outputId = "prior_input_select")
                  )
                ),
-               hr(),
-               # h4("Informative priors"),
                uiOutput(outputId = "alpha_prior"),
-               uiOutput(outputId = "beta_prior"),
-               uiOutput(outputId = "rho_prior"),
+               uiOutput(outputId = "beta_prior" ),
+               uiOutput(outputId = "rho_prior"  ),
                uiOutput(outputId = "sigma_prior"),
                uiOutput(outputId = "xstar_prior")
              ), ## sidePanel
@@ -277,27 +275,16 @@ ui = navbarPage(
              sidebarPanel(
                title = "Discrepancy parameters",
                radioButtons(
-                 inputId  = "discrepancy_inputs",
-                 label    = "Select inputs",
+                 inputId  = "discrepancy_input_select",
+                 label    = "Input style",
                  choices  = list(Sliders = "sliders", Numerical = "numerical"),
                  selected = "sliders",
                  inline   = TRUE
                ),
-               hr(),
-               h5("Intercept \\(\\alpha_\\star\\)"),
-               uiOutput(outputId = "mu_delta_alpha"),
-               uiOutput(outputId = "sigma_delta_alpha"),
-               hr(),
-               h5("Slope \\(\\beta_\\star\\)"),
-               uiOutput(outputId = "mu_delta_beta"),
-               uiOutput(outputId = "sigma_delta_beta"),
-               hr(),
-               h5("Correlation \\(\\rho_\\delta\\)"),
-               uiOutput(outputId = "rho_delta"),
-               hr(),
-               h5("Spread \\(\\sigma_\\star\\)"),
-               uiOutput(outputId = "mu_delta_sigma"),
-               uiOutput(outputId = "sigma_delta_sigma"),
+               uiOutput(outputId = "alpha_discrepancy"),
+               uiOutput(outputId = "beta_discrepancy" ),
+               uiOutput(outputId = "rho_discrepancy"  ),
+               uiOutput(outputId = "sigma_discrepancy"),
                hr(),
                numericInput(inputId = "N",
                             label   = "Number of samples",
