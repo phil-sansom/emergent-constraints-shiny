@@ -66,50 +66,6 @@ observe({
 
 }) ## observe
 
-## Update posterior plot limits
-observe ({
-  # print("Observers 11: xlim_marginal,xlim_joint,ylim_joint")
-
-  if (no_data() | bad_obs() | bad_prior()) {
-
-    xlims = list(value = c(0,1), min = 0, max = 1, step = 0.1)
-    ylims = xlims
-
-  } else {
-
-    xlims = posterior_limits(data()[,input$x], posterior()[,,"xstar"],
-                             discrepancy()[,,"xstar"])
-    ylims = posterior_limits(data()[,input$y], posterior()[,,"ystar"],
-                             discrepancy()[,,"ystar"])
-
-  }
-
-  updateSliderInput(session = session,
-                    inputId = "xlim_marginal",
-                    value   = ylims$value,
-                    min     = ylims$min,
-                    max     = ylims$max,
-                    step    = ylims$step
-  ) ## xlim_marginal
-
-  updateSliderInput(session = session,
-                    inputId = "xlim_joint",
-                    value   = xlims$value,
-                    min     = xlims$min,
-                    max     = xlims$max,
-                    step    = xlims$step
-  ) ## xlim_joint
-
-  updateSliderInput(session = session,
-                    inputId = "ylim_joint",
-                    value   = ylims$value,
-                    min     = ylims$min,
-                    max     = ylims$max,
-                    step    = ylims$step
-  ) ## ylim_joint
-
-})
-
 ## Check sample number
 observe ({
   

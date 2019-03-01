@@ -342,18 +342,6 @@ ui = navbarPage(
                    title = "Marginal projections",
                    plotOutput(outputId = "marginal_plot"),
                    fluidRow(
-                     column(width = 6,
-                            sliderInput(inputId = "xlim_marginal",
-                                        label   = "X limits",
-                                        value   = c(0,1),
-                                        min     = 0,
-                                        max     = 1,
-                                        step    = 0.1,
-                                        ticks   = FALSE
-                            ) ## xlim_marginal
-                     ) ## column
-                   ), ## fluidRow
-                   fluidRow(
                      column(width = 4,
                             downloadButton(outputId = "save_marginal_plot",
                                            label    = "Download plot"
@@ -371,28 +359,6 @@ ui = navbarPage(
                  tabPanel(
                    title = "Joint projections",
                    plotOutput(outputId = "joint_plot"),
-                   fluidRow(
-                     column(width = 6,
-                            sliderInput(inputId = "xlim_joint",
-                                        label   = "X limits",
-                                        value   = c(0,1),
-                                        min     = 0,
-                                        max     = 1,
-                                        step    = 0.1,
-                                        ticks   = FALSE
-                            ) ## xlim_joint
-                     ), ## column
-                     column(width = 6,
-                            sliderInput(inputId = "ylim_joint",
-                                        label   = "Y limits",
-                                        value   = c(0,1),
-                                        min     = 0,
-                                        max     = 1,
-                                        step    = 0.1,
-                                        ticks   = FALSE
-                            ) ## ylim_joint
-                     ) ## column
-                   ), ## fluidRow
                    downloadButton(outputId = "save_joint_plot",
                                   label    = "Download plot"
                    )

@@ -565,7 +565,7 @@ marginal_plot = function() {
 
   ## Plotting limiis
   ymax = max(dens1$y,dens2$y)*1.04
-  xlim = input$xlim_marginal
+  xlim = range(dens1$x,dens2$x)
   ylim = c(0,ymax)
 
   ## Graphical parameters
@@ -711,9 +711,9 @@ joint_plot = function() {
   discrepancy_density$z = z
 
   ## Plotting limits
-  xlim = input$xlim_joint
-  ylim = input$ylim_joint
-
+  xlim = range(x,xstar,xstar_ref)
+  ylim = range(y,ystar,ystar_ref)
+  
   ## Graphical parameters
   graphical_parameters()
 

@@ -31,27 +31,6 @@ limits = function(...) {
   
 }  
 
-## Compute useful limits for posterior plots
-posterior_limits = function(...) {
-  
-  vrange  = range(..., na.rm = TRUE)
-  vdiff   = diff(vrange)
-  vminval = vrange[1] - 0.04 * vdiff
-  vmaxval = vrange[2] + 0.04 * vdiff
-  vmin    = vminval
-  vmax    = vmaxval
-  vstep   = 10^floor(log10(vdiff)  )
-  vmin    = floor  (vmin   /vstep)*vstep
-  vmax    = ceiling(vmax   /vstep)*vstep
-  vstep   = 10^floor(log10(vdiff)-1)
-  vminval = floor  (vminval/vstep)*vstep
-  vmaxval = ceiling(vmaxval/vstep)*vstep
-  
-  return(list(value = c(vminval,vmaxval), min = vmin, max = vmax, 
-              step = vstep))
-  
-} ## posterior_limits
-
 ## Function to sample posterior predictive distribution
 posterior_predictive = function(x, alpha, beta, sigma, gamma, N) {
   
