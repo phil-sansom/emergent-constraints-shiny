@@ -2,12 +2,29 @@
 ## Priors tab ##
 ################
 
-## Input selection
-output$prior_input_select = renderUI({
+## Model input selection
+output$model_input_select = renderUI({
   
-  if (input$priors == "informative") {
+  if (input$model_priors == "informative") {
     radioButtons(
-      inputId  = "prior_input_select",
+      inputId  = "model_input_select",
+      label    = "Input style",
+      choices  = list(Sliders = "sliders", Numerical = "numerical"),
+      selected = "sliders",
+      inline   = FALSE
+    )
+  } else {
+    return(NULL)
+  }
+  
+})
+
+## Real world input selection
+output$real_input_select = renderUI({
+  
+  if (input$real_priors == "informative") {
+    radioButtons(
+      inputId  = "real_input_select",
       label    = "Input style",
       choices  = list(Sliders = "sliders", Numerical = "numerical"),
       selected = "sliders",
@@ -22,7 +39,7 @@ output$prior_input_select = renderUI({
 ## Intercept prior
 output$alpha_prior = renderUI({
 
-  if (input$priors == "reference" | is.null(input$prior_input_select))
+  if (input$model_priors == "reference" | is.null(input$model_input_select))
     return (NULL)
   
   if (no_data()) {
@@ -39,7 +56,7 @@ output$alpha_prior = renderUI({
     max  = ceiling(max / step) * step
   }
 
-  if (input$prior_input_select == "numerical") {
+  if (input$model_input_select == "numerical") {
     tagList(
       withMathJax(),
       hr(),
@@ -94,7 +111,7 @@ output$alpha_prior = renderUI({
 ## Slope prior
 output$beta_prior = renderUI({
   
-  if (input$priors == "reference" | is.null(input$prior_input_select))
+  if (input$model_priors == "reference" | is.null(input$model_input_select))
     return (NULL)
   
   if (no_data()) {
@@ -112,7 +129,7 @@ output$beta_prior = renderUI({
     max  = ceiling(max / step) * step
   } 
   
-  if (input$prior_input_select == "numerical") {
+  if (input$model_input_select == "numerical") {
     tagList(
       withMathJax(),
       hr(),
@@ -167,7 +184,7 @@ output$beta_prior = renderUI({
 ## Prior correlation
 output$rho_prior = renderUI({
   
-  if (input$priors == "reference" | is.null(input$prior_input_select))
+  if (input$model_priors == "reference" | is.null(input$model_input_select))
     return(NULL)
   
   inputId = "rho"
@@ -177,7 +194,7 @@ output$rho_prior = renderUI({
   max     = +1
   step    = 0.01
   
-  if (input$prior_input_select == "numerical") {
+  if (input$model_input_select == "numerical") {
     tagList(
       withMathJax(),
       hr(),
@@ -215,7 +232,7 @@ output$rho_prior = renderUI({
 ## Response uncertainty prior
 output$sigma_prior = renderUI({
   
-  if (input$priors == "reference" | is.null(input$prior_input_select))
+  if (input$model_priors == "reference" | is.null(input$model_input_select))
     return (NULL)
   
   if (no_data()) {
@@ -232,7 +249,7 @@ output$sigma_prior = renderUI({
     max  = ceiling(max / step) * step
   }
   
-  if (input$prior_input_select == "numerical") {
+  if (input$model_input_select == "numerical") {
     tagList(
       withMathJax(),
       hr(),
@@ -287,7 +304,7 @@ output$sigma_prior = renderUI({
 ## Real world predictor prior
 output$xstar_prior = renderUI({
   
-  if (input$priors == "reference" | is.null(input$prior_input_select))
+  if (input$real_priors == "reference" | is.null(input$real_input_select))
     return (NULL)
   
   if (no_data()) {
@@ -304,7 +321,7 @@ output$xstar_prior = renderUI({
     max  = ceiling(max / step) * step
   }
   
-  if (input$prior_input_select == "numerical") {
+  if (input$real_input_select == "numerical") {
     tagList(
       withMathJax(),
       hr(),
@@ -360,7 +377,7 @@ output$xstar_prior = renderUI({
 output$alpha_prior_plot = renderPlot({
 
   ## Skip plotting if bad prior or reference prior
-  if(input$priors == "reference" | is.null(input$prior_input_select))
+  if(input$model_priors == "reference" | is.null(input$model_input_select))
     return(NULL)
   if (is.null(input$mu_alpha) | is.null(input$sigma_alpha))
     return(NULL)
@@ -382,7 +399,7 @@ output$alpha_prior_plot = renderPlot({
 output$beta_prior_plot = renderPlot({
 
   ## Skip plotting if bad prior or reference prior
-  if(input$priors == "reference" | is.null(input$prior_input_select))
+  if(input$model_priors == "reference" | is.null(input$model_input_select))
     return(NULL)
   if (is.null(input$mu_beta) | is.null(input$sigma_beta))
     return(NULL)
@@ -404,7 +421,7 @@ output$beta_prior_plot = renderPlot({
 output$sigma_prior_plot = renderPlot({
 
   ## Skip plotting if bad prior or reference prior
-  if(input$priors == "reference" | is.null(input$prior_input_select))
+  if(input$model_priors == "reference" | is.null(input$model_input_select))
     return(NULL)
   if (is.null(input$mu_sigma) | is.null(input$sigma_sigma))
     return(NULL)
@@ -426,7 +443,7 @@ output$sigma_prior_plot = renderPlot({
 output$xstar_prior_plot = renderPlot({
 
   ## Skip plotting if bad prior or reference prior
-  if(input$priors == "reference" | is.null(input$prior_input_select))
+  if(input$real_priors == "reference" | is.null(input$real_input_select))
     return(NULL)
   if (is.null(input$mu_xstar) | is.null(input$sigma_xstar))
     return(NULL)
@@ -448,7 +465,7 @@ output$xstar_prior_plot = renderPlot({
 output$prior_predictive_plot = renderPlot({
 
   ## Skip plotting if error condition
-  if(no_data() | input$priors == "reference" | bad_prior())
+  if(no_data() | input$model_priors == "reference" | bad_model_prior())
     return(NULL)
 
   ## Simulate from parameter priors

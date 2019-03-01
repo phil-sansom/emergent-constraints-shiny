@@ -6,11 +6,14 @@
 output$summary = renderTable({   
   
   ## Skip table if error condition
-  if (no_data() | bad_obs() | bad_prior())
+  if (no_data() | bad_obs() | bad_model_prior() | bad_real_prior())
     return(NULL)
   
-  monitor(posterior(), warmup = 0, print = FALSE)[c("alpha","beta",
-                                                    "sigma","xstar"),]
+  sims = posterior()
+  dimnames(sims)$parameters = c("alpha","beta","sigma","xstar")
+  sims[,,"xstar"] = xstar()
+  
+  monitor(sims, warmup = 0, print = FALSE)[c("alpha","beta","sigma","xstar"),]
   
 },
 rownames = TRUE
@@ -20,10 +23,17 @@ rownames = TRUE
 output$sample_plot = renderPlot({
   
   ## Skip plotting if error condition
-  if (no_data() | bad_obs() | bad_prior())
+  if (no_data() | bad_obs() | bad_model_prior() | bad_real_prior())
     return(NULL)
+ 
+  if (input$diag_var == "xstar") {
+    samples = xstar()
+  } else {
+    samples = posterior()[,,input$diag_var]
+  }
+  label   = parameter_labels[input$diag_var]
   
-  plot_samples(input$diag_var)
+  plot_samples(samples, label)
   
 }) ## sample_plot
 
@@ -31,10 +41,17 @@ output$sample_plot = renderPlot({
 output$density_plot = renderPlot({
   
   ## Skip plotting if error condition
-  if (no_data() | bad_obs() | bad_prior())
+  if (no_data() | bad_obs() | bad_model_prior() | bad_real_prior())
     return(NULL)
   
-  plot_density(input$diag_var)
+  if (input$diag_var == "xstar") {
+    samples = xstar()
+  } else {
+    samples = posterior()[,,input$diag_var]
+  }
+  label   = parameter_labels[input$diag_var]
+  
+  plot_density(samples, label)
   
 }) ## density_plot
 
@@ -42,11 +59,15 @@ output$density_plot = renderPlot({
 output$log_posterior_plot = renderPlot({
   
   ## Skip plotting if error condition
-  if (no_data() | bad_obs() | bad_prior())
+  if (no_data() | bad_obs() | bad_model_prior() | bad_real_prior())
     return(NULL)
   
   ## Extract data    
-  x = posterior()[,,input$diag_var]
+  if (input$diag_var == "xstar") {
+    x = xstar()
+  } else {
+    x = posterior()[,,input$diag_var]
+  }
   y = posterior()[,,"lp__"]
   
   ## Graphical parameters
@@ -68,11 +89,15 @@ output$log_posterior_plot = renderPlot({
 output$autocorrelation_plot = renderPlot({
   
   ## Skip plotting if error condition
-  if (no_data() | bad_obs() | bad_prior())
+  if (no_data() | bad_obs() | bad_model_prior() | bad_real_prior())
     return(NULL)
   
   ## Extract data
-  x = posterior()[,,input$diag_var]
+  if (input$diag_var == "xstar") {
+    x = xstar()
+  } else {
+    x = posterior()[,,input$diag_var]
+  }
   
   ## Compute autocorrelation functions
   acfs = list()
@@ -111,10 +136,13 @@ output$autocorrelation_plot = renderPlot({
 output$log_posterior_samples = renderPlot({
   
   ## Skip plotting if error condition
-  if (no_data() | bad_obs() | bad_prior())
+  if (no_data() | bad_obs() | bad_model_prior() | bad_real_prior())
     return(NULL)
-  
-  plot_samples("lp__")
+
+  samples = posterior()[,,"lp__"]
+  label   = parameter_labels["lp__"]
+
+  plot_samples(samples, label)
   
 }) ## log_posterior_samples
 
@@ -122,9 +150,12 @@ output$log_posterior_samples = renderPlot({
 output$log_posterior_density = renderPlot({
   
   ## Skip plotting if error condition
-  if (no_data() | bad_obs() | bad_prior())
+  if (no_data() | bad_obs() | bad_model_prior() | bad_real_prior())
     return(NULL)
+ 
+  samples = posterior()[,,"lp__"]
+  label   = parameter_labels["lp__"]
   
-  plot_density("lp__")
+  plot_density(samples, label)
   
 }) ## log_posterior_density

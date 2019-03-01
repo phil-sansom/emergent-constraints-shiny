@@ -24,25 +24,60 @@ data = reactive({
 ## Subset samples for plotting
 mask = reactive({
   # print("Computation 2: mask")
+  
   sample.int(input$N, 1e3)
+  
 })
 
 ## Predictor points for plotting
 xx = reactive({
   # print("Computation 3: xx")
+  
   seq(from       = xlim()$min,
       to         = xlim()$max,
       length.out = 101)
+  
 })
 
 ## Posterior distribution
 posterior = reactive({
   # print("Computation 4: posterior")
-  if (input$priors == "informative" & ! bad_prior()) {
-    informative_posterior()
+  
+  if (input$model_priors == "informative" & ! bad_model_prior()) {
+    
+    ## Extract data
+    x       = data()[,input$x]
+    y       = data()[,input$y]
+    
+    ## Sample size
+    cores = getOption("mc.cores")
+    n     = input$N %/% cores
+    N     = n * cores
+    
+    ## Package data
+    data = list(M = length(x), x = x, y = y,
+                mu_alpha = input$mu_alpha, sigma_alpha = input$sigma_alpha,
+                mu_beta  = input$mu_beta , sigma_beta  = input$sigma_beta ,
+                mu_sigma = input$mu_sigma, sigma_sigma = input$sigma_sigma,
+                rho = input$rho)
+    
+    ## Fit STAN model
+    buffer = sampling(model, data = data, chains = getOption("mc.cores"),
+                      iter = 2*N/getOption("mc.cores"),
+                      warmup = N/getOption("mc.cores"),
+                      verbose = FALSE, show_messages = FALSE)
+    
+    ## Extract posterior samples
+    buffer = as.array(buffer)
+    dimnames(buffer)$parameters = c("alpha","beta","sigma","lp__")
+    return(buffer)
+    
   } else {
+    
     reference_posterior()
+    
   }
+  
 })
 
 ## Sample posterior with reference priors
@@ -52,9 +87,7 @@ reference_posterior = reactive({
   ## Extract data
   x       = data()[,input$x]
   y       = data()[,input$y]
-  z       = input$z
-  sigma_z = input$sigma_z
-
+ 
   ## Model
   model = lm(y ~ x)
 
@@ -65,14 +98,12 @@ reference_posterior = reactive({
   
   ## Initialise storage
   samples = array(data     = NA,
-                  dim      = c(n, cores, 7),
+                  dim      = c(n, cores, 4),
                   dimnames = list(iterations = NULL,
                                   chains     = paste("chain:",
                                                      1:getOption("mc.cores"),
                                                      sep = ""),
-                                  parameters = c("alpha","beta", "log_sigma",
-                                                 "xstar","sigma","ystar",
-                                                 "lp__")
+                                  parameters = c("alpha","beta","sigma","lp__")
                   ) ## dimnames
   ) ## samples
 
@@ -82,65 +113,111 @@ reference_posterior = reactive({
   samples[,,"beta" ]     = theta[,2]
   samples[,,"sigma"]     = sqrt(sum(model$residuals^2) /
                                   rchisq(N, df.residual(model)))
-  samples[,,"log_sigma"] = log(samples[,,"sigma"])
-  samples[,,"xstar"]     = rnorm(N, z, sigma_z)
-  samples[,,"ystar"]     = samples[,,"alpha"] +
-    samples[,,"beta" ] * samples[,,"xstar"] +  samples[,,"sigma"] * rnorm(N)
 
   ## Compute log posterior probability
   samples[,,"lp__"] = apply(samples, c(1,2), function(s)
-    sum(dnorm(y, s["alpha"] + s["beta"]*x, s["sigma"], log = TRUE)) +
-      dnorm(z, s["xstar"], sigma_z, log = TRUE))
+    sum(dnorm(y, s["alpha"] + s["beta"]*x, s["sigma"], log = TRUE)))
 
   ## Return posterior samples
   return(samples)
 
 })
 
-## Sample posterior with informative priors
-informative_posterior = reactive({
-  # print("Computation 6: informative_posterior")
+## Posterior for xstar
+xstar = reactive({
+  # print("Computation 6: xstar")
+  
+  if (input$real_priors == "informative" & ! bad_real_prior()) {
+ 
+    ## Sample size
+    cores = getOption("mc.cores")
+    n     = input$N %/% cores
+    N     = n * cores
+    
+    ## Data
+    mux  = input$mu_xstar
+    taux = input$sigma_xstar^-2
+    z    = input$z
+    tauz = input$sigma_z^-2
+    
+    ## Compute posterior
+    mu    = taux*mux + tauz*z
+    sigma = 1/(taux + tauz)
+    mu    = mu*sigma
+    sigma = sqrt(sigma)
+    
+    ## Sample posterior
+    xstar = rnorm(input$N, mu, sigma)
+    dim(xstar) = c(n,cores)
+    
+    ## Return samples
+    return(xstar)
+    
+    
+  } else {
+    
+    xstar_reference()
+    
+  }
+})
 
-  ## Extract data
-  x       = data()[,input$x]
-  y       = data()[,input$y]
-  z       = input$z
-  sigma_z = input$sigma_z
+## Posterior for real predictor
+xstar_reference = reactive({
+  # print("Computation 7: xstar_reference")
   
   ## Sample size
   cores = getOption("mc.cores")
   n     = input$N %/% cores
   N     = n * cores
   
-  ## Package data
-  data = list(M = length(x), x = x, y = y, z = z, sigma_z = sigma_z,
-              mu_alpha = input$mu_alpha, sigma_alpha = input$sigma_alpha,
-              mu_beta  = input$mu_beta , sigma_beta  = input$sigma_beta ,
-              mu_sigma = input$mu_sigma, sigma_sigma = input$sigma_sigma,
-              mu_xstar = input$mu_xstar, sigma_xstar = input$sigma_xstar,
-              rho = input$rho)
+  ## Sample posterior
+  xstar = rnorm(input$N, input$z, input$sigma_z)
+  dim(xstar) = c(n,cores)
+  
+  ## Return samples
+  return(xstar)
+  
+})
 
-  ## Fit STAN model
-  buffer = sampling(model, data = data, chains = getOption("mc.cores"),
-                    iter = 2*N/getOption("mc.cores"),
-                    warmup = N/getOption("mc.cores"),
-                    verbose = FALSE, show_messages = FALSE)
+## Predictive deviations
+epsilon = reactive({
+  # print("Computation 8: epsilon)
+  
+  rnorm(input$N)
+  
+})
 
-  ## Extract posterior samples
-  buffer = as.array(buffer)
-  dimnames(buffer)$parameters = c("alpha","beta","sigma","xstar","ystar","lp__")
-  return(buffer)
+## Posterior predictive distribution
+ystar = reactive({
+  # print("Computation 9: ystar")
+  
+  alphastar = discrepancy()[,,"alphastar"]
+  betastar  = discrepancy()[,,"betastar" ]
+  sigmastar = discrepancy()[,,"sigmastar"]
 
+  alphastar + betastar * xstar() + sigmastar * epsilon()
+  
+})
+
+## Reference posterior predictive
+ystar_reference = reactive({
+  # print("Computation 10: ystar_reference")
+  
+  alpha = reference_posterior()[,,"alpha"]
+  beta  = reference_posterior()[,,"beta" ]
+  sigma = reference_posterior()[,,"sigma"]
+
+  alpha + beta * xstar_reference() + sigma * epsilon()
+  
 })
 
 ## Compute discrepancy
 discrepancy = reactive({
-  # print("Computation 7: discrepancy")
+  # print("Computation 11: discrepancy")
 
   ## Initialise storage
-  samples = posterior()[,,c("alpha","beta","sigma","xstar","ystar")]
-  dimnames(samples)$parameters = c("alphastar","betastar","sigmastar",
-                                   "xstar","ystar")
+  samples = posterior()[,,c("alpha","beta","sigma")]
+  dimnames(samples)$parameters = c("alphastar","betastar","sigmastar")
   
   ## Check discrepancy parameters
   if (! any(is.null(input$mu_delta_alpha) | is.null(input$sigma_delta_alpha) |
@@ -209,34 +286,16 @@ discrepancy = reactive({
       
     } ## Sigma bias and uncertainty
     
-    ## Posterior predictive distribution
-    if (new_mean | new_sd) {
-      
-      samples[,,"ystar"] = posterior()[,,"alpha"] + 
-        posterior()[,,"beta"] * posterior()[,,"xstar"]
-      epsilon = posterior()[,,"ystar"] - samples[,,"ystar"]
-      
-      if (new_mean)
-        samples[,,"ystar"] = samples[,,"alphastar"] + 
-        samples[,,"betastar"] * samples[,,"xstar"]
-      
-      if (new_sd)
-        epsilon = epsilon * samples[,,"sigmastar"] / posterior()[,,"sigma"]
-      
-      samples[,,"ystar"] =  samples[,,"ystar"] + epsilon
-      
-    }    
-
   } ## Check discrepancy parameters
     
-  ## Return predictions
+  ## Return samples
   return(samples)
   
 })
 
 ## Sample posterior predictive
 predictive = reactive({
-  # print("Computation 8: predictive")
+  # print("Computation 12: predictive")
 
   posterior_predictive(x     = xx(),
                        alpha = posterior()[,,"alpha"],
@@ -249,7 +308,7 @@ predictive = reactive({
 
 ## Sample posterior predictive discrepancy
 discrepancy_predictive = reactive({
-  # print("Computation 9: discrepancy_predictive")
+  # print("Computation 13: discrepancy_predictive")
 
   posterior_predictive(x     = xx(),
                        alpha = discrepancy()[,,"alphastar"],
@@ -262,7 +321,7 @@ discrepancy_predictive = reactive({
 
 ## Sample posterior predictive from basic model with reference priors
 reference_predictive = reactive({
-  # print("Computation 10: reference_predictive")
+  # print("Computation 14: reference_predictive")
 
   posterior_predictive(x     = xx(),
                        alpha = reference_posterior()[,,"alpha"],

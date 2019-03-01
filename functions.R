@@ -19,6 +19,7 @@ alpha_col = function(x) {
   
 }
 
+
 ## Compute useful plotting limits
 limits = function(...) {
   
@@ -39,6 +40,7 @@ limits = function(...) {
               step = vstep))
   
 }  
+
 
 ## Function to sample posterior predictive distribution
 posterior_predictive = function(x, alpha, beta, sigma, gamma, N) {
@@ -67,6 +69,7 @@ posterior_predictive = function(x, alpha, beta, sigma, gamma, N) {
   
 }
 
+
 ## Function to plot a normal distribution
 normal_plot = function(mu, sigma, gamma, xlab, ylab, ...) {
   
@@ -94,7 +97,7 @@ normal_plot = function(mu, sigma, gamma, xlab, ylab, ...) {
   
   ## Add prior interval
   polygon(x = c(xp[1],xp,xp[101]), y = c(0,yp,0), 
-          border = NA, col = alpha_red)
+          border = NA, col = alpha_col("red"))
   lines(xx, yy, col = "red", lwd = 2)
   
   ## Add labels
@@ -102,6 +105,7 @@ normal_plot = function(mu, sigma, gamma, xlab, ylab, ...) {
   title(ylab = ylab, line = 3.0)
   
 } ## normal_plot
+
 
 ## Function to plot a folded normal distribution
 folded_normal_plot = function(mu, sigma, gamma, xlab, ylab, ...) {
@@ -128,7 +132,7 @@ folded_normal_plot = function(mu, sigma, gamma, xlab, ylab, ...) {
   
   ## Add prior interval
   polygon(x = c(xx[xp[1]],xx[xp],xx[xp[length(xp)]]), y = c(0,yy[xp],0),
-          border = NA, col = alpha_red)
+          border = NA, col = alpha_col("red"))
   lines(xx, yy, col = "red", lwd = 2)
   
   ## Add labels
@@ -137,11 +141,9 @@ folded_normal_plot = function(mu, sigma, gamma, xlab, ylab, ...) {
   
 } ## folded_normal_plot
 
+
 ## Function to plot time series of MCMC samples
-plot_samples = function(diag_var) {
-  
-  ## Extract data
-  x = posterior()[,,diag_var]
+plot_samples = function(x, label) {
   
   ## Graphical parameters
   graphical_parameters()
@@ -153,15 +155,13 @@ plot_samples = function(diag_var) {
   
   ## Add labels
   title(xlab = "Sample")
-  title(ylab = parameter_labels[diag_var])
+  title(ylab = label)
   
 } ## plot_samples
 
+
 ## Function to plot parameter densities
-plot_density = function(diag_var){
-  
-  ## Extract data
-  x = posterior()[,,diag_var]
+plot_density = function(x, label){
   
   ## Compute densities
   dd = list()
@@ -195,7 +195,7 @@ plot_density = function(diag_var){
   }
   
   ## Add labels
-  title(xlab = parameter_labels[diag_var])
+  title(xlab = label)
   title(ylab = "Density")
   
 } ## plot_density

@@ -288,7 +288,7 @@ gamma = reactive({
 output$alpha_discrepancy_plot = renderPlot({
   
   ## Skip plotting if no data is loaded
-  if (no_data() | bad_obs() | bad_prior())
+  if (no_data() | bad_obs() | bad_model_prior() | bad_real_prior())
     return(NULL)
   
   ## Skip plotting if discrepancy not defined
@@ -301,8 +301,7 @@ output$alpha_discrepancy_plot = renderPlot({
 
   ## Posterior and predictive
   alpha     = as.numeric(posterior()[,,"alpha"])
-  alphastar = alpha + input$mu_delta_alpha + 
-    input$sigma_delta_alpha * rnorm(input$N)
+  alphastar = as.numeric(discrepancy()[,,"alphastar"])
 
   ## Compute densities
   da  = density(alpha)
@@ -346,7 +345,7 @@ output$alpha_discrepancy_plot = renderPlot({
 output$beta_discrepancy_plot = renderPlot({
   
   ## Skip plotting if no data is loaded
-  if (no_data() | bad_obs() | bad_prior())
+  if (no_data() | bad_obs() | bad_model_prior() | bad_real_prior())
     return(NULL)
   
   ## Skip plotting if discrepancy not defined
@@ -359,8 +358,7 @@ output$beta_discrepancy_plot = renderPlot({
   
   ## Posterior and predictive
   beta     = as.numeric(posterior()[,,"beta"])
-  betastar = beta + input$mu_delta_beta + 
-    input$sigma_delta_beta * rnorm(input$N)
+  betastar = as.numeric(discrepancy()[,,"betastar"])
   
   ## Compute densities
   da  = density(beta)
@@ -404,7 +402,7 @@ output$beta_discrepancy_plot = renderPlot({
 output$sigma_discrepancy_plot = renderPlot({
   
   ## Skip plotting if no data is loaded
-  if (no_data() | bad_obs() | bad_prior())
+  if (no_data() | bad_obs() | bad_model_prior() | bad_real_prior())
     return(NULL)
   
   ## Skip plotting if discrepancy not defined
@@ -417,7 +415,7 @@ output$sigma_discrepancy_plot = renderPlot({
   
   ## Posterior and predictive
   sigma     = as.numeric(posterior()[,,"sigma"])
-  sigmastar = sqrt(sigma^2 + rnorm(input$N, input$mu_delta_sigma, input$sigma_delta_sigma)^2)
+  sigmastar = as.numeric(discrepancy()[,,"sigmastar"])
   
   ## Compute densities
   bw  = bw.nrd0(sigma)
@@ -463,7 +461,7 @@ output$sigma_discrepancy_plot = renderPlot({
 output$prior_discrepancy_plot = renderPlot({
   
   ## Skip plotting if error condition
-  if(no_data() | input$priors == "reference" | bad_prior())
+  if(no_data() | input$model_priors == "reference" | bad_model_prior() | bad_real_prior())
     return(NULL)
   
   ## Simulate from parameter priors
@@ -550,13 +548,13 @@ output$prior_discrepancy_plot = renderPlot({
 marginal_plot = function() {
 
   ## Skip plotting if no data is loaded
-  if (no_data() | bad_obs() | bad_prior())
+  if (no_data() | bad_obs() | bad_model_prior() | bad_real_prior())
     return(NULL)
 
   ## Extract data
   y      = data()[,input$y]
-  ystar1 = reference_posterior()[,,"ystar"]
-  ystar2 = discrepancy()[,,"ystar"]
+  ystar1 = ystar_reference()
+  ystar2 = ystar()
   probs  = 0.5*(1 + c(-1,+1)*gamma())
 
   ## Reference predictive density interval
@@ -626,7 +624,7 @@ output$save_samples = downloadHandler(
   filename = "samples.csv",
   content = function(file) {
     ## Skip plotting if no data is loaded
-    if (no_data() | bad_obs() | bad_prior()) {
+    if (no_data() | bad_obs() | bad_model_prior() | bad_real_prior()) {
       write.csv(NULL, file = file, row.names = FALSE)
     } else {
       write.csv(data.frame(alpha     = as.numeric(posterior()[,,"alpha"]),
@@ -635,8 +633,8 @@ output$save_samples = downloadHandler(
                            alphastar = as.numeric(discrepancy()[,,"alphastar"]),
                            betastar  = as.numeric(discrepancy()[,,"betastar"]),
                            sigmastar = as.numeric(discrepancy()[,,"sigmastar"]),
-                           xstar     = as.numeric(discrepancy()[,,"xstar"]),
-                           ystar     = as.numeric(discrepancy()[,,"ystar"])
+                           xstar     = as.numeric(xstar()),
+                           ystar     = as.numeric(ystar())
       ),
       file = file, row.names = FALSE)
     }
@@ -648,12 +646,12 @@ output$save_samples = downloadHandler(
 output$predictive_intervals = renderTable({
 
   ## Skip table if no data is loaded
-  if (no_data() | bad_obs() | bad_prior())
+  if (no_data() | bad_obs() | bad_model_prior() | bad_real_prior())
     return(NULL)
 
   ## Extract data
-  ystar1 = reference_posterior()[,,"ystar"]
-  ystar2 = discrepancy()[,,"ystar"]
+  ystar1 = ystar_reference()
+  ystar2 = ystar()
 
   ## Interval width
   probs = 0.5*(1 + c(-1,+1)*gamma())
@@ -681,16 +679,16 @@ rownames = TRUE
 joint_plot = function() {
 
   ## Skip plotting if error condition
-  if (no_data() | bad_obs() | bad_prior())
+  if (no_data() | bad_obs() | bad_model_prior() | bad_real_prior())
     return(NULL)
 
   ## Extract data
   x         = data()[,input$x]
   y         = data()[,input$y]
-  xstar     = as.numeric(discrepancy()[,,"xstar"])
-  ystar     = as.numeric(discrepancy()[,,"ystar"])
-  xstar_ref = as.numeric(reference_posterior()[,,"xstar"])
-  ystar_ref = as.numeric(reference_posterior()[,,"ystar"])
+  xstar     = as.numeric(xstar())
+  ystar     = as.numeric(ystar())
+  xstar_ref = as.numeric(xstar_reference())
+  ystar_ref = as.numeric(ystar_reference())
 
   ## Extract predictive intervals
   reference   = reference_predictive()

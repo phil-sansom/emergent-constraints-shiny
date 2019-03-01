@@ -198,8 +198,8 @@ ui = navbarPage(
                fluidRow(
                  column(width = 6,
                         radioButtons(
-                          inputId  = "priors",
-                          label    = "Select priors",
+                          inputId  = "model_priors",
+                          label    = "Ensemble priors",
                           choices  = list(Reference   = "reference", 
                                           Informative = "informative"),
                           selected = "reference",
@@ -207,13 +207,29 @@ ui = navbarPage(
                         ) ## priors
                  ),
                  column(width = 6,
-                        uiOutput(outputId = "prior_input_select")
+                        uiOutput(outputId = "model_input_select")
                  )
                ),
                uiOutput(outputId = "alpha_prior"),
                uiOutput(outputId = "beta_prior" ),
                uiOutput(outputId = "rho_prior"  ),
                uiOutput(outputId = "sigma_prior"),
+               hr(),
+               fluidRow(
+                 column(width = 6,
+                        radioButtons(
+                          inputId  = "real_priors",
+                          label    = "Real world priors",
+                          choices  = list(Reference   = "reference", 
+                                          Informative = "informative"),
+                          selected = "reference",
+                          inline   = FALSE
+                        ) ## priors
+                 ),
+                 column(width = 6,
+                        uiOutput(outputId = "real_input_select")
+                 )
+               ),
                uiOutput(outputId = "xstar_prior")
              ), ## sidePanel
 
