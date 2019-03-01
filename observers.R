@@ -22,23 +22,23 @@ observe({
 
 }) ## observe
 
-## Update predictor label when predictor changes
-observe({
-  # print("Observers 2: Update xlab")
-  updateTextInput(session = session,
-                  inputId = "xlab",
-                  value   = input$x
-  )
-}) ## observe
-
-## Update response label when response changes
-observe({
-  # print("Observers 3: Update ylab")
-  updateTextInput(session = session,
-                  inputId = "ylab",
-                  value   = input$y
-  )
-}) ## observe
+# ## Update predictor label when predictor changes
+# observe({
+#   # print("Observers 2: Update xlab")
+#   updateTextInput(session = session,
+#                   inputId = "xlab",
+#                   value   = input$x
+#   )
+# }) ## observe
+# 
+# ## Update response label when response changes
+# observe({
+#   # print("Observers 3: Update ylab")
+#   updateTextInput(session = session,
+#                   inputId = "ylab",
+#                   value   = input$y
+#   )
+# }) ## observe
 
 ## Update observation input controls
 observe({

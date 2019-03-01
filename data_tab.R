@@ -26,8 +26,8 @@ output$data_plot = renderPlot({
     abline(v = input$z, col = "blue", lty = "dotdash", lwd = 2)
 
   ## Add labels
-  title(xlab = input$xlab)
-  title(ylab = input$ylab)
+  title(xlab = input$x)
+  title(ylab = input$y)
 
   ## Add legend
   legend("bottomright", legend = c("Models","Observation"),
@@ -38,7 +38,7 @@ output$data_plot = renderPlot({
   # p = ggplot() +
   #   geom_point(mapping = aes_string(x = input$x, y = input$y),
   #              data = data()) +
-  #   labs(x = input$xlab, y = input$ylab)
+  #   labs(x = input$x, y = input$y)
   #
   # ## Add observations
   # if (is.numeric(input$z))

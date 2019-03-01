@@ -10,6 +10,15 @@ graphical_parameters = function() {
   
 }
 
+## Transparent colours
+alpha_col = function(x) {
+  
+  xx = col2rgb(x)
+  
+  rgb(xx[1], xx[2], xx[3], 127, maxColorValue = 255)
+  
+}
+
 ## Compute useful plotting limits
 limits = function(...) {
   

@@ -164,19 +164,6 @@ ui = navbarPage(
                                     selected = NULL)
                  ) ## column
                ), ## fluidRow
-               fluidRow(
-                 column(width = 6,
-                        textInput(inputId = "xlab",
-                                  label   = "Predictor label",
-                                  value   = NULL)
-                 ), ## column
-                 column(width = 6,
-                        textInput(inputId = "ylab",
-                                  label   = "Response label",
-                                  value   = NULL
-                        )
-                 ) ## column
-               ), ## fluidRow
                hr(),
                h4("Observations"),
                fluidRow(
@@ -205,7 +192,6 @@ ui = navbarPage(
   ## Prior panel
   tabPanel("Priors",
            value = "priors",
-           useShinyjs(),
            sidebarLayout(
              sidebarPanel(
                # h4("Priors"),
@@ -273,42 +259,178 @@ ui = navbarPage(
   tabPanel("Projections",
            sidebarLayout(
              sidebarPanel(
-               title = "Discrepancy parameters",
-               radioButtons(
-                 inputId  = "discrepancy_input_select",
-                 label    = "Input style",
-                 choices  = list(Sliders = "sliders", Numerical = "numerical"),
-                 selected = "sliders",
-                 inline   = TRUE
-               ),
-               uiOutput(outputId = "alpha_discrepancy"),
-               uiOutput(outputId = "beta_discrepancy" ),
-               uiOutput(outputId = "rho_discrepancy"  ),
-               uiOutput(outputId = "sigma_discrepancy"),
-               hr(),
-               numericInput(inputId = "N",
-                            label   = "Number of samples",
-                            value   = 10000,
-                            min     = 1000,
-                            step    = 1000
-               ), ## numericInput
-               fluidRow(
-                 column(width = 8,
-                        selectInput(inputId  = "gamma",
-                                    label    = "Interval width",
-                                    choices  = list("68% (1 sd)" = 0.68,
-                                                    "90%"        = 0.90,
-                                                    "95% (2 sd)" = 0.95,
-                                                    "99%"        = 0.99,
-                                                    "Custom"     = "custom"),
-                                    selected = 0.90
-                        ) ## selectInput
-                 ), ## column
-                 column(width = 4,
-                        uiOutput(outputId = "gamma_custom")
-                 ) ## column
-               ) ## fluidRow
+               tabsetPanel(
+                 tabPanel(
+                   title = "Discrepancy parameters",
+                   radioButtons(
+                     inputId  = "discrepancy_input_select",
+                     label    = "Input style",
+                     choices  = list(Sliders = "sliders", Numerical = "numerical"),
+                     selected = "sliders",
+                     inline   = TRUE
+                   ),
+                   uiOutput(outputId = "alpha_discrepancy"),
+                   uiOutput(outputId = "beta_discrepancy" ),
+                   uiOutput(outputId = "rho_discrepancy"  ),
+                   uiOutput(outputId = "sigma_discrepancy")
+                 ), ## tabPanel
+                 tabPanel(
+                   title = "Plotting options",
+                   h5("Labels"),
+                   fluidRow(
+                     column(width = 6,
+                            textInput(inputId = "xlab",
+                                      label   = "Predictor"
+                            ) ## xlab
+                     ), ## column
+                     column(width = 6,
+                            textInput(inputId = "ylab",
+                                      label   = "Response"
+                            ) ## ylab
+                     ) ## column
+                   ), ## fluidRow
+                   hr(),
+                   h5("Predictor limits"),
+                   fluidRow(
+                     column(width = 6,
+                            numericInput(inputId = "xmin",
+                                         label   = "Min",
+                                         value   = NA
+                            ) ## xmin
+                     ), ## column
+                     column(width = 6,
+                            numericInput(inputId = "xmax",
+                                          label   = "Max",
+                                          value   = NA
+                            ) ## xmax
+                     ) ## column
+                   ), ## fluidRow
+                   h5("Response limits"),
+                   fluidRow(
+                     column(width = 6,
+                            numericInput(inputId = "ymin",
+                                         label   = "Min",
+                                         value   = NA
+                            ) ## ymin
+                     ), ## column
+                     column(width = 6,
+                            numericInput(inputId = "ymax",
+                                         label   = "Max",
+                                         value   = NA
+                            ) ## ymax
+                     ) ## column
+                   ), ## fluidRow
+                   h5("Plotting colours"),
+                   fluidRow(
+                     column(width = 4,
+                            selectInput(inputId = "ref_col",
+                                        label   = "Reference",
+                                        choices = list(Black   = "black",
+                                                       Red     = "red",
+                                                       Blue    = "blue",
+                                                       Green   = "green",
+                                                       Yellow  = "yellow",
+                                                       Orange  = "orange",
+                                                       Brown   = "brown",
+                                                       Cyan    = "cyan",
+                                                       Gold    = "gold",
+                                                       Gray    = "gray",
+                                                       Magenta = "magenta",
+                                                       Pink    = "pink",
+                                                       Purple  = "purple"),
+                                        selected = "black"
+                            ) ## ref_col
+                     ), ## column
+                     column(width = 4,
+                            selectInput(inputId = "inf_col",
+                                        label   = "Discrepancy",
+                                        choices = list(Black   = "black",
+                                                       Red     = "red",
+                                                       Blue    = "blue",
+                                                       Green   = "green",
+                                                       Yellow  = "yellow",
+                                                       Orange  = "orange",
+                                                       Brown   = "brown",
+                                                       Cyan    = "cyan",
+                                                       Gold    = "gold",
+                                                       Gray    = "gray",
+                                                       Magenta = "magenta",
+                                                       Pink    = "pink",
+                                                       Purple  = "purple"),
+                                        selected = "red"
+                            ) ## inf_col
+                     ), ## column
+                     column(width = 4,
+                            selectInput(inputId = "obs_col",
+                                        label   = "Observations",
+                                        choices = list(Black   = "black",
+                                                       Red     = "red",
+                                                       Blue    = "blue",
+                                                       Green   = "green",
+                                                       Yellow  = "yellow",
+                                                       Orange  = "orange",
+                                                       Brown   = "brown",
+                                                       Cyan    = "cyan",
+                                                       Gold    = "gold",
+                                                       Gray    = "gray",
+                                                       Magenta = "magenta",
+                                                       Pink    = "pink",
+                                                       Purple  = "purple"),
+                                        selected = "blue"
+                            ) ## obs_col
+                     ) ## column
+                   ), ## fluidRow
+                   hr(),
+                   h5("Legend"),
+                   fluidRow(
+                     column(width = 8,
+                            selectInput(inputId = "legend_position",
+                                        label   = "Position",
+                                        choices = list("Bottom right" = "bottomright",
+                                                        Bottom        = "botttom",
+                                                       "Bottom left"  = "bottomleft",
+                                                        Left          = "left",
+                                                       "Top left"     = "topleft",
+                                                        Top           = "top",
+                                                       "Top right"    = "topright",
+                                                        Right         = "right"),
+                                        selected = "topright"
+                            ) ## legend_position
+                     ), ## column
+                     column(width = 4,
+                            checkboxInput(inputId = "legend_orientation",
+                                          label   = "Horizontal",
+                                          value   = FALSE
+                            ) ## legend_orientation
+                     ) ## column
+                   ), ## fluidRow
+                   hr(),
+                   numericInput(inputId = "N",
+                                label   = "Number of samples",
+                                value   = 10000,
+                                min     = 1000,
+                                step    = 1000
+                   ), ## numericInput
+                   fluidRow(
+                     column(width = 8,
+                            selectInput(inputId  = "gamma",
+                                        label    = "Interval width",
+                                        choices  = list("68% (1 sd)" = 0.68,
+                                                        "90%"        = 0.90,
+                                                        "95% (2 sd)" = 0.95,
+                                                        "99%"        = 0.99,
+                                                        "Custom"     = "custom"),
+                                        selected = 0.90
+                            ) ## selectInput
+                     ), ## column
+                     column(width = 4,
+                            uiOutput(outputId = "gamma_custom")
+                     ) ## column
+                   ) ## fluidRow
+                 ) ## tabPanel
+               ) ## tabsetPanel
              ), ## sidebarPanel
+             
              mainPanel(
                tabsetPanel(
                  selected = "Marginal projections",

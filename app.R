@@ -1,7 +1,7 @@
 ## Preamble
 library(MASS)
 library(rstan)
-library(shinyjs)
+library(shiny)
 options(mc.cores = 4)             ## Set the number of CPU cores to use
 rstan_options(auto_write = TRUE)  ## Prevent STAN recompiling unnecessarily
 

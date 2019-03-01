@@ -324,21 +324,21 @@ output$alpha_discrepancy_plot = renderPlot({
   ## Plot posterior and predictive densities
   plot (NA, type = "n", xlim = xlim, ylim = ylim)
   polygon(x = c(da$x[xa[1]],da$x[xa],da$x[xa[length(xa)]]),
-          y = c(0,da$y[xa],0), border = NA, col = alpha_black)
-  lines(da, col = "black", lwd = 2)
+          y = c(0,da$y[xa],0), border = NA, col = alpha_col(input$ref_col))
+  lines(da, col = input$ref_col, lwd = 2)
   polygon(x = c(das$x[xas[1]],das$x[xas],das$x[xas[length(xas)]]),
-          y = c(0,das$y[xas],0), border = NA, col = alpha_red)
-  lines(das, col = "red", lwd = 2)
+          y = c(0,das$y[xas],0), border = NA, col = alpha_col(input$inf_col))
+  lines(das, col = input$inf_col, lwd = 2)
   
   ## Add labels
   title(xlab = parameter_labels["alphastar"])
   title(ylab = "Density")
   
   ## Add legend
-  legend("topright", 
+  legend(input$legend_position, 
          legend = c(parameter_labels["alpha"],parameter_labels["alphastar"]),
-         col = c("black","red"), lty = c("solid","solid"), lwd = c(2,2),
-         bty = "n")
+         col = c(input$ref_col,input$inf_col), lty = c("solid","solid"), 
+         lwd = c(2,2), bty = "n", horiz = input$legend_orientation)
   
 }) ## alpha_prior_plot
 
@@ -382,21 +382,21 @@ output$beta_discrepancy_plot = renderPlot({
   ## Plot posterior and predictive densities
   plot (NA, type = "n", xlim = xlim, ylim = ylim)
   polygon(x = c(da$x[xa[1]],da$x[xa],da$x[xa[length(xa)]]),
-          y = c(0,da$y[xa],0), border = NA, col = alpha_black)
-  lines(da, col = "black", lwd = 2)
+          y = c(0,da$y[xa],0), border = NA, col = alpha_col(input$ref_col))
+  lines(da, col = input$ref_col, lwd = 2)
   polygon(x = c(das$x[xas[1]],das$x[xas],das$x[xas[length(xas)]]),
-          y = c(0,das$y[xas],0), border = NA, col = alpha_red)
-  lines(das, col = "red", lwd = 2)
+          y = c(0,das$y[xas],0), border = NA, col = alpha_col(input$inf_col))
+  lines(das, col = input$inf_col, lwd = 2)
   
   ## Add labels
   title(xlab = parameter_labels["betastar"])
   title(ylab = "Density")
   
   ## Add legend
-  legend("topright", 
+  legend(input$legend_position, 
          legend = c(parameter_labels["beta"],parameter_labels["betastar"]),
-         col = c("black","red"), lty = c("solid","solid"), lwd = c(2,2),
-         bty = "n")
+         col = c(input$ref_col,input$inf_col), lty = c("solid","solid"), 
+         lwd = c(2,2), bty = "n", horiz = input$legend_orientation)
   
 }) ## beta_prior_plot
 
@@ -441,21 +441,21 @@ output$sigma_discrepancy_plot = renderPlot({
   ## Plot posterior and predictive densities
   plot (NA, type = "n", xlim = xlim, ylim = ylim)
   polygon(x = c(da$x[xa[1]],da$x[xa],da$x[xa[length(xa)]]),
-          y = c(0,da$y[xa],0), border = NA, col = alpha_black)
-  lines(da, col = "black", lwd = 2)
+          y = c(0,da$y[xa],0), border = NA, col = alpha_col(input$ref_col))
+  lines(da, col = input$ref_col, lwd = 2)
   polygon(x = c(das$x[xas[1]],das$x[xas],das$x[xas[length(xas)]]),
-          y = c(0,das$y[xas],0), border = NA, col = alpha_red)
-  lines(das, col = "red", lwd = 2)
+          y = c(0,das$y[xas],0), border = NA, col = alpha_col(input$inf_col))
+  lines(das, col = input$inf_col, lwd = 2)
   
   ## Add labels
   title(xlab = parameter_labels["sigmastar"])
   title(ylab = "Density")
   
   ## Add legend
-  legend("topright", 
+  legend(input$legend_position, 
          legend = c(parameter_labels["sigma"],parameter_labels["sigmastar"]),
-         col = c("black","red"), lty = c("solid","solid"), lwd = c(2,2),
-         bty = "n")
+         col = c(input$ref_col,input$inf_col), lty = c("solid","solid"), 
+         lwd = c(2,2), bty = "n", horiz = input$legend_orientation)
   
 }) ## sigma_discrepancy_plot
 
@@ -514,29 +514,35 @@ output$prior_discrepancy_plot = renderPlot({
     dp[i,c("lwr","upr")] = quantile(buffer, 0.5*(1 + c(-1,+1)*gamma()))
   }
   
+  ## Labels
+  xlab = ifelse (nchar(input$xlab) == 0, input$x, input$xlab)
+  ylab = ifelse (nchar(input$ylab) == 0, input$y, input$ylab)
+  
   ## Graphical parameters
   graphical_parameters()
   
   ## Plot prior predictive mean
-  plot(xx, pp[,"fit"], type = "l", lty = "dotdash", lwd = 2,
+  plot(xx, pp[,"fit"], type = "l", 
+       col = input$ref_col, lty = "dotdash", lwd = 2,
        xlim = range(xx), ylim = range(pp,dp), yaxs = "r")
   
   ## Add prior predictive interval
-  lines(xx, pp[,"lwr"], lty = "dashed", lwd = 2)
-  lines(xx, pp[,"upr"], lty = "dashed", lwd = 2)
+  lines(xx, pp[,"lwr"], col = input$ref_col, lty = "dashed", lwd = 2)
+  lines(xx, pp[,"upr"], col = input$ref_col, lty = "dashed", lwd = 2)
   
   ## Add discrepancy predictive distribution
-  lines(xx, dp[,"fit"], col = "red", lty = "dotdash" , lwd = 2)
-  lines(xx, dp[,"lwr"], col = "red", lty = "dashed", lwd = 2)
-  lines(xx, dp[,"upr"], col = "red", lty = "dashed", lwd = 2)
+  lines(xx, dp[,"fit"], col = input$inf_col, lty = "dotdash" , lwd = 2)
+  lines(xx, dp[,"lwr"], col = input$inf_col, lty = "dashed", lwd = 2)
+  lines(xx, dp[,"upr"], col = input$inf_col, lty = "dashed", lwd = 2)
 
   ## Add labels
-  title(xlab = input$xlab)
-  title(ylab = input$ylab)
+  title(xlab = xlab)
+  title(ylab = ylab)
   
   ## Add legend
-  legend("topright", legend = c("Models","Real world"), col = c("black", "red"),
-         lty = c("solid","solid"), lwd = c(2,2), bty = "n")
+  legend(input$legend_position, legend = c("Models","Real world"), 
+         col = c(input$ref_col, input$inf_col), lty = c("solid","solid"), 
+         lwd = c(2,2), bty = "n", horiz = input$legend_orientation)
   
 }) ## prior_discrepancy_plot
 
@@ -563,35 +569,42 @@ marginal_plot = function() {
   x2m   = quantile(ystar2, probs = probs)
   x2m   = seq(max(which(dens2$x < x2m[1])), min(which(dens2$x > x2m[2])), 1)
 
-  ## Plotting limiis
-  ymax = max(dens1$y,dens2$y)*1.04
-  xlim = range(dens1$x,dens2$x)
-  ylim = c(0,ymax)
+  ## Plotting limits
+  xlim    = numeric(2)
+  ylim    = numeric(2)
+  xlim[1] = if (is.na(input$ymin)) min(dens1$x,dens2$x) else input$ymin
+  xlim[2] = if (is.na(input$ymax)) max(dens1$x,dens2$x) else input$ymax
+  ylim[1] = 0
+  ylim[2] = max(dens1$y,dens2$y)*1.04
 
+  ## Labels
+  xlab = ifelse (nchar(input$ylab) == 0, input$y, input$ylab)
+  ylab = "Density"
+  
   ## Graphical parameters
   graphical_parameters()
 
   ## Plot data as rug
   plot(y, type = "n", xlim = xlim, ylim = ylim)
-  rug (y, ticksize = 0.02, side = 1, lwd = 2, col = "black", quiet = TRUE)
+#  rug (y, ticksize = 0.02, side = 1, lwd = 2, col = "black", quiet = TRUE)
 
   ## Add predictive densities
   polygon(x = c(dens1$x[x1m[1]],dens1$x[x1m],dens1$x[x1m[length(x1m)]]),
-          y = c(0,dens1$y[x1m],0), border = NA, col = alpha_black)
+          y = c(0,dens1$y[x1m],0), border = NA, col = alpha_col(input$ref_col))
   polygon(x = c(dens2$x[x2m[1]],dens2$x[x2m],dens2$x[x2m[length(x2m)]]),
-          y = c(0,dens2$y[x2m],0), border = NA, col = alpha_red)
-  lines(dens1, col = "black", lwd = 2)
-  lines(dens2, col = "red"  , lwd = 2)
+          y = c(0,dens2$y[x2m],0), border = NA, col = alpha_col(input$inf_col))
+  lines(dens1, col = input$ref_col, lwd = 2)
+  lines(dens2, col = input$inf_col, lwd = 2)
 
   ## Add labels
-  title(xlab = input$ylab)
-  title(ylab = "Density")
+  title(xlab = xlab)
+  title(ylab = ylab)
 
   ## Add legend
-  legend("topright",
+  legend(input$legend_position,
          legend = c("Reference model","Conditionally exchangeable model"),
-         col = c("black","red"), lty = c("solid","solid"), lwd = c(2,2),
-         bty = "n")
+         col = c(input$ref_col,input$inf_col), lty = c("solid","solid"), 
+         lwd = c(2,2), bty = "n", horiz = input$legend_orientation)
 
 }
 output$marginal_plot = renderPlot(marginal_plot())
@@ -711,8 +724,16 @@ joint_plot = function() {
   discrepancy_density$z = z
 
   ## Plotting limits
-  xlim = range(x,xstar,xstar_ref)
-  ylim = range(y,ystar,ystar_ref)
+  xlim = numeric(2)
+  ylim = numeric(2)
+  xlim[1] = if (is.na(input$xmin)) min(x,xstar,xstar_ref) else input$xmin
+  xlim[2] = if (is.na(input$xmax)) max(x,xstar,xstar_ref) else input$xmax
+  ylim[1] = if (is.na(input$ymin)) min(y,ystar,ystar_ref) else input$ymin
+  ylim[2] = if (is.na(input$ymax)) max(y,ystar,ystar_ref) else input$ymax
+
+  ## Labels
+  xlab = ifelse (nchar(input$xlab) == 0, input$x, input$xlab)
+  ylab = ifelse (nchar(input$ylab) == 0, input$y, input$ylab)
   
   ## Graphical parameters
   graphical_parameters()
@@ -725,39 +746,40 @@ joint_plot = function() {
   points(x, y, col = "black", pch = 19)
 
   ## Add reference predictions
-  lines(xx, reference[,"fit"], col = "black", lty = "dotdash", lwd = 2)
-  lines(xx, reference[,"lwr"], col = "black", lty = "dashed" , lwd = 2)
-  lines(xx, reference[,"upr"], col = "black", lty = "dashed" , lwd = 2)
+  lines(xx, reference[,"fit"], col = input$ref_col, lty = "dotdash", lwd = 2)
+  lines(xx, reference[,"lwr"], col = input$ref_col, lty = "dashed" , lwd = 2)
+  lines(xx, reference[,"upr"], col = input$ref_col, lty = "dashed" , lwd = 2)
 
   ## Add discrepancy predictions
-  lines(xx, discrepancy[,"fit"], col = "red", lty = "dotdash", lwd = 2)
-  lines(xx, discrepancy[,"lwr"], col = "red", lty = "dashed" , lwd = 2)
-  lines(xx, discrepancy[,"upr"], col = "red", lty = "dashed" , lwd = 2)
+  lines(xx, discrepancy[,"fit"], col = input$inf_col, lty = "dotdash", lwd = 2)
+  lines(xx, discrepancy[,"lwr"], col = input$inf_col, lty = "dashed" , lwd = 2)
+  lines(xx, discrepancy[,"upr"], col = input$inf_col, lty = "dashed" , lwd = 2)
 
   ## Add observations
-  abline(v = mean    (xstar)       , col = "blue", lty = "dotdash", lwd = 2)
-  abline(v = quantile(xstar, probs), col = "blue", lty = "dashed" , lwd = 2)
+  abline(v = mean    (xstar)       , col = input$obs_col, lty = "dotdash", lwd = 2)
+  abline(v = quantile(xstar, probs), col = input$obs_col, lty = "dashed" , lwd = 2)
 
   ## Add reference density
   contour(reference_density$x, reference_density$y, reference_density$z,
           levels = gamma(), drawlabels = FALSE,
-          lwd = 2, col = "black", lty = "dotted", add = TRUE)
+          lwd = 2, col = input$ref_col, lty = "dotted", add = TRUE)
 
   ## Add discrepancy density
   contour(discrepancy_density$x, discrepancy_density$y, discrepancy_density$z,
           levels = gamma(), drawlabels = FALSE,
-          lwd = 2, col = "red", lty = "dotted", add = TRUE)
+          lwd = 2, col = input$inf_col, lty = "dotted", add = TRUE)
 
   ## Add labels
-  title(xlab = input$xlab)
-  title(ylab = input$ylab)
+  title(xlab = xlab)
+  title(ylab = ylab)
 
   ## Add legend
-  legend("bottomright",
+  legend(input$legend_position,
          legend = c("Reference model","Conditionally exchangeable model",
                     "Observational constraint"),
-         col = c("black","red","blue"),
-         lty = c("dotdash","dotdash","dotdash"), lwd = c(2,2,2), bty = "n")
+         col = c(input$ref_col,input$inf_col,input$obs_col),
+         lty = c("solid","solid","solid"), lwd = c(2,2,2), bty = "n", 
+         horiz = input$legend_orientation)
 
 }
 output$joint_plot = renderPlot(joint_plot())
