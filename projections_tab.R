@@ -211,7 +211,7 @@ output$sigma_discrepancy = renderUI({
       fluidRow(
         column(width = 6,
                numericInput(inputId = "mu_delta_sigma",
-                            label   = "Bias \\(\\mu_{\\delta_\\sigma}\\)",
+                            label   = "Fold \\(\\mu_{\\delta_\\sigma}\\)",
                             value   = 0,
                             min     = NA,
                             max     = NA,
@@ -220,7 +220,7 @@ output$sigma_discrepancy = renderUI({
         ), ## column
         column(width = 6,
                numericInput(inputId = "sigma_delta_sigma",
-                            label   = "Uncertainty \\(\\sigma_{\\delta_\\sigma}\\)",
+                            label   = "Scale \\(\\sigma_{\\delta_\\sigma}\\)",
                             value   = 0,
                             min     = 0,
                             max     = NA,
@@ -235,7 +235,7 @@ output$sigma_discrepancy = renderUI({
       hr(),
       h5("Response spread \\(\\sigma_\\star\\)"),
       sliderInput(inputId = "mu_delta_sigma",
-                  label   = "Bias \\(\\mu_{\\delta_\\sigma}\\)",
+                  label   = "Fold \\(\\mu_{\\delta_\\sigma}\\)",
                   value   = 0,
                   min     = min,
                   max     = max,
@@ -243,7 +243,7 @@ output$sigma_discrepancy = renderUI({
                   ticks   = FALSE
       ), ## mu_delta_sigma
       sliderInput(inputId = "sigma_delta_sigma",
-                  label   = "Uncertainty \\(\\sigma_{\\delta_\\sigma}\\)",
+                  label   = "Scale \\(\\sigma_{\\delta_\\sigma}\\)",
                   value   = 0,
                   min     = 0,
                   max     = max,
