@@ -432,7 +432,7 @@ output$sigma_discrepancy_plot = renderPlot({
   xas = seq(max(which(das$x < qas[1])), min(which(das$x > qas[2])), 1)
   
   ## Plotting limits
-  xlim = range(sigma,sigmastar)
+  xlim = range(da$x,das$x)
   ylim = c(0, 1.04*max(da$y))
   
   ## Graphical parameters
