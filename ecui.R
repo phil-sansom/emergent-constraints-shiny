@@ -55,11 +55,10 @@ ui = navbarPage(
                          \\text{Real world intercept} \\\\
                          \\text{Real world slope}
                        \\end{array} \\\\
-                       \\sigma_\\star^2 & =
-                           \\sigma^2 + \\delta_\\sigma^2 & 
-                       \\delta_\\sigma & \\sim
+                        & & 
+                       \\sigma_\\star \\mid \\sigma & \\sim
                        \\text{Folded-Normal} \\left( 
-                           \\mu_{\\delta_\\sigma}, \\sigma_{\\delta_\\sigma}^2
+                           \\sigma, \\sigma_{\\delta_\\sigma}^2
                        \\right) &
                        \\text{Real world response uncertainty} \\\\ ~ \\\\
 
