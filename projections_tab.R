@@ -210,15 +210,6 @@ output$sigma_discrepancy = renderUI({
       h5("Response spread \\(\\sigma_\\star\\)"),
       fluidRow(
         column(width = 6,
-               numericInput(inputId = "mu_delta_sigma",
-                            label   = "Fold \\(\\mu_{\\delta_\\sigma}\\)",
-                            value   = 0,
-                            min     = NA,
-                            max     = NA,
-                            step    = step
-               ) ## mu_delta_sigma
-        ), ## column
-        column(width = 6,
                numericInput(inputId = "sigma_delta_sigma",
                             label   = "Scale \\(\\sigma_{\\delta_\\sigma}\\)",
                             value   = 0,
@@ -234,14 +225,6 @@ output$sigma_discrepancy = renderUI({
       withMathJax(),
       hr(),
       h5("Response spread \\(\\sigma_\\star\\)"),
-      sliderInput(inputId = "mu_delta_sigma",
-                  label   = "Fold \\(\\mu_{\\delta_\\sigma}\\)",
-                  value   = 0,
-                  min     = min,
-                  max     = max,
-                  step    = step,
-                  ticks   = FALSE
-      ), ## mu_delta_sigma
       sliderInput(inputId = "sigma_delta_sigma",
                   label   = "Scale \\(\\sigma_{\\delta_\\sigma}\\)",
                   value   = 0,
@@ -406,9 +389,9 @@ output$sigma_discrepancy_plot = renderPlot({
     return(NULL)
   
   ## Skip plotting if discrepancy not defined
-  if (is.null(input$mu_delta_sigma) | is.null(input$sigma_delta_sigma))
+  if (is.null(input$sigma_delta_sigma))
     return(NULL)
-  if (is.na  (input$mu_delta_sigma) | is.na  (input$sigma_delta_sigma))
+  if (is.na  (input$sigma_delta_sigma))
     return(NULL)
   if (input$sigma_delta_sigma < 0)
     return(NULL)
@@ -486,7 +469,7 @@ output$prior_discrepancy_plot = renderPlot({
   delta = mvrnorm(input$N, mu, Sigma)
   alphastar = alpha + delta[,1]
   betastar  = beta  + delta[,2] 
-  sigmastar = sqrt(sigma^2 + rnorm(input$N, input$mu_delta_sigma, input$sigma_delta_sigma)^2)
+  sigmastar = abs(rnorm(input$N, sigma, input$sigma_delta_sigma))
 
   ## Simulate from real world predictor
   xstar = input$mu_xstar + input$sigma_xstar * rnorm(input$N)

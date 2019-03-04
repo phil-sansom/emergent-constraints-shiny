@@ -222,12 +222,10 @@ discrepancy = reactive({
   ## Check discrepancy parameters
   if (! any(is.null(input$mu_delta_alpha) | is.null(input$sigma_delta_alpha) |
             is.null(input$mu_delta_beta ) | is.null(input$sigma_delta_beta ) |
-            is.null(input$mu_delta_sigma) | is.null(input$sigma_delta_sigma) |
-            is.null(input$rho_delta)) &
+            is.null(input$rho_delta)      | is.null(input$sigma_delta_sigma) ) &
       ! any(is.na(input$mu_delta_alpha) | is.na(input$sigma_delta_alpha) |
             is.na(input$mu_delta_beta ) | is.na(input$sigma_delta_beta ) |
-            is.na(input$mu_delta_sigma) | is.na(input$sigma_delta_sigma) |
-            is.na(input$rho_delta))) {
+            is.na(input$rho_delta)      | is.na(input$sigma_delta_sigma) )) {
     
     ## Set flags
     new_mean = FALSE
@@ -267,20 +265,11 @@ discrepancy = reactive({
       
     } ## Alpha/Beta uncertainty
     
-    ## Sigma bias and uncertainty
-    if (input$mu_delta_sigma != 0 | input$sigma_delta_sigma  > 0) {
+    ## Sigma uncertainty
+    if (input$sigma_delta_sigma  > 0) {
       
-      samples[,,"sigmastar"] = samples[,,"sigmastar"]^2
-      
-      if (input$mu_delta_sigma != 0)
-        samples[,,"sigmastar"] = 
-          samples[,,"sigmastar"] + input$mu_delta_sigma^2
-      
-      if (input$sigma_delta_sigma > 0)
-        samples[,,"sigmastar"] = 
-          samples[,,"sigmastar"] + (input$sigma_delta_sigma * rnorm(input$N))^2
-      
-      samples[,,"sigmastar"] = sqrt(samples[,,"sigmastar"])
+      samples[,,"sigmastar"] = 
+        abs(rnorm(input$N, samples[,,"sigmastar"], input$sigma_delta_sigma))
       
       new_sd = TRUE
       
