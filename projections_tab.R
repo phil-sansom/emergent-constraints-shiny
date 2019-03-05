@@ -2,8 +2,155 @@
 ## Projections tab ##
 #####################
 
+## Predictor distribution
+output$predictor = renderUI(
+  
+  if (input$discrepancy == "guided") {
+    
+    tagList(
+      fluidRow(
+        column(
+          width = 6,
+          numericInput(
+            inputId = "ymean",
+            label   = "Response mean",
+            value   = 0
+          )
+        ), ## column
+        column(
+          width = 6,
+          numericInput(
+            inputId = "ysd",
+            label   = "Response SD",
+            value   = 1
+          )
+        ) ## column
+      ) ## fluidRow
+    ) ## tagList
+    
+  } else {
+    
+    NULL
+    
+  }
+  
+) ## predictor
+
+## Likelihood of emergent constraint
+output$likelihood = renderUI(
+  
+  if (input$discrepancy == "guided") {
+    
+    tagList(
+      selectInput(inputId  = "likelihood",
+                  label    = "Likelihood of emergent relationship",
+                  choices  = list("Virtually certain (99-100%)" = 0.99,
+                                  "Very likely       (90-100%)" = 0.90,
+                                  "Likely            (66-100%)" = 0.66,
+                                  "Custom"            = "custom"),
+                  selected = 0.99
+      )
+    )
+    
+  } else {
+    
+    NULL
+    
+  }
+  
+) ## likelihood
+
+## Custom likelihood
+output$likelihood_custom = renderUI({
+  
+  if (input$discrepancy == "manual" | is.null(input$likelihood))
+    return(NULL)
+
+  if (input$likelihood == "custom")
+    tagList(
+      numericInput(inputId = "likelihood_custom", 
+                   label   = "Custom", 
+                   value   = 0.666,
+                   min     = 0.501, 
+                   max     = 1, 
+                   step    = 0.001) 
+    ) ## tagList
+
+}) ## custom_likelihood
+
+## Update likelihood
+likelihood = reactive({
+  
+  if (is.null(input$likelihood))
+    return(0.99)
+ 
+  if (input$likelihood != "custom")
+    return(as.numeric(input$likelihood))
+ 
+  if (is.null(input$likelihood_custom)) {
+    return(0.99)
+  } else {
+    return(input$likelihood_custom)
+  }
+
+}) ## likelihood
+
+
+## Print predictive intervals
+output$discrepancies = renderTable({
+  
+  ## Skip table if no data is loaded
+  if (input$discrepancy == "manual")
+    return(NULL)
+  if (no_data() | bad_obs() | bad_model_prior() | bad_real_prior())
+    return(NULL)
+
+  ## Initialise storage
+  discs = data.frame("SD" = numeric(3))
+  rownames(discs) = c("Intercept","Slope","Uncertainty")
+  
+  ## Compute intervals
+  discs[1,1] = sigma_delta_alpha()
+  discs[2,1] = sigma_delta_beta()
+  discs[3,1] = sigma_delta_sigma()
+
+  ## Return intervals
+  return(discs)
+  
+},
+rownames = TRUE
+)
+
+
+## Input selection
+output$discrepancy_input_select = renderUI({
+  
+  if (input$discrepancy == "manual") {
+    
+    tagList(
+      radioButtons(
+        inputId  = "discrepancy_input_select",
+        label    = "Input style",
+        choices  = list(Sliders = "sliders", Numerical = "numerical"),
+        selected = "sliders",
+        inline   = FALSE
+      )
+    ) ## tagList
+    
+  } else {
+    
+    NULL
+    
+  }
+  
+}) ## Discrepancy_input_select
+
+
 ## Intercept discrepancy
 output$alpha_discrepancy = renderUI({
+  
+  if (input$discrepancy == "guided" | is.null(input$discrepancy_input_select))
+    return(NULL)
   
   if (no_data()) {
     min  = -1.0
@@ -22,7 +169,6 @@ output$alpha_discrepancy = renderUI({
   if (input$discrepancy_input_select == "numerical") {
     tagList(
       withMathJax(),
-      hr(),
       h5("Intercept \\(\\alpha_\\star\\)"),
       fluidRow(
         column(width = 6,
@@ -48,7 +194,6 @@ output$alpha_discrepancy = renderUI({
   } else {
     tagList(
       withMathJax(),
-      hr(),
       h5("Intercept \\(\\alpha_\\star\\)"),
       sliderInput(inputId = "mu_delta_alpha",
                   label   = "Bias \\(\\mu_{\\delta_\\alpha}\\)",
@@ -73,6 +218,9 @@ output$alpha_discrepancy = renderUI({
 
 ## Slope discrepancy
 output$beta_discrepancy = renderUI({
+
+  if (input$discrepancy == "guided" | is.null(input$discrepancy_input_select))
+    return(NULL)
   
   if (no_data()) {
     min  = -1
@@ -143,6 +291,9 @@ output$beta_discrepancy = renderUI({
 
 ## Prior discrepancy correlation
 output$rho_discrepancy = renderUI({
+
+  if (input$discrepancy == "guided" | is.null(input$discrepancy_input_select))
+    return(NULL)
   
   inputId = "rho_delta"
   label   = "Corr(\\(\\alpha_\\star,\\beta_\\star\\))"
@@ -188,6 +339,9 @@ output$rho_discrepancy = renderUI({
 
 ## Response uncertainty discrepancy
 output$sigma_discrepancy = renderUI({
+
+  if (input$discrepancy == "guided" | is.null(input$discrepancy_input_select))
+    return(NULL)
   
   if (no_data()) {
     min  = -1
@@ -275,11 +429,11 @@ output$alpha_discrepancy_plot = renderPlot({
     return(NULL)
   
   ## Skip plotting if discrepancy not defined
-  if (is.null(input$mu_delta_alpha) | is.null(input$sigma_delta_alpha))
+  if (is.null(mu_delta_alpha()) | is.null(sigma_delta_alpha()))
     return(NULL)
-  if (is.na  (input$mu_delta_alpha) | is.na  (input$sigma_delta_alpha))
+  if (is.na  (mu_delta_alpha()) | is.na  (sigma_delta_alpha()))
     return(NULL)
-  if (input$sigma_delta_alpha < 0)
+  if (sigma_delta_alpha() < 0)
     return(NULL)
 
   ## Posterior and predictive
@@ -332,11 +486,11 @@ output$beta_discrepancy_plot = renderPlot({
     return(NULL)
   
   ## Skip plotting if discrepancy not defined
-  if (is.null(input$mu_delta_beta) | is.null(input$sigma_delta_beta))
+  if (is.null(mu_delta_beta()) | is.null(sigma_delta_beta()))
     return(NULL)
-  if (is.na  (input$mu_delta_beta) | is.na  (input$sigma_delta_beta))
+  if (is.na  (mu_delta_beta()) | is.na  (sigma_delta_beta()))
     return(NULL)
-  if (input$sigma_delta_beta < 0)
+  if (sigma_delta_beta() < 0)
     return(NULL)
   
   ## Posterior and predictive
@@ -389,11 +543,11 @@ output$sigma_discrepancy_plot = renderPlot({
     return(NULL)
   
   ## Skip plotting if discrepancy not defined
-  if (is.null(input$sigma_delta_sigma))
+  if (is.null(sigma_delta_sigma()))
     return(NULL)
-  if (is.na  (input$sigma_delta_sigma))
+  if (is.na  (sigma_delta_sigma()))
     return(NULL)
-  if (input$sigma_delta_sigma < 0)
+  if (sigma_delta_sigma() < 0)
     return(NULL)
   
   ## Posterior and predictive
@@ -444,7 +598,8 @@ output$sigma_discrepancy_plot = renderPlot({
 output$prior_discrepancy_plot = renderPlot({
   
   ## Skip plotting if error condition
-  if(no_data() | input$model_priors == "reference" | bad_model_prior() | bad_real_prior())
+  if(no_data() | input$model_priors == "reference" | bad_model_prior() |
+                 input$real_priors  == "reference" | bad_real_prior())
     return(NULL)
   
   ## Simulate from parameter priors
@@ -460,16 +615,16 @@ output$prior_discrepancy_plot = renderPlot({
   sigma = abs(rnorm(input$N, input$mu_sigma, input$sigma_sigma))
 
   ## Simulate from discrepancies
-  mu    = c(input$mu_delta_alpha,input$mu_delta_beta)
-  Sigma = matrix(c(input$sigma_delta_alpha^2,
-                   input$rho_delta*input$sigma_delta_alpha*input$sigma_delta_beta,
-                   input$rho_delta*input$sigma_delta_alpha*input$sigma_delta_beta,
-                   input$sigma_delta_beta^2),
+  mu    = c(mu_delta_alpha(),mu_delta_beta())
+  Sigma = matrix(c(sigma_delta_alpha()^2,
+                   rho_delta()*sigma_delta_alpha()*sigma_delta_beta(),
+                   rho_delta()*sigma_delta_alpha()*sigma_delta_beta(),
+                   sigma_delta_beta()^2),
                  2, 2)
   delta = mvrnorm(input$N, mu, Sigma)
   alphastar = alpha + delta[,1]
   betastar  = beta  + delta[,2] 
-  sigmastar = abs(rnorm(input$N, sigma, input$sigma_delta_sigma))
+  sigmastar = abs(rnorm(input$N, sigma, sigma_delta_sigma()))
 
   ## Simulate from real world predictor
   xstar = input$mu_xstar + input$sigma_xstar * rnorm(input$N)
@@ -567,7 +722,7 @@ marginal_plot = function() {
 
   ## Plot data as rug
   plot(y, type = "n", xlim = xlim, ylim = ylim)
-#  rug (y, ticksize = 0.02, side = 1, lwd = 2, col = "black", quiet = TRUE)
+  rug (y, ticksize = 0.02, side = 1, lwd = 2, col = "black", quiet = TRUE)
 
   ## Add predictive densities
   polygon(x = c(dens1$x[x1m[1]],dens1$x[x1m],dens1$x[x1m[length(x1m)]]),

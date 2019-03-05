@@ -220,60 +220,42 @@ discrepancy = reactive({
   dimnames(samples)$parameters = c("alphastar","betastar","sigmastar")
   
   ## Check discrepancy parameters
-  if (! any(is.null(input$mu_delta_alpha) | is.null(input$sigma_delta_alpha) |
-            is.null(input$mu_delta_beta ) | is.null(input$sigma_delta_beta ) |
-            is.null(input$rho_delta)      | is.null(input$sigma_delta_sigma) ) &
-      ! any(is.na(input$mu_delta_alpha) | is.na(input$sigma_delta_alpha) |
-            is.na(input$mu_delta_beta ) | is.na(input$sigma_delta_beta ) |
-            is.na(input$rho_delta)      | is.na(input$sigma_delta_sigma) )) {
-    
-    ## Set flags
-    new_mean = FALSE
-    new_sd   = FALSE
+  if (! any(is.null(mu_delta_alpha()), is.null(sigma_delta_alpha()),
+            is.null(mu_delta_beta ()), is.null(sigma_delta_beta ()),
+            is.null(rho_delta     ()), is.null(sigma_delta_sigma())) &
+      ! any(is.na(mu_delta_alpha()), is.na(sigma_delta_alpha()),
+            is.na(mu_delta_beta ()), is.na(sigma_delta_beta ()),
+            is.na(rho_delta     ()), is.na(sigma_delta_sigma()))) {
     
     ## Alpha bias
-    if (input$mu_delta_alpha != 0) {
-      samples[,,"alphastar"] = samples[,,"alphastar"] + input$mu_delta_alpha
-      new_mean = TRUE
-    }
+    if (mu_delta_alpha() != 0)
+      samples[,,"alphastar"] = samples[,,"alphastar"] + mu_delta_alpha()
     
     ## Beta bias
-    if (input$mu_delta_beta != 0) {
-      samples[,,"betastar" ] = samples[,,"betastar" ] + input$mu_delta_beta
-      new_mean = TRUE
-    }
+    if (mu_delta_beta() != 0)
+      samples[,,"betastar" ] = samples[,,"betastar" ] + mu_delta_beta()
     
     ## Alpha/Beta uncertainty
-    if (input$sigma_delta_alpha > 0 | input$sigma_delta_beta > 0 | 
-        input$rho_delta != 0) {
+    if (sigma_delta_alpha() > 0 | sigma_delta_beta() > 0) {
       
       ## If discrepancy uncertainty non-zero then sample discrepancies
-      Sigma = matrix(c(input$sigma_delta_alpha^2,
-                       input$rho_delta*
-                         input$sigma_delta_alpha*input$sigma_delta_beta,
-                       input$rho_delta*
-                         input$sigma_delta_alpha*input$sigma_delta_beta,
-                       input$sigma_delta_beta^2),
+      Sigma = matrix(c(sigma_delta_alpha()^2,
+                       rho_delta()*sigma_delta_alpha()*sigma_delta_beta(),
+                       rho_delta()*sigma_delta_alpha()*sigma_delta_beta(),
+                       sigma_delta_beta()^2),
                      nrow = 2, 
                      ncol = 2
       )
       delta = mvrnorm(input$N, c(0,0), Sigma)
       samples[,,"alphastar"] = samples[,,"alphastar"] + delta[,1]
       samples[,,"betastar" ] = samples[,,"betastar" ] + delta[,2]
-      
-      new_mean = TRUE
-      
+
     } ## Alpha/Beta uncertainty
     
     ## Sigma uncertainty
-    if (input$sigma_delta_sigma  > 0) {
-      
+    if (sigma_delta_sigma() > 0)
       samples[,,"sigmastar"] = 
-        abs(rnorm(input$N, samples[,,"sigmastar"], input$sigma_delta_sigma))
-      
-      new_sd = TRUE
-      
-    } ## Sigma bias and uncertainty
+        abs(rnorm(input$N, samples[,,"sigmastar"], sigma_delta_sigma()))
     
   } ## Check discrepancy parameters
     
@@ -321,3 +303,89 @@ reference_predictive = reactive({
 
 })
 
+## Intercept bias
+mu_delta_alpha = reactive({
+  
+  if (input$discrepancy == "manual")
+    return(input$mu_delta_alpha)
+
+  0
+
+}) ## mu_delta_alpha
+
+## Intercept uncertainty
+sigma_delta_alpha = reactive({
+  
+  if (input$discrepancy == "manual")
+    return(input$sigma_delta_alpha)
+
+  q = qnorm(likelihood())
+  
+  alpha = as.numeric(posterior()[,,"alpha"])
+      
+  sqrt(max(0,(input$ymean - mean(alpha))^2/q^2 - var(alpha)))
+
+}) ## sigma_delta_alpha
+
+## Slope bias
+mu_delta_beta = reactive({
+  
+  if (input$discrepancy == "manual")
+    return(input$mu_delta_beta)
+
+  0
+
+}) ## mu_delta_beta
+
+## Slope uncertainty
+sigma_delta_beta = reactive({
+  
+  if (input$discrepancy == "manual")
+    return(input$sigma_delta_beta)
+  
+  q = qnorm(likelihood())
+
+  beta = as.numeric(posterior()[,,"beta"])
+  
+  sqrt(max(0,mean(beta)^2/q^2 - var(beta)))
+
+}) ## sigma_delta_beta
+
+## Discrepancy correlation
+rho_delta = reactive({
+  
+  if (input$discrepancy == "manual")
+    return(input$rho_delta)
+
+  0
+
+}) ## rho_delta
+
+## Response spread uncertainty
+sigma_delta_sigma = reactive({
+  
+  if (input$discrepancy == "manual")
+    return(input$sigma_delta_sigma)
+
+  sigma = as.numeric(posterior()[,,"sigma"])
+  
+  if(is.null(likelihood()))
+    return(0)
+  
+  if (mean(sigma < input$ysd) < likelihood())
+    return(0)
+  
+  ## Approximate the posterior as folded-normal
+  theta = fit_folded_normal(sigma)
+  
+  if (pfnorm(input$ysd, theta[1], theta[2]) < likelihood())
+    return(0)
+  
+  f = function(x, theta)
+    (pfnorm(input$ysd, theta[1], x) - likelihood())^2
+  
+  z = optimize(f = f, lower = theta[2], upper = 100, theta = theta)$minimum
+  
+  return(sqrt(z^2 - theta[2]^2))  
+
+}) ## sigma_delta_sigma

@@ -277,13 +277,31 @@ ui = navbarPage(
                tabsetPanel(
                  tabPanel(
                    title = "Discrepancy parameters",
-                   radioButtons(
-                     inputId  = "discrepancy_input_select",
-                     label    = "Input style",
-                     choices  = list(Sliders = "sliders", Numerical = "numerical"),
-                     selected = "sliders",
-                     inline   = TRUE
-                   ),
+                   fluidRow(
+                     column(width = 6,
+                            radioButtons(
+                              inputId  = "discrepancy",
+                              label    = "Discrepancy specification",
+                              choices  = list(Guided = "guided", 
+                                              Manual = "manual"),
+                              selected = "guided",
+                              inline   = FALSE
+                            )
+                     ), ## column
+                     column(width = 6,
+                            uiOutput(outputId = "discrepancy_input_select")
+                     ) ## column
+                   ), ## fluidRow
+                   hr(),
+                   uiOutput(outputId = "predictor"),
+                   fluidRow(
+                     column(width = 8,
+                            uiOutput(outputId = "likelihood")
+                     ), ## column
+                     column(width = 4,
+                            uiOutput(outputId = "likelihood_custom")
+                     ) ## column
+                   ), ## fluidRow
                    uiOutput(outputId = "alpha_discrepancy"),
                    uiOutput(outputId = "beta_discrepancy" ),
                    uiOutput(outputId = "rho_discrepancy"  ),
@@ -467,7 +485,8 @@ ui = navbarPage(
                        plotOutput(outputId = "sigma_discrepancy_plot")
                      ), ## column
                      column(
-                       width = 6
+                       width = 6,
+                       tableOutput(outputId = "discrepancies")
                      ) ## column
                    ) ## fluidRow
                   ),

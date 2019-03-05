@@ -199,3 +199,43 @@ plot_density = function(x, label){
   title(ylab = "Density")
   
 } ## plot_density
+
+
+## Folded-normal density
+dfnorm = function(x, mu = 0, sigma = 1, log = FALSE) {
+  
+  d = dnorm(x, -mu, sigma) + dnorm(x, +mu, sigma)
+  
+  if (log)
+    d = log(d)
+  
+  return(d)
+
+}
+
+## Folded-normal distribution
+pfnorm = function(q, mu = 0, sigma = 1, log = FALSE) {
+  
+  p = pnorm(q, -mu, sigma) + pnorm(q, +mu, sigma) - 1
+  
+  if (log)
+    p = log(p)
+  
+  return(p)
+  
+}
+
+## Fit folded-normal
+fit_folded_normal = function(x) {
+  
+  par = log(c(mean(x), sd(x)))
+
+  fn  = function(theta, x)
+    - sum(log(dfnorm(x, theta[1], exp(theta[2]))))
+  
+  theta    = optim(par = par, fn = fn, x = x)$par
+  theta[2] = exp(theta[2])
+  
+  return(theta)
+  
+} ## fit_folded_normal
