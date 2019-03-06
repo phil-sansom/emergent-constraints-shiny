@@ -369,7 +369,7 @@ sigma_delta_sigma = reactive({
 
   sigma = as.numeric(posterior()[,,"sigma"])
   
-  if(is.null(likelihood()))
+  if(is.null(likelihood()) | is.null(input$ysd))
     return(0)
   
   if (mean(sigma < input$ysd) < likelihood())

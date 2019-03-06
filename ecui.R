@@ -209,10 +209,7 @@ ui = navbarPage(
                         uiOutput(outputId = "model_input_select")
                  )
                ),
-               uiOutput(outputId = "alpha_prior"),
-               uiOutput(outputId = "beta_prior" ),
-               uiOutput(outputId = "rho_prior"  ),
-               uiOutput(outputId = "sigma_prior"),
+               uiOutput(outputId = "model_prior_interface"),
                hr(),
                fluidRow(
                  column(width = 6,
@@ -229,7 +226,7 @@ ui = navbarPage(
                         uiOutput(outputId = "real_input_select")
                  )
                ),
-               uiOutput(outputId = "xstar_prior")
+               uiOutput(outputId = "real_prior_interface")
              ), ## sidePanel
 
              mainPanel(

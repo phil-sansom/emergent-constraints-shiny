@@ -24,7 +24,7 @@ observe({
 
 ## Update observation input controls
 observe({
-  # print("Observers 4: Update z and sigma_z scale")
+  # print("Observers 2: Update z and sigma_z scale")
 
   if (no_data()) {
 
@@ -47,6 +47,30 @@ observe({
   ) ## sigma_z
 
 }) ## observe
+
+## Set sensible values for discrepancy reference values
+observe({
+  
+  if (no_data())
+    return(NULL)
+  
+  y      = data()[,input$y]
+  yrange = diff(range(y))
+  yorder = 10^round(log10(yrange) - 1)
+  
+  updateNumericInput(
+    session = session,
+    inputId = "ymean",
+    value   = round(mean(y)/yorder)*yorder
+  ) ## ymean
+
+  updateNumericInput(
+    session = session,
+    inputId = "ysd",
+    value   = round(sd(y)/yorder)*yorder
+  ) ## ysd
+  
+}) ## observer
 
 ## Check sample number
 observe ({
