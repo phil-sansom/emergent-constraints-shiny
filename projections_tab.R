@@ -3,38 +3,46 @@
 #####################
 
 ## Predictor distribution
-output$predictor = renderUI(
+output$predictor = renderUI({
   
-  if (input$discrepancy == "guided") {
-    
-    tagList(
-      fluidRow(
-        column(
-          width = 6,
-          numericInput(
-            inputId = "ymean",
-            label   = "Response mean",
-            value   = 0
-          )
-        ), ## column
-        column(
-          width = 6,
-          numericInput(
-            inputId = "ysd",
-            label   = "Response SD",
-            value   = 1
-          )
-        ) ## column
-      ) ## fluidRow
-    ) ## tagList
-    
+  if (input$discrepancy != "guided")
+    return(NULL)
+     
+  if (no_data()) {
+    ymean = 0
+    ysd   = 1
   } else {
+    y      = data()[,input$y]
+    yrange = diff(range(y))
+    yorder = 10^round(log10(yrange) - 1)
     
-    NULL
+    ymean = round(mean(y)/yorder)*yorder
+    ysd   = round(sd(y)/yorder)*yorder
     
   }
-  
-) ## predictor
+
+  tagList(
+    fluidRow(
+      column(
+        width = 6,
+        numericInput(
+          inputId = "ymean",
+          label   = "Response mean",
+          value   = ymean
+        )
+      ), ## column
+      column(
+        width = 6,
+        numericInput(
+          inputId = "ysd",
+          label   = "Response SD",
+          value   = ysd
+        )
+      ) ## column
+    ) ## fluidRow
+  ) ## tagList
+
+}) ## predictor
 
 ## Likelihood of emergent constraint
 output$likelihood = renderUI(
@@ -106,13 +114,14 @@ output$discrepancies = renderTable({
     return(NULL)
 
   ## Initialise storage
-  discs = data.frame("SD" = numeric(3))
-  rownames(discs) = c("Intercept","Slope","Uncertainty")
+  discs = data.frame("SD" = numeric(4))
+  rownames(discs) = c("Intercept","Slope","Uncertainty","Correlation")
   
   ## Compute intervals
   discs[1,1] = sigma_delta_alpha()
   discs[2,1] = sigma_delta_beta()
   discs[3,1] = sigma_delta_sigma()
+  discs[4,1] = rho_delta()
 
   ## Return intervals
   return(discs)

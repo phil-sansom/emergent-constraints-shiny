@@ -20,7 +20,7 @@ observe({
                     selected = choices[2]
   ) ## y
 
-}) ## observe
+}) ## Update variable choices when data loaded
 
 ## Update observation input controls
 observe({
@@ -46,31 +46,7 @@ observe({
                      step    = 10^(vstep-2)
   ) ## sigma_z
 
-}) ## observe
-
-## Set sensible values for discrepancy reference values
-observe({
-  
-  if (no_data())
-    return(NULL)
-  
-  y      = data()[,input$y]
-  yrange = diff(range(y))
-  yorder = 10^round(log10(yrange) - 1)
-  
-  updateNumericInput(
-    session = session,
-    inputId = "ymean",
-    value   = round(mean(y)/yorder)*yorder
-  ) ## ymean
-
-  updateNumericInput(
-    session = session,
-    inputId = "ysd",
-    value   = round(sd(y)/yorder)*yorder
-  ) ## ysd
-  
-}) ## observer
+}) ## Update observation input controls
 
 ## Check sample number
 observe ({
@@ -82,4 +58,4 @@ observe ({
                          getOption("mc.cores")
     )
     
-})
+}) ## Check sample number

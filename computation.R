@@ -322,8 +322,14 @@ sigma_delta_alpha = reactive({
   q = qnorm(likelihood())
   
   alpha = as.numeric(posterior()[,,"alpha"])
-      
-  sqrt(max(0,(input$ymean - mean(alpha))^2/q^2 - var(alpha)))
+  beta  = as.numeric(posterior()[,,"beta" ])
+  
+  var_beta_star = var(beta) + sigma_delta_beta()^2
+  
+  mu = mean(alpha) - cov(alpha,beta)*mean(beta)/var(beta)
+  
+  sqrt(max(0,(input$ymean - mu)^2 / q^2 - var(alpha) + 
+             cov(alpha,beta)^2 * var_beta_star / var(beta)^2))
 
 }) ## sigma_delta_alpha
 
@@ -356,9 +362,15 @@ rho_delta = reactive({
   
   if (input$discrepancy == "manual")
     return(input$rho_delta)
-
-  0
-
+  
+  alpha = as.numeric(posterior()[,,"alpha"])
+  beta  = as.numeric(posterior()[,,"beta" ])
+  
+  var_alpha_star = var(alpha) + sigma_delta_alpha()^2
+  var_beta_star  = var(beta)  + sigma_delta_beta()^2
+  
+  cov(alpha,beta)*var_beta_star/var(beta)/sqrt(var_beta_star)/sqrt(var_alpha_star)
+  
 }) ## rho_delta
 
 ## Response spread uncertainty
