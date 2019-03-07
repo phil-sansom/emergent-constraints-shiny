@@ -291,12 +291,12 @@ output$real_prior_interface = renderUI({
     
   }
   
-    tagList(
-      withMathJax(),
-      hr(),
-      h5("Real world predictor \\(X_\\star\\)"),
-      if (input$real_input_select == "numerical") {
-        fluidRow(
+  tagList(
+    withMathJax(),
+    hr(),
+    h5("Real world predictor \\(X_\\star\\)"),
+    if (input$real_input_select == "numerical") {
+      fluidRow(
         column(width = 6,
                numericInput(inputId = "mu_xstar",
                             label   = "Mean \\(\\mu_{X_\\star}\\)",
@@ -316,33 +316,33 @@ output$real_prior_interface = renderUI({
                ) ## sigma_xstar
         ) ## column
       ) ## fluidRow
-      } else {
-        tagList(
-          sliderInput(inputId = "mu_xstar",
-                      label   = "Mean \\(\\mu_{X_\\star}\\)",
-                      value   = xmval,
-                      min     = xmmin,
-                      max     = xmmax,
-                      step    = xstep,
-                      ticks   = FALSE
-          ), ## mu_xstar
-          sliderInput(inputId = "sigma_xstar",
-                      label   = "Standard deviation \\(\\sigma_{X_\\star}\\)",
-                      value   = xsmax,
-                      min     = 0,
-                      max     = xsmax,
-                      step    = xstep,
-                      ticks   = FALSE
-          ) ## sigma_xstar
-        ) ## tagList
-      }
-    ) ## tagList
- 
+    } else {
+      tagList(
+        sliderInput(inputId = "mu_xstar",
+                    label   = "Mean \\(\\mu_{X_\\star}\\)",
+                    value   = xmval,
+                    min     = xmmin,
+                    max     = xmmax,
+                    step    = xstep,
+                    ticks   = FALSE
+        ), ## mu_xstar
+        sliderInput(inputId = "sigma_xstar",
+                    label   = "Standard deviation \\(\\sigma_{X_\\star}\\)",
+                    value   = xsmax,
+                    min     = 0,
+                    max     = xsmax,
+                    step    = xstep,
+                    ticks   = FALSE
+        ) ## sigma_xstar
+      ) ## tagList
+    }
+  ) ## tagList
+  
 }) ## real_prior_interface
 
 ## Plot intercept prior
 output$alpha_prior_plot = renderPlot({
-
+  
   ## Skip plotting if bad prior or reference prior
   if(input$model_priors == "reference" | is.null(input$model_input_select))
     return(NULL)

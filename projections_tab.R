@@ -44,6 +44,7 @@ output$predictor = renderUI({
 
 }) ## predictor
 
+
 ## Likelihood of emergent constraint
 output$likelihood = renderUI(
   
@@ -68,6 +69,7 @@ output$likelihood = renderUI(
   
 ) ## likelihood
 
+
 ## Custom likelihood
 output$likelihood_custom = renderUI({
   
@@ -85,6 +87,7 @@ output$likelihood_custom = renderUI({
     ) ## tagList
 
 }) ## custom_likelihood
+
 
 ## Update likelihood
 likelihood = reactive({
@@ -128,7 +131,7 @@ output$discrepancies = renderTable({
   
 },
 rownames = TRUE
-)
+) ## discrepancies
 
 
 ## Input selection
@@ -152,204 +155,135 @@ output$discrepancy_input_select = renderUI({
     
   }
   
-}) ## Discrepancy_input_select
+}) ## discrepancy_input_select
 
 
-## Intercept discrepancy
-output$alpha_discrepancy = renderUI({
+## Discrepancy interface
+output$discrepancy_interface = renderUI({
   
   if (input$discrepancy == "guided" | is.null(input$discrepancy_input_select))
     return(NULL)
   
   if (no_data()) {
-    min  = -1.0
-    max  = +1.0
-    step =  0.1
+    
+    amax  = +1.0
+    astep =  0.1
+    bmin  = -1
+    bmax  = +1
+    bstep = 0.1
+    smin  = -1
+    smax  = +1
+    sstep = 0.1
+    
   } else {
-    x    = c(ylim()$min,ylim()$max)
-    diff = diff(x)
-    step = 10^(floor(log10(diff))-1)
-    min  = - diff / 2
-    max  = + diff / 2
-    min  = floor  (min / step) * step
-    max  = ceiling(max / step) * step
+
+    x     = c(xlim()$min,xlim()$max)
+    y     = c(ylim()$min,ylim()$max)
+
+    ## alpha_star
+    astep = 10^(floor(log10(diff(x)))-1)
+    amax  = + diff(x) / 2
+    amax  = ceiling(amax / astep) * astep
+ 
+    ## beta_star
+    bstep = 10^(floor(log10(diff(y)/diff(x)))-1)
+    bmax  = + diff(y)/diff(x) / 2
+    bmax  = ceiling(bmax / bstep) * bstep
+    
+    ## sigma_star
+    sstep = 10^(floor(log10(diff(y)))-1)
+    smax  = + diff(y) / 2
+    smax  = ceiling(smax / sstep) * sstep
+    
   }
   
-  if (input$discrepancy_input_select == "numerical") {
-    tagList(
-      withMathJax(),
-      h5("Intercept \\(\\alpha_\\star\\)"),
+  numerical = input$discrepancy_input_select == "numerical"
+  
+  tagList(
+    withMathJax(),
+    h5("Intercept \\(\\alpha_\\star\\)"),
+    if (numerical) {
       numericInput(inputId = "sigma_alpha_star",
                    label   = "Uncertainty \\(\\sigma_{\\alpha_\\star}\\)",
                    value   = 0,
                    min     = 0,
                    max     = NA,
-                   step    = step
+                   step    = astep
       ) ## sigma_alpha_star
-    ) ## tagList
-  } else {
-    tagList(
-      withMathJax(),
-      h5("Intercept \\(\\alpha_\\star\\)"),
+    } else {
       sliderInput(inputId = "sigma_alpha_star",
                   label   = "Uncertainty \\(\\sigma_{\\alpha_\\star}\\)",
                   value   = 0,
                   min     = 0,
-                  max     = max,
-                  step    = step,
+                  max     = amax,
+                  step    = astep,
                   ticks   = FALSE
       ) ## sigma_alpha_star
-    ) ## tagList
-  }
-  
-}) ## alpha_discrepancy
-
-## Slope discrepancy
-output$beta_discrepancy = renderUI({
-
-  if (input$discrepancy == "guided" | is.null(input$discrepancy_input_select))
-    return(NULL)
-  
-  if (no_data()) {
-    min  = -1
-    max  = +1
-    step = 0.1
-  } else {
-    x     = c(xlim()$min,xlim()$max)
-    y     = c(ylim()$min,ylim()$max)
-    diff = diff(y)/diff(x)
-    step = 10^(floor(log10(diff))-1)
-    min  = - diff / 2
-    max  = + diff / 2
-    min  = floor  (min / step) * step
-    max  = ceiling(max / step) * step
-  } 
-  
-  if (input$discrepancy_input_select == "numerical") {
-    tagList(
-      withMathJax(),
-      hr(),
-      h5("Slope \\(\\beta_\\star\\)"),
+    },
+    hr(),
+    h5("Slope \\(\\beta_\\star\\)"),
+    if (numerical) {
       numericInput(inputId = "sigma_beta_star",
                    label   = "Uncertainty \\(\\sigma_{\\beta_\\star}\\)",
                    value   = 0,
                    min     = 0,
                    max     = NA,
-                   step    = step
-      ) ## sigma_beta_star
-    ) ## tagList
-  } else {
-    tagList(
-      withMathJax(),
-      hr(),
-      h5("Slope \\(\\beta_\\star\\)"),
+                   step    = bstep
+      )
+    } else {
       sliderInput(inputId = "sigma_beta_star",
                   label   = "Uncertainty \\(\\sigma_{\\beta_\\star}\\)",
                   value   = 0,
                   min     = 0,
-                  max     = max,
-                  step    = step,
-                  ticks   = FALSE
-      ) ## sigma_beta_star
-    ) ## tagList
-  }
-  
-}) ## beta_discrepancy
-
-## Prior discrepancy correlation
-output$rho_discrepancy = renderUI({
-
-  if (input$discrepancy == "guided" | is.null(input$discrepancy_input_select))
-    return(NULL)
-  
-  inputId = "rho_star"
-  label   = "Corr(\\(\\alpha_\\star,\\beta_\\star\\))"
-  value   =  0
-  min     = -1
-  max     = +1
-  step    = 0.01
-  
-  if (input$discrepancy_input_select == "numerical") {
-    tagList(
-      withMathJax(),
-      hr(),
-      h5("Correlation \\(\\rho_\\star\\)"),
-      numericInput(inputId = inputId,
-                   label   = label,
-                   value   = value,
-                   min     = min,
-                   max     = NA,
-                   step    = step
-      )
-    ) ## tagList
-  } else {
-    tagList(
-      withMathJax(),
-      hr(),
-      h5("Correlation \\(\\rho_\\star\\)"),
-      sliderInput(inputId = inputId,
-                  label   = label,
-                  value   = value,
-                  min     = min,
-                  max     = max,
-                  step    = step,
+                  max     = bmax,
+                  step    = bstep,
                   ticks   = FALSE
       )
-    ) ## tagList
-  }
-  
-}) ## rho_star
-
-## Response uncertainty discrepancy
-output$sigma_discrepancy = renderUI({
-
-  if (input$discrepancy == "guided" | is.null(input$discrepancy_input_select))
-    return(NULL)
-  
-  if (no_data()) {
-    min  = -1
-    max  = +1
-    step = 0.1
-  } else {
-    x    = c(ylim()$min,ylim()$max)
-    diff = diff(x)
-    step = 10^(floor(log10(diff))-1)
-    min  = - diff / 2
-    max  = + diff / 2
-    min  = floor  (min / step) * step
-    max  = ceiling(max / step) * step
-  }
-  
-  if (input$discrepancy_input_select == "numerical") {
-    tagList(
-      withMathJax(),
-      hr(),
-      h5("Response spread \\(\\sigma_\\star\\)"),
+    },
+    hr(),
+    h5("Correlation \\(\\rho_\\star\\)"),
+    if (numerical) {
+      numericInput(inputId = "rho_star",
+                   label   = "Corr(\\(\\alpha_\\star,\\beta_\\star\\))",
+                   value   =  0,
+                   min     = -1,
+                   max     = +1,
+                   step    = 0.01
+      )
+    } else {
+      sliderInput(inputId = "rho_star",
+                  label   = "Corr(\\(\\alpha_\\star,\\beta_\\star\\))",
+                  value   =  0,
+                  min     = -1,
+                  max     = +1,
+                  step    = 0.01,
+                  ticks   = FALSE
+      )
+    },
+    hr(),
+    h5("Response spread \\(\\sigma_\\star\\)"),
+    if (input$discrepancy_input_select == "numerical") {
       numericInput(inputId = "sigma_sigma_star",
                    label   = "Scale \\(\\sigma_{\\sigma_\\star}\\)",
                    value   = 0,
                    min     = 0,
                    max     = NA,
-                   step    = step
-      ) ## sigma_sigma_star
-    ) ## tagList
-  } else {
-    tagList(
-      withMathJax(),
-      hr(),
-      h5("Response spread \\(\\sigma_\\star\\)"),
+                   step    = sstep
+      )
+    } else {
       sliderInput(inputId = "sigma_sigma_star",
                   label   = "Scale \\(\\sigma_{\\sigma_\\star}\\)",
                   value   = 0,
                   min     = 0,
-                  max     = max,
-                  step    = step,
+                  max     = smax,
+                  step    = sstep,
                   ticks   = FALSE
-      ) ## sigma_sigma_star
-    ) ## tagList
-  }
+      )
+    }
+  ) ## tagList
   
-}) ## sigma_discrepancy
+}) ## discrepancy_interface
+
 
 ## Custom interval width
 output$gamma_custom = renderUI({
@@ -367,6 +301,7 @@ output$gamma_custom = renderUI({
   ) ## tagList
 })
 
+
 ## Update gamma
 gamma = reactive({
   if (input$gamma == "custom") {
@@ -379,6 +314,7 @@ gamma = reactive({
     as.numeric(input$gamma)
   }
 })
+
 
 ## Plot intercept discrepancy
 output$alpha_discrepancy_plot = renderPlot({
@@ -437,6 +373,7 @@ output$alpha_discrepancy_plot = renderPlot({
   
 }) ## alpha_prior_plot
 
+
 ## Plot slope discrepancy
 output$beta_discrepancy_plot = renderPlot({
   
@@ -493,6 +430,7 @@ output$beta_discrepancy_plot = renderPlot({
          lwd = c(2,2), bty = "n", horiz = input$legend_orientation)
   
 }) ## beta_prior_plot
+
 
 ## Plot spread discrepancy
 output$sigma_discrepancy_plot = renderPlot({
@@ -552,6 +490,7 @@ output$sigma_discrepancy_plot = renderPlot({
          lwd = c(2,2), bty = "n", horiz = input$legend_orientation)
   
 }) ## sigma_discrepancy_plot
+
 
 ## Plot prior discrepancy
 output$prior_discrepancy_plot = renderPlot({
@@ -640,6 +579,7 @@ output$prior_discrepancy_plot = renderPlot({
   
 }) ## prior_discrepancy_plot
 
+
 ## Marginal posterior predictive plot
 marginal_plot = function() {
 
@@ -700,8 +640,9 @@ marginal_plot = function() {
          col = c(input$ref_col,input$inf_col), lty = c("solid","solid"), 
          lwd = c(2,2), bty = "n", horiz = input$legend_orientation)
 
-}
+} ## marginal_plot
 output$marginal_plot = renderPlot(marginal_plot())
+
 
 ## Download marginal plot
 output$save_marginal_plot = downloadHandler(
@@ -713,7 +654,8 @@ output$save_marginal_plot = downloadHandler(
     dev.off()
   },
   contentType = "application/pdf"
-)
+) ## save_marginal_plot
+
 
 ## Download samples
 output$save_samples = downloadHandler(
@@ -736,7 +678,8 @@ output$save_samples = downloadHandler(
     }
   },
   contentType = "text/csv"
-)
+) ## save_samples
+
 
 ## Print predictive intervals
 output$predictive_intervals = renderTable({
@@ -769,7 +712,8 @@ output$predictive_intervals = renderTable({
 
 },
 rownames = TRUE
-)
+) ## predictive_intervals
+
 
 ## Joint posterior preditive plot
 joint_plot = function() {
@@ -875,7 +819,7 @@ joint_plot = function() {
          lty = c("solid","solid","solid"), lwd = c(2,2,2), bty = "n", 
          horiz = input$legend_orientation)
 
-}
+} ## joint_plot
 output$joint_plot = renderPlot(joint_plot())
 
 ## Download joint plot
@@ -888,4 +832,4 @@ output$save_joint_plot = downloadHandler(
     dev.off()
   },
   contentType = "application/pdf"
-)
+) ## save_joint_plot

@@ -295,10 +295,7 @@ ui = navbarPage(
                             uiOutput(outputId = "likelihood_custom")
                      ) ## column
                    ), ## fluidRow
-                   uiOutput(outputId = "alpha_discrepancy"),
-                   uiOutput(outputId = "beta_discrepancy" ),
-                   uiOutput(outputId = "rho_discrepancy"  ),
-                   uiOutput(outputId = "sigma_discrepancy")
+                   uiOutput(outputId = "discrepancy_interface")
                  ), ## tabPanel
                  tabPanel(
                    title = "Plotting options",
