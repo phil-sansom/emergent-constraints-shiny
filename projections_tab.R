@@ -118,10 +118,10 @@ output$discrepancies = renderTable({
   rownames(discs) = c("Intercept","Slope","Uncertainty","Correlation")
   
   ## Compute intervals
-  discs[1,1] = sigma_delta_alpha()
-  discs[2,1] = sigma_delta_beta()
-  discs[3,1] = sigma_delta_sigma()
-  discs[4,1] = rho_delta()
+  discs[1,1] = sigma_alpha_star()
+  discs[2,1] = sigma_beta_star()
+  discs[3,1] = sigma_sigma_star()
+  discs[4,1] = rho_star()
 
   ## Return intervals
   return(discs)
@@ -179,47 +179,26 @@ output$alpha_discrepancy = renderUI({
     tagList(
       withMathJax(),
       h5("Intercept \\(\\alpha_\\star\\)"),
-      fluidRow(
-        column(width = 6,
-               numericInput(inputId = "mu_delta_alpha",
-                            label   = "Bias \\(\\mu_{\\delta_\\alpha}\\)",
-                            value   = 0.5 * (min + max),
-                            min     = NA,
-                            max     = NA,
-                            step    = step
-               ) ## mu_delta_alpha
-        ), ## column
-        column(width = 6,
-               numericInput(inputId = "sigma_delta_alpha",
-                            label   = "Uncertainty \\(\\sigma_{\\delta_\\alpha}\\)",
-                            value   = 0,
-                            min     = 0,
-                            max     = NA,
-                            step    = step
-               ) ## sigma_delta_alpha
-        ) ## column
-      ) ## fluidRow
+      numericInput(inputId = "sigma_alpha_star",
+                   label   = "Uncertainty \\(\\sigma_{\\alpha_\\star}\\)",
+                   value   = 0,
+                   min     = 0,
+                   max     = NA,
+                   step    = step
+      ) ## sigma_alpha_star
     ) ## tagList
   } else {
     tagList(
       withMathJax(),
       h5("Intercept \\(\\alpha_\\star\\)"),
-      sliderInput(inputId = "mu_delta_alpha",
-                  label   = "Bias \\(\\mu_{\\delta_\\alpha}\\)",
-                  value   = 0.5 * (min + max),
-                  min     = min,
-                  max     = max,
-                  step    = step,
-                  ticks   = FALSE
-      ), ## mu_delta_alpha
-      sliderInput(inputId = "sigma_delta_alpha",
-                  label   = "Uncertainty \\(\\sigma_{\\delta_\\alpha}\\)",
+      sliderInput(inputId = "sigma_alpha_star",
+                  label   = "Uncertainty \\(\\sigma_{\\alpha_\\star}\\)",
                   value   = 0,
                   min     = 0,
                   max     = max,
                   step    = step,
                   ticks   = FALSE
-      ) ## sigma_delta_alpha
+      ) ## sigma_alpha_star
     ) ## tagList
   }
   
@@ -251,48 +230,27 @@ output$beta_discrepancy = renderUI({
       withMathJax(),
       hr(),
       h5("Slope \\(\\beta_\\star\\)"),
-      fluidRow(
-        column(width = 6,
-               numericInput(inputId = "mu_delta_beta",
-                            label   = "Bias \\(\\mu_{\\delta_\\beta}\\)",
-                            value   = 0,
-                            min     = NA,
-                            max     = NA,
-                            step    = step
-               ) ## mu_delta_beta
-        ), ## column
-        column(width = 6,
-               numericInput(inputId = "sigma_delta_beta",
-                            label   = "Uncertainty \\(\\sigma_{\\delta_\\beta}\\)",
-                            value   = 0,
-                            min     = 0,
-                            max     = NA,
-                            step    = step
-               ) ## sigma_delta_beta
-        ) ## column
-      ) ## fluidRow
+      numericInput(inputId = "sigma_beta_star",
+                   label   = "Uncertainty \\(\\sigma_{\\beta_\\star}\\)",
+                   value   = 0,
+                   min     = 0,
+                   max     = NA,
+                   step    = step
+      ) ## sigma_beta_star
     ) ## tagList
   } else {
     tagList(
       withMathJax(),
       hr(),
       h5("Slope \\(\\beta_\\star\\)"),
-      sliderInput(inputId = "mu_delta_beta",
-                  label   = "Bias \\(\\mu_{\\delta_\\beta}\\)",
-                  value   = 0,
-                  min     = min,
-                  max     = max,
-                  step    = step,
-                  ticks   = FALSE
-      ), ## mu_delta_beta
-      sliderInput(inputId = "sigma_delta_beta",
-                  label   = "Uncertainty \\(\\sigma_{\\delta_\\beta}\\)",
+      sliderInput(inputId = "sigma_beta_star",
+                  label   = "Uncertainty \\(\\sigma_{\\beta_\\star}\\)",
                   value   = 0,
                   min     = 0,
                   max     = max,
                   step    = step,
                   ticks   = FALSE
-      ) ## sigma_delta_beta
+      ) ## sigma_beta_star
     ) ## tagList
   }
   
@@ -304,7 +262,7 @@ output$rho_discrepancy = renderUI({
   if (input$discrepancy == "guided" | is.null(input$discrepancy_input_select))
     return(NULL)
   
-  inputId = "rho_delta"
+  inputId = "rho_star"
   label   = "Corr(\\(\\alpha_\\star,\\beta_\\star\\))"
   value   =  0
   min     = -1
@@ -315,24 +273,20 @@ output$rho_discrepancy = renderUI({
     tagList(
       withMathJax(),
       hr(),
-      h5("Correlation \\(\\rho_\\delta\\)"),
-      fluidRow(
-        column(width = 6,
-               numericInput(inputId = inputId,
-                            label   = label,
-                            value   = value,
-                            min     = min,
-                            max     = NA,
-                            step    = step
-               )
-        ) ## column
-      ) ## fluidRow
+      h5("Correlation \\(\\rho_\\star\\)"),
+      numericInput(inputId = inputId,
+                   label   = label,
+                   value   = value,
+                   min     = min,
+                   max     = NA,
+                   step    = step
+      )
     ) ## tagList
   } else {
     tagList(
       withMathJax(),
       hr(),
-      h5("Correlation \\(\\rho_\\delta\\)"),
+      h5("Correlation \\(\\rho_\\star\\)"),
       sliderInput(inputId = inputId,
                   label   = label,
                   value   = value,
@@ -344,7 +298,7 @@ output$rho_discrepancy = renderUI({
     ) ## tagList
   }
   
-}) ## rho_delta
+}) ## rho_star
 
 ## Response uncertainty discrepancy
 output$sigma_discrepancy = renderUI({
@@ -371,31 +325,27 @@ output$sigma_discrepancy = renderUI({
       withMathJax(),
       hr(),
       h5("Response spread \\(\\sigma_\\star\\)"),
-      fluidRow(
-        column(width = 6,
-               numericInput(inputId = "sigma_delta_sigma",
-                            label   = "Scale \\(\\sigma_{\\delta_\\sigma}\\)",
-                            value   = 0,
-                            min     = 0,
-                            max     = NA,
-                            step    = step
-               ) ## sigma_delta_sigma
-        ) ## column
-      ) ## fluidRow
+      numericInput(inputId = "sigma_sigma_star",
+                   label   = "Scale \\(\\sigma_{\\sigma_\\star}\\)",
+                   value   = 0,
+                   min     = 0,
+                   max     = NA,
+                   step    = step
+      ) ## sigma_sigma_star
     ) ## tagList
   } else {
     tagList(
       withMathJax(),
       hr(),
       h5("Response spread \\(\\sigma_\\star\\)"),
-      sliderInput(inputId = "sigma_delta_sigma",
-                  label   = "Scale \\(\\sigma_{\\delta_\\sigma}\\)",
+      sliderInput(inputId = "sigma_sigma_star",
+                  label   = "Scale \\(\\sigma_{\\sigma_\\star}\\)",
                   value   = 0,
                   min     = 0,
                   max     = max,
                   step    = step,
                   ticks   = FALSE
-      ) ## sigma_delta_sigma
+      ) ## sigma_sigma_star
     ) ## tagList
   }
   
@@ -438,11 +388,11 @@ output$alpha_discrepancy_plot = renderPlot({
     return(NULL)
   
   ## Skip plotting if discrepancy not defined
-  if (is.null(mu_delta_alpha()) | is.null(sigma_delta_alpha()))
+  if (is.null(sigma_alpha_star()))
     return(NULL)
-  if (is.na  (mu_delta_alpha()) | is.na  (sigma_delta_alpha()))
+  if (is.na  (sigma_alpha_star()))
     return(NULL)
-  if (sigma_delta_alpha() < 0)
+  if (sigma_alpha_star() < 0)
     return(NULL)
 
   ## Posterior and predictive
@@ -495,11 +445,11 @@ output$beta_discrepancy_plot = renderPlot({
     return(NULL)
   
   ## Skip plotting if discrepancy not defined
-  if (is.null(mu_delta_beta()) | is.null(sigma_delta_beta()))
+  if (is.null(sigma_beta_star()))
     return(NULL)
-  if (is.na  (mu_delta_beta()) | is.na  (sigma_delta_beta()))
+  if (is.na  (sigma_beta_star()))
     return(NULL)
-  if (sigma_delta_beta() < 0)
+  if (sigma_beta_star() < 0)
     return(NULL)
   
   ## Posterior and predictive
@@ -552,11 +502,11 @@ output$sigma_discrepancy_plot = renderPlot({
     return(NULL)
   
   ## Skip plotting if discrepancy not defined
-  if (is.null(sigma_delta_sigma()))
+  if (is.null(sigma_sigma_star()))
     return(NULL)
-  if (is.na  (sigma_delta_sigma()))
+  if (is.na  (sigma_sigma_star()))
     return(NULL)
-  if (sigma_delta_sigma() < 0)
+  if (sigma_sigma_star() < 0)
     return(NULL)
   
   ## Posterior and predictive
@@ -624,16 +574,15 @@ output$prior_discrepancy_plot = renderPlot({
   sigma = abs(rnorm(input$N, input$mu_sigma, input$sigma_sigma))
 
   ## Simulate from discrepancies
-  mu    = c(mu_delta_alpha(),mu_delta_beta())
-  Sigma = matrix(c(sigma_delta_alpha()^2,
-                   rho_delta()*sigma_delta_alpha()*sigma_delta_beta(),
-                   rho_delta()*sigma_delta_alpha()*sigma_delta_beta(),
-                   sigma_delta_beta()^2),
+  Sigma = matrix(c(sigma_alpha_star()^2,
+                   rho_star()*sigma_alpha_star()*sigma_beta_star(),
+                   rho_star()*sigma_alpha_star()*sigma_beta_star(),
+                   sigma_beta_star()^2),
                  2, 2)
-  delta = mvrnorm(input$N, mu, Sigma)
+  delta = mvrnorm(input$N, c(0,0), Sigma)
   alphastar = alpha + delta[,1]
   betastar  = beta  + delta[,2] 
-  sigmastar = abs(rnorm(input$N, sigma, sigma_delta_sigma()))
+  sigmastar = abs(rnorm(input$N, sigma, sigma_sigma_star()))
 
   ## Simulate from real world predictor
   xstar = input$mu_xstar + input$sigma_xstar * rnorm(input$N)

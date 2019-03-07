@@ -26,29 +26,25 @@ ui = navbarPage(
                          \\text{Observations} \\\\ ~ \\\\
 
                        \\text{Discrepancies} \\\\
+                       & &
                        \\left[ \\begin{array}{c}
                          \\alpha_\\star \\\\ \\beta_\\star
-                       \\end{array} \\right]
-                         & = \\left[ \\begin{array}{c} 
-                               \\alpha \\\\ \\beta 
-                             \\end{array} \\right]
-                           + \\left[ \\begin{array}{c} 
-                               \\delta_\\alpha \\\\ \\delta_\\beta
-                             \\end{array} \\right] &
-                       \\left[ \\begin{array}{c} 
-                         \\delta_\\alpha \\\\ \\delta_\\beta
-                       \\end{array} \\right] & 
+                       \\end{array} \\right] 
+                       \\bigg\\vert
+                       \\left[ \\begin{array}{c}
+                         \\alpha \\\\ \\beta
+                       \\end{array} \\right] &
                        \\sim \\text{Normal} \\left(
                          \\left[ \\begin{array}{c} 
-                           \\mu_{\\delta_\\alpha} \\\\ \\mu_{\\delta_\\beta}
+                           \\alpha \\\\ \\beta
                          \\end{array} \\right],
                          \\left[ \\begin{array}{cc} 
-                           \\sigma_{\\delta_\\alpha}^2 &
-                             \\rho_\\delta \\sigma_{\\delta_\\alpha}
-                               \\sigma_{\\delta_\\beta} \\\\
-                           \\rho_\\delta \\sigma_{\\delta_\\alpha}
-                             \\sigma_{\\delta_\\beta} &
-                               \\sigma_{\\delta_\\beta}^2
+                           \\sigma_{\\alpha_\\star}^2 &
+                             \\rho_\\star \\sigma_{\\alpha_\\star}
+                               \\sigma_{\\beta_\\star} \\\\
+                           \\rho_\\star \\sigma_{\\alpha_\\star}
+                             \\sigma_{\\beta_\\star} &
+                               \\sigma_{\\beta_\\star}^2
                          \\end{array} \\right]
                        \\right) &
                        \\begin{array}{r}
@@ -56,9 +52,9 @@ ui = navbarPage(
                          \\text{Real world slope}
                        \\end{array} \\\\
                         & & 
-                       \\sigma_\\star \\mid \\sigma & \\sim
+                       \\sigma_\\star \\vert \\sigma & \\sim
                        \\text{Folded-Normal} \\left( 
-                           \\sigma, \\sigma_{\\delta_\\sigma}^2
+                           \\sigma, \\sigma_{\\sigma_\\star}^2
                        \\right) &
                        \\text{Real world response uncertainty} \\\\ ~ \\\\
 

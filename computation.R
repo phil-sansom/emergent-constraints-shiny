@@ -21,6 +21,7 @@ data = reactive({
 
 })
 
+
 ## Subset samples for plotting
 mask = reactive({
   # print("Computation 2: mask")
@@ -28,6 +29,7 @@ mask = reactive({
   sample.int(input$N, 1e3)
   
 })
+
 
 ## Predictor points for plotting
 xx = reactive({
@@ -38,6 +40,7 @@ xx = reactive({
       length.out = 101)
   
 })
+
 
 ## Posterior distribution
 posterior = reactive({
@@ -79,6 +82,7 @@ posterior = reactive({
   }
   
 })
+
 
 ## Sample posterior with reference priors
 reference_posterior = reactive({
@@ -123,6 +127,7 @@ reference_posterior = reactive({
 
 })
 
+
 ## Posterior for xstar
 xstar = reactive({
   # print("Computation 6: xstar")
@@ -159,7 +164,9 @@ xstar = reactive({
     xstar_reference()
     
   }
+  
 })
+
 
 ## Posterior for real predictor
 xstar_reference = reactive({
@@ -179,206 +186,66 @@ xstar_reference = reactive({
   
 })
 
-## Predictive deviations
-epsilon = reactive({
-  # print("Computation 8: epsilon)
-  
-  rnorm(input$N)
-  
-})
-
-## Posterior predictive distribution
-ystar = reactive({
-  # print("Computation 9: ystar")
-  
-  alphastar = discrepancy()[,,"alphastar"]
-  betastar  = discrepancy()[,,"betastar" ]
-  sigmastar = discrepancy()[,,"sigmastar"]
-
-  alphastar + betastar * xstar() + sigmastar * epsilon()
-  
-})
-
-## Reference posterior predictive
-ystar_reference = reactive({
-  # print("Computation 10: ystar_reference")
-  
-  alpha = reference_posterior()[,,"alpha"]
-  beta  = reference_posterior()[,,"beta" ]
-  sigma = reference_posterior()[,,"sigma"]
-
-  alpha + beta * xstar_reference() + sigma * epsilon()
-  
-})
-
-## Compute discrepancy
-discrepancy = reactive({
-  # print("Computation 11: discrepancy")
-
-  ## Initialise storage
-  samples = posterior()[,,c("alpha","beta","sigma")]
-  dimnames(samples)$parameters = c("alphastar","betastar","sigmastar")
-  
-  ## Check discrepancy parameters
-  if (! any(is.null(mu_delta_alpha()), is.null(sigma_delta_alpha()),
-            is.null(mu_delta_beta ()), is.null(sigma_delta_beta ()),
-            is.null(rho_delta     ()), is.null(sigma_delta_sigma())) &
-      ! any(is.na(mu_delta_alpha()), is.na(sigma_delta_alpha()),
-            is.na(mu_delta_beta ()), is.na(sigma_delta_beta ()),
-            is.na(rho_delta     ()), is.na(sigma_delta_sigma()))) {
-    
-    ## Alpha bias
-    if (mu_delta_alpha() != 0)
-      samples[,,"alphastar"] = samples[,,"alphastar"] + mu_delta_alpha()
-    
-    ## Beta bias
-    if (mu_delta_beta() != 0)
-      samples[,,"betastar" ] = samples[,,"betastar" ] + mu_delta_beta()
-    
-    ## Alpha/Beta uncertainty
-    if (sigma_delta_alpha() > 0 | sigma_delta_beta() > 0) {
-      
-      ## If discrepancy uncertainty non-zero then sample discrepancies
-      Sigma = matrix(c(sigma_delta_alpha()^2,
-                       rho_delta()*sigma_delta_alpha()*sigma_delta_beta(),
-                       rho_delta()*sigma_delta_alpha()*sigma_delta_beta(),
-                       sigma_delta_beta()^2),
-                     nrow = 2, 
-                     ncol = 2
-      )
-      delta = mvrnorm(input$N, c(0,0), Sigma)
-      samples[,,"alphastar"] = samples[,,"alphastar"] + delta[,1]
-      samples[,,"betastar" ] = samples[,,"betastar" ] + delta[,2]
-
-    } ## Alpha/Beta uncertainty
-    
-    ## Sigma uncertainty
-    if (sigma_delta_sigma() > 0)
-      samples[,,"sigmastar"] = 
-        abs(rnorm(input$N, samples[,,"sigmastar"], sigma_delta_sigma()))
-    
-  } ## Check discrepancy parameters
-    
-  ## Return samples
-  return(samples)
-  
-})
-
-## Sample posterior predictive
-predictive = reactive({
-  # print("Computation 12: predictive")
-
-  posterior_predictive(x     = xx(),
-                       alpha = posterior()[,,"alpha"],
-                       beta  = posterior()[,,"beta" ],
-                       sigma = posterior()[,,"sigma"],
-                       gamma = gamma()
-  )
-
-})
-
-## Sample posterior predictive discrepancy
-discrepancy_predictive = reactive({
-  # print("Computation 13: discrepancy_predictive")
-
-  posterior_predictive(x     = xx(),
-                       alpha = discrepancy()[,,"alphastar"],
-                       beta  = discrepancy()[,,"betastar" ],
-                       sigma = discrepancy()[,,"sigmastar"],
-                       gamma = gamma()
-  )
-
-})
-
-## Sample posterior predictive from basic model with reference priors
-reference_predictive = reactive({
-  # print("Computation 14: reference_predictive")
-
-  posterior_predictive(x     = xx(),
-                       alpha = reference_posterior()[,,"alpha"],
-                       beta  = reference_posterior()[,,"beta" ],
-                       sigma = reference_posterior()[,,"sigma"],
-                       gamma = gamma()
-  )
-
-})
-
-## Intercept bias
-mu_delta_alpha = reactive({
-  
-  if (input$discrepancy == "manual")
-    return(input$mu_delta_alpha)
-
-  0
-
-}) ## mu_delta_alpha
 
 ## Intercept uncertainty
-sigma_delta_alpha = reactive({
+sigma_alpha_star = reactive({
   
   if (input$discrepancy == "manual")
-    return(input$sigma_delta_alpha)
-
+    return(input$sigma_alpha_star)
+  
   q = qnorm(likelihood())
   
   alpha = as.numeric(posterior()[,,"alpha"])
   beta  = as.numeric(posterior()[,,"beta" ])
   
-  var_beta_star = var(beta) + sigma_delta_beta()^2
+  var_beta_star = var(beta) + sigma_beta_star()^2
   
   mu = mean(alpha) - cov(alpha,beta)*mean(beta)/var(beta)
   
   sqrt(max(0,(input$ymean - mu)^2 / q^2 - var(alpha) + 
              cov(alpha,beta)^2 * var_beta_star / var(beta)^2))
-
-}) ## sigma_delta_alpha
-
-## Slope bias
-mu_delta_beta = reactive({
   
-  if (input$discrepancy == "manual")
-    return(input$mu_delta_beta)
+}) ## sigma_alpha_star
 
-  0
-
-}) ## mu_delta_beta
 
 ## Slope uncertainty
-sigma_delta_beta = reactive({
+sigma_beta_star = reactive({
   
   if (input$discrepancy == "manual")
-    return(input$sigma_delta_beta)
+    return(input$sigma_beta_star)
   
   q = qnorm(likelihood())
-
+  
   beta = as.numeric(posterior()[,,"beta"])
   
   sqrt(max(0,mean(beta)^2/q^2 - var(beta)))
+  
+}) ## sigma_beta_star
 
-}) ## sigma_delta_beta
 
 ## Discrepancy correlation
-rho_delta = reactive({
+rho_star = reactive({
   
   if (input$discrepancy == "manual")
-    return(input$rho_delta)
+    return(input$rho_star)
   
   alpha = as.numeric(posterior()[,,"alpha"])
   beta  = as.numeric(posterior()[,,"beta" ])
   
-  var_alpha_star = var(alpha) + sigma_delta_alpha()^2
-  var_beta_star  = var(beta)  + sigma_delta_beta()^2
+  var_alpha_star = var(alpha) + sigma_alpha_star()^2
+  var_beta_star  = var(beta)  + sigma_beta_star()^2
   
   cov(alpha,beta)*var_beta_star/var(beta)/sqrt(var_beta_star)/sqrt(var_alpha_star)
   
-}) ## rho_delta
+}) ## rho_star
+
 
 ## Response spread uncertainty
-sigma_delta_sigma = reactive({
+sigma_sigma_star = reactive({
   
   if (input$discrepancy == "manual")
-    return(input$sigma_delta_sigma)
-
+    return(input$sigma_sigma_star)
+  
   sigma = as.numeric(posterior()[,,"sigma"])
   
   if(is.null(likelihood()) | is.null(input$ysd))
@@ -399,5 +266,125 @@ sigma_delta_sigma = reactive({
   z = optimize(f = f, lower = theta[2], upper = 100, theta = theta)$minimum
   
   return(sqrt(z^2 - theta[2]^2))  
+  
+}) ## sigma_sigma_star
 
-}) ## sigma_delta_sigma
+
+## Compute discrepancy
+discrepancy = reactive({
+  # print("Computation 11: discrepancy")
+  
+  ## Initialise storage
+  samples = posterior()[,,c("alpha","beta","sigma")]
+  dimnames(samples)$parameters = c("alphastar","betastar","sigmastar")
+  
+  ## Check discrepancy parameters
+  if (any(is.null(sigma_alpha_star()), is.null(sigma_beta_star ()),
+          is.null(rho_star        ()), is.null(sigma_sigma_star())) &
+      any(is.na(sigma_alpha_star()), is.na(sigma_beta_star ()),
+          is.na(rho_star        ()), is.na(sigma_sigma_star())))
+    return(samples)
+  
+  ## Alpha/Beta uncertainty
+  if (sigma_alpha_star() > 0 | sigma_beta_star() > 0) {
+    
+    ## If discrepancy uncertainty non-zero then sample discrepancies
+    Sigma = matrix(c(sigma_alpha_star()^2,
+                     rho_star()*sigma_alpha_star()*sigma_beta_star(),
+                     rho_star()*sigma_alpha_star()*sigma_beta_star(),
+                     sigma_beta_star()^2),
+                   nrow = 2, 
+                   ncol = 2
+    )
+    delta = mvrnorm(input$N, c(0,0), Sigma)
+    samples[,,"alphastar"] = samples[,,"alphastar"] + delta[,1]
+    samples[,,"betastar" ] = samples[,,"betastar" ] + delta[,2]
+    
+  } ## Alpha/Beta uncertainty
+  
+  ## Sigma uncertainty
+  if (sigma_sigma_star() > 0)
+    samples[,,"sigmastar"] = 
+    abs(rnorm(input$N, samples[,,"sigmastar"], sigma_sigma_star()))
+  
+  ## Return samples
+  return(samples)
+  
+})
+
+
+## Predictive deviations
+epsilon = reactive({
+  # print("Computation 8: epsilon)
+  
+  rnorm(input$N)
+  
+})
+
+
+## Posterior predictive distribution
+ystar = reactive({
+  # print("Computation 9: ystar")
+  
+  alphastar = discrepancy()[,,"alphastar"]
+  betastar  = discrepancy()[,,"betastar" ]
+  sigmastar = discrepancy()[,,"sigmastar"]
+
+  alphastar + betastar * xstar() + sigmastar * epsilon()
+  
+})
+
+
+## Reference posterior predictive
+ystar_reference = reactive({
+  # print("Computation 10: ystar_reference")
+  
+  alpha = reference_posterior()[,,"alpha"]
+  beta  = reference_posterior()[,,"beta" ]
+  sigma = reference_posterior()[,,"sigma"]
+
+  alpha + beta * xstar_reference() + sigma * epsilon()
+  
+})
+
+
+## Sample posterior predictive
+predictive = reactive({
+  # print("Computation 12: predictive")
+
+  posterior_predictive(x     = xx(),
+                       alpha = posterior()[,,"alpha"],
+                       beta  = posterior()[,,"beta" ],
+                       sigma = posterior()[,,"sigma"],
+                       gamma = gamma()
+  )
+
+})
+
+
+## Sample posterior predictive discrepancy
+discrepancy_predictive = reactive({
+  # print("Computation 13: discrepancy_predictive")
+
+  posterior_predictive(x     = xx(),
+                       alpha = discrepancy()[,,"alphastar"],
+                       beta  = discrepancy()[,,"betastar" ],
+                       sigma = discrepancy()[,,"sigmastar"],
+                       gamma = gamma()
+  )
+
+})
+
+
+## Sample posterior predictive from basic model with reference priors
+reference_predictive = reactive({
+  # print("Computation 14: reference_predictive")
+
+  posterior_predictive(x     = xx(),
+                       alpha = reference_posterior()[,,"alpha"],
+                       beta  = reference_posterior()[,,"beta" ],
+                       sigma = reference_posterior()[,,"sigma"],
+                       gamma = gamma()
+  )
+
+})
