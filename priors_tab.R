@@ -97,17 +97,19 @@ output$model_prior_interface = renderUI({
     ssmax  = 10*yorder/2
     
   }
-
-  if (input$model_input_select == "numerical") {
-    tagList(
-      withMathJax(),
-      hr(),
-      h5("Intercept \\(\\alpha\\)"),
+  
+  numerical = input$model_input_select == "numerical"
+  
+  tagList(
+    withMathJax(),
+    hr(),
+    h5("Intercept \\(\\alpha\\)"),
+    if (numerical) {
       fluidRow(
         column(width = 6,
                numericInput(inputId = "mu_alpha",
                             label   = "Mean \\(\\mu_\\alpha\\)",
-                            value   = 0,
+                            value   = amval,
                             min     = NA,
                             max     = NA,
                             step    = astep
@@ -116,15 +118,36 @@ output$model_prior_interface = renderUI({
         column(width = 6,
                numericInput(inputId = "sigma_alpha",
                             label   = "Standard deviation \\(\\sigma_\\alpha\\)",
-                            value   = 1000,
+                            value   = asmax,
                             min     = 0,
                             max     = NA,
                             step    = astep
                ) ## sigma_alpha
         ) ## column
-      ), ## fluidRow
-      hr(),
-      h5("Slope \\(\\beta\\)"),
+      ) ## fluidRow
+    } else {
+      tagList(
+        sliderInput(inputId = "mu_alpha",
+                    label   = "Mean \\(\\mu_\\alpha\\)",
+                    value   = amval,
+                    min     = ammin,
+                    max     = ammax,
+                    step    = astep,
+                    ticks   = FALSE
+        ), ## mu_alpha
+        sliderInput(inputId = "sigma_alpha",
+                    label   = "Standard deviation \\(\\sigma_\\alpha\\)",
+                    value   = asmax,
+                    min     = 0,
+                    max     = asmax,
+                    step    = astep,
+                    ticks   = FALSE
+        ) ## sigma_alpha
+      ) ## tagList        
+    },
+    hr(),
+    h5("Slope \\(\\beta\\)"),
+    if (numerical) {
       fluidRow(
         column(width = 6,
                numericInput(inputId = "mu_beta",
@@ -138,15 +161,36 @@ output$model_prior_interface = renderUI({
         column(width = 6,
                numericInput(inputId = "sigma_beta",
                             label   = "Standard deviation \\(\\sigma_\\beta\\)",
-                            value   = 1000,
+                            value   = bsmax,
                             min     = 0,
                             max     = NA,
                             step    = bstep
                ) ## sigma_beta
         ) ## column
-      ), ## fluidRow
-      hr(),
-      h5("Correlation \\(\\rho\\)"),
+      ) ## fluidRow
+    } else {
+      tagList(
+        sliderInput(inputId = "mu_beta",
+                    label   = "Mean \\(\\mu_\\beta\\)",
+                    value   = 0,
+                    min     = bmmin,
+                    max     = bmmax,
+                    step    = bstep,
+                    ticks   = FALSE
+        ), ## mu_beta
+        sliderInput(inputId = "sigma_beta",
+                    label   = "Standard deviation \\(\\sigma_\\beta\\)",
+                    value   = bsmax,
+                    min     = 0,
+                    max     = bsmax,
+                    step    = bstep,
+                    ticks   = FALSE
+        ) ## sigma_beta
+      ) ## tagList
+    },
+    hr(),
+    h5("Correlation \\(\\rho\\)"),
+    if (numerical) {
       fluidRow(
         column(width = 6,
                numericInput(inputId = "rho",
@@ -155,11 +199,24 @@ output$model_prior_interface = renderUI({
                             min     = -1,
                             max     = +1,
                             step    = 0.01
-               )
+               ) ## rho
         ) ## column
-      ), ## fluidRow
-      hr(),
-      h5("Response spread \\(\\sigma\\)"),
+      ) ## fluidRow
+    } else {
+      tagList(
+        sliderInput(inputId = "rho",
+                    label   = "Corr(\\(\\alpha,\\beta\\))",
+                    value   = rval,
+                    min     = -1,
+                    max     = +1,
+                    step    = 0.01,
+                    ticks   = FALSE
+        ) ## rho
+      ) ## tagList
+    },
+    hr(),
+    h5("Response spread \\(\\sigma\\)"),
+    if (numerical) {
       fluidRow(
         column(width = 6,
                numericInput(inputId = "mu_sigma",
@@ -173,83 +230,34 @@ output$model_prior_interface = renderUI({
         column(width = 6,
                numericInput(inputId = "sigma_sigma",
                             label   = "Scale \\(\\sigma_\\sigma\\)",
-                            value   = 1000,
+                            value   = ssmax,
                             min     = 0,
                             max     = NA,
                             step    = sstep
                ) ## sigma_sigma
         ) ## column
       ) ## fluidRow
-    ) ## tagList
-  } else {
-    tagList(
-      withMathJax(),
-      hr(),
-      h5("Intercept \\(\\alpha\\)"),
-      sliderInput(inputId = "mu_alpha",
-                  label   = "Mean \\(\\mu_\\alpha\\)",
-                  value   = amval,
-                  min     = ammin,
-                  max     = ammax,
-                  step    = astep,
-                  ticks   = FALSE
-      ), ## mu_alpha
-      sliderInput(inputId = "sigma_alpha",
-                  label   = "Standard deviation \\(\\sigma_\\alpha\\)",
-                  value   = asmax,
-                  min     = 0,
-                  max     = asmax,
-                  step    = astep,
-                  ticks   = FALSE
-      ), ## sigma_alpha
-      hr(),
-      h5("Slope \\(\\beta\\)"),
-      sliderInput(inputId = "mu_beta",
-                  label   = "Mean \\(\\mu_\\beta\\)",
-                  value   = 0,
-                  min     = bmmin,
-                  max     = bmmax,
-                  step    = bstep,
-                  ticks   = FALSE
-      ), ## mu_beta
-      sliderInput(inputId = "sigma_beta",
-                  label   = "Standard deviation \\(\\sigma_\\beta\\)",
-                  value   = bsmax,
-                  min     = 0,
-                  max     = bsmax,
-                  step    = bstep,
-                  ticks   = FALSE
-      ), ## sigma_beta
-      hr(),
-      h5("Correlation \\(\\rho\\)"),
-      sliderInput(inputId = "rho",
-                  label   = "Corr(\\(\\alpha,\\beta\\))",
-                  value   = rval,
-                  min     = -1,
-                  max     = +1,
-                  step    = 0.01,
-                  ticks   = FALSE
-      ),
-      hr(),
-      h5("Response spread \\(\\sigma\\)"),
-      sliderInput(inputId = "mu_sigma",
-                  label   = "Fold \\(\\mu_\\sigma\\)",
-                  value   = 0,
-                  min     = 0,
-                  max     = smmax,
-                  step    = sstep,
-                  ticks   = FALSE
-      ), ## mu_sigma
-      sliderInput(inputId = "sigma_sigma",
-                  label   = "Scale \\(\\sigma_\\sigma\\)",
-                  value   = ssmax,
-                  min     = 0,
-                  max     = ssmax,
-                  step    = sstep,
-                  ticks   = FALSE
-      ) ## sigma_sigma
-    ) ## tagList
-  }
+    } else {
+      tagList(
+        sliderInput(inputId = "mu_sigma",
+                    label   = "Fold \\(\\mu_\\sigma\\)",
+                    value   = 0,
+                    min     = 0,
+                    max     = smmax,
+                    step    = sstep,
+                    ticks   = FALSE
+        ), ## mu_sigma
+        sliderInput(inputId = "sigma_sigma",
+                    label   = "Scale \\(\\sigma_\\sigma\\)",
+                    value   = ssmax,
+                    min     = 0,
+                    max     = ssmax,
+                    step    = sstep,
+                    ticks   = FALSE
+        ) ## sigma_sigma
+      ) ## tagList
+    }
+  ) ## tagList
   
 }) ## model_prior_interface
 
@@ -260,12 +268,15 @@ output$real_prior_interface = renderUI({
     return (NULL)
   
   if (no_data()) {
+    
     xstep =  0.1
     xmval =  0.0
     xmmin = -1.0
     xmmax = +1.0
     xsmax = +1.0
+    
   } else {
+    
     x      = data()[,input$x]
     xrange = diff(range(x))
     xorder = 10^round(log10(xrange))
@@ -277,18 +288,19 @@ output$real_prior_interface = renderUI({
     xmmax  = xmval + 10*xorder/2
     
     xsmax  = 10*xorder/2
+    
   }
   
-  if (input$real_input_select == "numerical") {
     tagList(
       withMathJax(),
       hr(),
       h5("Real world predictor \\(X_\\star\\)"),
-      fluidRow(
+      if (input$real_input_select == "numerical") {
+        fluidRow(
         column(width = 6,
                numericInput(inputId = "mu_xstar",
                             label   = "Mean \\(\\mu_{X_\\star}\\)",
-                            value   = 0,
+                            value   = xmval,
                             min     = NA,
                             max     = NA,
                             step    = xstep
@@ -297,38 +309,35 @@ output$real_prior_interface = renderUI({
         column(width = 6,
                numericInput(inputId = "sigma_xstar",
                             label   = "Standard deviation \\(\\sigma_{X_\\star}\\)",
-                            value   = 1000,
+                            value   = xsmax,
                             min     = 0,
                             max     = NA,
                             step    = xstep
                ) ## sigma_xstar
         ) ## column
       ) ## fluidRow
+      } else {
+        tagList(
+          sliderInput(inputId = "mu_xstar",
+                      label   = "Mean \\(\\mu_{X_\\star}\\)",
+                      value   = xmval,
+                      min     = xmmin,
+                      max     = xmmax,
+                      step    = xstep,
+                      ticks   = FALSE
+          ), ## mu_xstar
+          sliderInput(inputId = "sigma_xstar",
+                      label   = "Standard deviation \\(\\sigma_{X_\\star}\\)",
+                      value   = xsmax,
+                      min     = 0,
+                      max     = xsmax,
+                      step    = xstep,
+                      ticks   = FALSE
+          ) ## sigma_xstar
+        ) ## tagList
+      }
     ) ## tagList
-  } else {
-    tagList(
-      withMathJax(),
-      hr(),
-      h5("Real world predictor \\(X_\\star\\)"),
-      sliderInput(inputId = "mu_xstar",
-                  label   = "Mean \\(\\mu_{X_\\star}\\)",
-                  value   = xmval,
-                  min     = xmmin,
-                  max     = xmmax,
-                  step    = xstep,
-                  ticks   = FALSE
-      ), ## mu_xstar
-      sliderInput(inputId = "sigma_xstar",
-                  label   = "Standard deviation \\(\\sigma_{X_\\star}\\)",
-                  value   = xsmax,
-                  min     = 0,
-                  max     = xsmax,
-                  step    = xstep,
-                  ticks   = FALSE
-      ) ## sigma_xstar
-    ) ## tagList
-  }
-  
+ 
 }) ## real_prior_interface
 
 ## Plot intercept prior

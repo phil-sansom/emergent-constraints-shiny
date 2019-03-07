@@ -280,7 +280,7 @@ discrepancy = reactive({
   
   ## Check discrepancy parameters
   if (any(is.null(sigma_alpha_star()), is.null(sigma_beta_star ()),
-          is.null(rho_star        ()), is.null(sigma_sigma_star())) &
+          is.null(rho_star        ()), is.null(sigma_sigma_star())) |
       any(is.na(sigma_alpha_star()), is.na(sigma_beta_star ()),
           is.na(rho_star        ()), is.na(sigma_sigma_star())))
     return(samples)
