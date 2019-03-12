@@ -49,3 +49,18 @@ output$data_plot = renderPlot({
   # p
 
 })
+
+
+## Print data table
+output$data_table = renderTable({
+  
+  ## Skip table if no data is loaded
+  if (no_data())
+    return(NULL)
+  
+  data()
+  
+},
+rownames = TRUE
+) ## data_table
+

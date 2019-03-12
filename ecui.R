@@ -179,7 +179,8 @@ ui = navbarPage(
                ) ## fluidRow
              ), ## sidePanel
              mainPanel(
-               plotOutput(outputId = "data_plot")
+               plotOutput(outputId = "data_plot"),
+               tableOutput(outputId = "data_table")
              ) ## mainPanel
            ) ## sidebarLayout
   ), ## tabPanel
@@ -536,11 +537,13 @@ ui = navbarPage(
         hr(),
         plotOutput(outputId = "sample_plot"),
         fluidRow(
-          column(width = 6,
-                 plotOutput(outputId = "density_plot")
+          column(
+            width = 6,
+            plotOutput(outputId = "density_plot")
           ),
-          column(width = 6,
-                 plotOutput(outputId = "log_posterior_plot")
+          column(
+            width = 6,
+            plotOutput(outputId = "log_posterior_plot")
           )
         ), ## fluidRow
         plotOutput(outputId = "autocorrelation_plot")
@@ -549,9 +552,23 @@ ui = navbarPage(
         title = "Sample information",
         plotOutput(outputId = "log_posterior_samples"),
         plotOutput(outputId = "log_posterior_density")
+      ),
+      tabPanel(
+        title = "Residual analysis",
+        fluidRow(
+          column(
+            width = 6,
+            plotOutput(outputId = "residuals_vs_fits")
+          ), ## column
+          column(
+            width = 6,
+            plotOutput(outputId = "quantile_quantile")
+          ) ## column
+        ), ## fluidRow
+        plotOutput(outputId = "residual_boxplots")
       )
+      
     ) ## navlistPanel
   ) ## tabPanel
 
 ) ## ui
-

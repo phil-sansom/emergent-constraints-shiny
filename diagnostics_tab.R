@@ -159,3 +159,109 @@ output$log_posterior_density = renderPlot({
   plot_density(samples, label)
   
 }) ## log_posterior_density
+
+## Plot residuals vs fitted values
+output$residuals_vs_fits = renderPlot({
+  
+  ## Skip plotting if error condition
+  if (no_data() | bad_obs() | bad_model_prior() | bad_real_prior())
+    return(NULL)
+ 
+  ## Extract data
+  x     = data()[,input$x]
+  y     = data()[,input$y]
+  alpha = as.numeric(posterior()[,,"alpha"])
+  beta  = as.numeric(posterior()[,,"beta"])
+
+  ## Compute residuals
+  yhat      = sapply(x, function(x) mean(alpha + beta*x))
+  residuals = y - yhat
+
+  ## Graphical parameters
+  graphical_parameters()
+  
+  ## Plot residuals
+  plot(yhat, residuals, col = "black", pch = 19, xaxs = "r", yaxs = "r")
+  
+  ## Add zero line
+  abline(h = 0, col = "grey", lty = "dashed")
+  
+  ## Add labels
+  title(xlab = "Fitted values")
+  title(ylab = "Residuals")
+  
+}) ## residuals_vs_fits
+
+
+## Plot residuals vs fitted values
+output$quantile_quantile = renderPlot({
+  
+  ## Skip plotting if error condition
+  if (no_data() | bad_obs() | bad_model_prior() | bad_real_prior())
+    return(NULL)
+  
+  ## Extract data
+  x     = data()[,input$x]
+  y     = data()[,input$y]
+  alpha = as.numeric(posterior()[,,"alpha"])
+  beta  = as.numeric(posterior()[,,"beta" ])
+  sigma = as.numeric(posterior()[,,"sigma"])
+  
+  ## Standardised residuals
+  rstandard = sapply(1:length(y), 
+                     function(i) mean((y[i] - alpha - beta*x[i])/sigma))
+
+  ## Graphical parameters
+  graphical_parameters()
+  
+  ## Q-Q Plot
+  qqnorm(rstandard, col = "black", pch = 19, xaxs = "r", yaxs = "r")
+  
+  ## Add reference line
+  abline(0, 1, col = "grey", lty = "dashed")
+  
+  ## Add labels
+  title(xlab = "Theoretical quantiles")
+  title(ylab = "Standardised residuals")
+  
+}) ## quantile_quantile
+
+
+## Residual boxplots
+output$residual_boxplots = renderPlot({
+  
+  ## Skip plotting if error condition
+  if (no_data() | bad_obs() | bad_model_prior() | bad_real_prior())
+    return(NULL)
+  
+  ## Extract data
+  x     = data()[,input$x]
+  y     = data()[,input$y]
+  alpha = as.numeric(posterior()[,,"alpha"])
+  beta  = as.numeric(posterior()[,,"beta" ])
+  sigma = as.numeric(posterior()[,,"sigma"])
+  
+  ## Standardised residuals
+  rstandard = sapply(1:length(y), 
+                     function(i) (y[i] - alpha - beta*x[i])/sigma)
+  
+  ## Boxplot statistics
+  stats = apply(rstandard, 2, quantile, probs = c(0.025,0.25,0.50,0.75,0.975))
+  n     = apply(rstandard, 2, length)
+  
+  ## Graphical parameters
+  graphical_parameters()
+
+  ## Boxplots
+  bxp(list(stats = stats, n = n), yaxs = "r")
+  
+  ## Add limit lines
+  abline(h = qnorm(0.025), col = "grey", lty = "dashed")
+  abline(h = qnorm(0.975), col = "grey", lty = "dashed")
+  
+  ## Add labels
+  title(xlab = "Model")
+  title(ylab = "Standardised residuals")
+  
+}) ## residual_boxplots
+
