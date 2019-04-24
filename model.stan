@@ -1,3 +1,8 @@
+functions {
+  real folded_normal_lpdf(real y, real mu, real sigma) {
+    return normal_lpdf(y | -mu, sigma) + normal_lpdf(y | +mu, sigma);
+  }
+}
 data{
   int<lower=0> M;               // number of models
   vector[M] x;                  // model predictors
@@ -31,7 +36,7 @@ parameters{
 model{
   // Priors
   theta ~ multi_normal(mu, Sigma);
-  sigma ~ normal(mu_sigma, sigma_sigma);
+  sigma ~ folded_normal(mu_sigma, sigma_sigma);
 
   // Likelihood
   y ~ normal(X * theta, sigma);
