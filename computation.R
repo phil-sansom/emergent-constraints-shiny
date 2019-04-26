@@ -193,7 +193,7 @@ sigma_alpha_star = reactive({
   if (input$discrepancy == "manual")
     return(input$sigma_alpha_star)
   
-  q = qnorm(likelihood())
+  q = qnorm((1+likelihood())/2)
   
   alpha = as.numeric(posterior()[,,"alpha"])
 
@@ -208,7 +208,7 @@ sigma_beta_star = reactive({
   if (input$discrepancy == "manual")
     return(input$sigma_beta_star)
   
-  q = qnorm(likelihood())
+  q = qnorm((1+likelihood())/2)
   
   beta = as.numeric(posterior()[,,"beta"])
   
@@ -245,17 +245,19 @@ sigma_sigma_star = reactive({
 
   sigma = as.numeric(posterior()[,,"sigma"])
   
-  if (mean(sigma < input$ysd) < likelihood())
+  gamma = (1+likelihood())/2
+  
+  if (mean(sigma < input$ysd) < gamma)
     return(0)
   
   ## Approximate the posterior as folded-normal
   theta = fit_folded_normal(sigma)
   
-  if (pfnorm(input$ysd, theta[1], theta[2]) < likelihood())
+  if (pfnorm(input$ysd, theta[1], theta[2]) < gamma)
     return(0)
   
   f = function(x, theta)
-    (pfnorm(input$ysd, theta[1], x) - likelihood())^2
+    (pfnorm(input$ysd, theta[1], x) - gamma)^2
   
   z = optimize(f = f, lower = theta[2], upper = 100, theta = theta)$minimum
   
