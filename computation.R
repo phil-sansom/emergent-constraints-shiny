@@ -237,7 +237,10 @@ sigma_sigma_star = reactive({
   if (input$discrepancy == "manual")
     return(input$sigma_sigma_star)
   
-  if(is.null(likelihood()) | is.null(input$ysd))
+  if (is.null(likelihood()) | is.null(input$ysd))
+    return(0)
+  
+  if (is.na(input$ysd))
     return(0)
 
   sigma = as.numeric(posterior()[,,"sigma"])

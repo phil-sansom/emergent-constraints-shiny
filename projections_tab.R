@@ -451,20 +451,28 @@ output$sigma_discrepancy_plot = renderPlot({
   sigma     = as.numeric(posterior()[,,"sigma"])
   sigmastar = as.numeric(discrepancy()[,,"sigmastar"])
   
+  ## Fitted approximation
+  theta    = fit_folded_normal(sigma)
+  sigmahat = abs(rnorm(input$N, theta[1], theta[2]))
+  
   ## Compute densities
   bw  = bw.nrd0(sigma)
   bws = bw.nrd0(sigmastar)
+  bwh = bw.nrd0(sigmahat)
   da  = density(sigma    , bw = bw , from = max(0,min(sigma    )-3*bw ))
   das = density(sigmastar, bw = bws, from = max(0,min(sigmastar)-3*bws))
+  dah = density(sigmahat , bw = bwh, from = max(0,min(sigmahat )-3*bwh))
   
   ## Compute limits for credible intervals
   qa  = quantile(sigma, 0.5 + c(-0.5,+0.5)*gamma())
   xa  = seq(max(which(da$x < qa[1])), min(which(da$x > qa[2])), 1)
   qas = quantile(sigmastar, 0.5 + c(-0.5,+0.5)*gamma())
   xas = seq(max(which(das$x < qas[1])), min(which(das$x > qas[2])), 1)
+  qah = quantile(sigmahat, 0.5 + c(-0.5,+0.5)*gamma())
+  xah = seq(max(which(dah$x < qah[1])), min(which(dah$x > qah[2])), 1)
   
   ## Plotting limits
-  xlim = range(da$x,das$x)
+  xlim = range(da$x,das$x,dah$x)
   ylim = c(0, 1.04*max(da$y))
   
   ## Graphical parameters
@@ -472,6 +480,9 @@ output$sigma_discrepancy_plot = renderPlot({
   
   ## Plot posterior and predictive densities
   plot (NA, type = "n", xlim = xlim, ylim = ylim)
+  polygon(x = c(dah$x[xah[1]],dah$x[xah],dah$x[xah[length(xah)]]),
+          y = c(0,dah$y[xah],0), border = NA, col = alpha_col("blue"))
+  lines(dah, col = "blue", lwd = 2)
   polygon(x = c(da$x[xa[1]],da$x[xa],da$x[xa[length(xa)]]),
           y = c(0,da$y[xa],0), border = NA, col = alpha_col(input$ref_col))
   lines(da, col = input$ref_col, lwd = 2)
@@ -485,9 +496,12 @@ output$sigma_discrepancy_plot = renderPlot({
   
   ## Add legend
   legend(input$legend_position, 
-         legend = c(parameter_labels["sigma"],parameter_labels["sigmastar"]),
-         col = c(input$ref_col,input$inf_col), lty = c("solid","solid"), 
-         lwd = c(2,2), bty = "n", horiz = input$legend_orientation)
+         legend = c(parameter_labels["sigma"],
+                    expression(paste("Folded-normal approximation ", hat(sigma))),
+                    parameter_labels["sigmastar"]),
+         col = c(input$ref_col,"blue",input$inf_col), 
+         lty = c("solid","solid","solid"), lwd = c(2,2), bty = "n", 
+         horiz = input$legend_orientation)
   
 }) ## sigma_discrepancy_plot
 
