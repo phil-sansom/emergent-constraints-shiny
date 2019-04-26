@@ -196,14 +196,8 @@ sigma_alpha_star = reactive({
   q = qnorm(likelihood())
   
   alpha = as.numeric(posterior()[,,"alpha"])
-  beta  = as.numeric(posterior()[,,"beta" ])
-  
-  var_beta_star = var(beta) + sigma_beta_star()^2
-  
-  mu = mean(alpha) - cov(alpha,beta)*mean(beta)/var(beta)
-  
-  sqrt(max(0,(input$ymean - mu)^2 / q^2 - var(alpha) + 
-             cov(alpha,beta)^2 * var_beta_star / var(beta)^2))
+
+  sqrt(max(0,(input$ymean - mean(alpha))^2 / q^2 - var(alpha)))
   
 }) ## sigma_alpha_star
 
@@ -218,7 +212,7 @@ sigma_beta_star = reactive({
   
   beta = as.numeric(posterior()[,,"beta"])
   
-  sqrt(max(0,mean(beta)^2/q^2 - var(beta)))
+  sqrt(max(0,mean(beta)^2 / q^2 - var(beta)))
   
 }) ## sigma_beta_star
 
@@ -232,10 +226,7 @@ rho_star = reactive({
   alpha = as.numeric(posterior()[,,"alpha"])
   beta  = as.numeric(posterior()[,,"beta" ])
   
-  var_alpha_star = var(alpha) + sigma_alpha_star()^2
-  var_beta_star  = var(beta)  + sigma_beta_star()^2
-  
-  cov(alpha,beta)*var_beta_star/var(beta)/sqrt(var_beta_star)/sqrt(var_alpha_star)
+  cor(alpha,beta)
   
 }) ## rho_star
 
@@ -246,10 +237,10 @@ sigma_sigma_star = reactive({
   if (input$discrepancy == "manual")
     return(input$sigma_sigma_star)
   
-  sigma = as.numeric(posterior()[,,"sigma"])
-  
   if(is.null(likelihood()) | is.null(input$ysd))
     return(0)
+
+  sigma = as.numeric(posterior()[,,"sigma"])
   
   if (mean(sigma < input$ysd) < likelihood())
     return(0)
