@@ -462,7 +462,9 @@ output$sigma_discrepancy_plot = renderPlot({
   da  = density(sigma    , bw = bw , from = max(0,min(sigma    )-3*bw ))
   das = density(sigmastar, bw = bws, from = max(0,min(sigmastar)-3*bws))
   dah = density(sigmahat , bw = bwh, from = max(0,min(sigmahat )-3*bwh))
-  
+  dah = list(x = dah$x)
+  dah$y = dfnorm(dah$x, theta[1], theta[2])
+   
   ## Compute limits for credible intervals
   qa  = quantile(sigma, 0.5 + c(-0.5,+0.5)*gamma())
   xa  = seq(max(which(da$x < qa[1])), min(which(da$x > qa[2])), 1)
