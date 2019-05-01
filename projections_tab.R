@@ -73,7 +73,7 @@ output$likelihood = renderUI(
 ## Custom likelihood
 output$likelihood_custom = renderUI({
   
-  if (input$discrepancy == "manual" | is.null(input$likelihood))
+  if (input$discrepancy != "guided" | is.null(input$likelihood))
     return(NULL)
 
   if (input$likelihood == "custom")
@@ -98,11 +98,13 @@ likelihood = reactive({
   if (input$likelihood != "custom")
     return(as.numeric(input$likelihood))
  
-  if (is.null(input$likelihood_custom)) {
+  if (is.null(input$likelihood_custom))
     return(0.99)
-  } else {
-    return(input$likelihood_custom)
-  }
+    
+  if (is.na(input$likelihood_custom))
+    return(0.99)
+
+  return(input$likelihood_custom)
 
 }) ## likelihood
 
@@ -308,7 +310,11 @@ gamma = reactive({
     if (is.null(input$gamma_custom)) {
       0.90
     } else {
-      input$gamma_custom
+      if (is.na(input$gamma_custom)) {
+        0.90
+      } else {
+        input$gamma_custom
+      }
     }
   } else {
     as.numeric(input$gamma)

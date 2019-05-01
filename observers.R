@@ -63,11 +63,22 @@ observe({
 ## Check sample number
 observe ({
   
-  if (input$N %% getOption("mc.cores") != 0)
+  if (is.na(input$N)) {
+    
     updateNumericInput(session = session, 
                        inputId = "N",
-                       value   = input$N %/% getOption("mc.cores") *
-                         getOption("mc.cores")
+                       value   = 1000
     )
     
+  } else {
+    
+    if (input$N %% getOption("mc.cores") != 0)
+      updateNumericInput(session = session, 
+                         inputId = "N",
+                         value   = input$N %/% getOption("mc.cores") *
+                           getOption("mc.cores")
+      )
+
+  }
+  
 }) ## Check sample number
