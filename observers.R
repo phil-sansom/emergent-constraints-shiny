@@ -6,19 +6,31 @@
 observe({
   # print("Observers 1: Update x,y")
 
-  choices = names(data())
+  if (!is.null(data())) {
+  
+    ## Extract classes
+    classes = sapply(data(), is.numeric)
 
-  updateSelectInput(session  = session,
-                    inputId  = "x",
-                    choices  = choices,
-                    selected = choices[1]
-  ) ## x
-
-  updateSelectInput(session  = session,
-                    inputId  = "y",
-                    choices  = choices,
-                    selected = choices[2]
-  ) ## y
+    if (sum(classes) >= 2) {
+      
+      ## Extract column names
+      choices = names(data())[classes]
+      
+      updateSelectInput(session  = session,
+                        inputId  = "x",
+                        choices  = choices,
+                        selected = choices[1]
+      ) ## x
+      
+      updateSelectInput(session  = session,
+                        inputId  = "y",
+                        choices  = choices,
+                        selected = choices[2]
+      ) ## y
+      
+    }
+    
+  }
 
 }) ## Update variable choices when data loaded
 

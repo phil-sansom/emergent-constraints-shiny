@@ -11,12 +11,20 @@ data = reactive({
   ## Check for input file
   if (is.null(input_file))
     return(NULL)
+  
+  ## Row names
+  if (input$rownames) {
+    rownames = 1
+  } else {
+    rownames = NULL
+  }
 
   ## Read data
-  read.csv(file   = input_file$datapath,
-           header = input$header,
-           sep    = input$sep,
-           quote  = input$quote
+  read.csv(file      = input_file$datapath,
+           header    = input$header,
+           sep       = input$sep,
+           quote     = input$quote,
+           row.names = rownames
   )
 
 })

@@ -55,7 +55,7 @@ output$data_plot = renderPlot({
 output$data_table = renderTable({
   
   ## Skip table if no data is loaded
-  if (no_data())
+  if (is.null(data()))
     return(NULL)
   
   data()

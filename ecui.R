@@ -122,10 +122,20 @@ ui = navbarPage(
                                      "text/comma-separated-values,text/plain",
                                      ".csv")
                ), ## fileInput
-               checkboxInput(inputId = "header",
-                             label   = "Header",
-                             value   = TRUE
-               ), ## checkboxInput
+               fluidRow(
+                 column(width = 6,
+                        checkboxInput(inputId = "header",
+                                      label   = "Header",
+                                      value   = TRUE
+                        ) ## checkboxInput
+                 ), ## column
+                 column(width = 6,
+                        checkboxInput(inputId = "rownames",
+                                      label   = "Row names",
+                                      value   = FALSE
+                        ) ## checkboxInput
+                 ) ## column
+               ), ## fluidRow
                fluidRow(
                  column(width = 6,
                  radioButtons("sep", "Separator",
