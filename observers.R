@@ -6,15 +6,15 @@
 observe({
   # print("Observers 1: Update x,y")
 
-  if (!is.null(data())) {
+  if (!is.null(csv())) {
   
     ## Extract classes
-    classes = sapply(data(), is.numeric)
+    classes = sapply(csv(), is.numeric)
 
     if (sum(classes) >= 2) {
       
       ## Extract column names
-      choices = names(data())[classes]
+      choices = names(csv())[classes]
       
       updateSelectInput(session  = session,
                         inputId  = "x",
@@ -44,7 +44,7 @@ observe({
 
   } else {
 
-    vstep  = floor(log10(diff(range(data()[,input$x]))))
+    vstep  = floor(log10(diff(range(data()$x))))
 
   }
 

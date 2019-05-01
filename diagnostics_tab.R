@@ -168,8 +168,8 @@ output$residuals_vs_fits = renderPlot({
     return(NULL)
  
   ## Extract data
-  x     = data()[,input$x]
-  y     = data()[,input$y]
+  x     = data()$x
+  y     = data()$y
   alpha = as.numeric(posterior()[,,"alpha"])
   beta  = as.numeric(posterior()[,,"beta"])
 
@@ -201,8 +201,8 @@ output$quantile_quantile = renderPlot({
     return(NULL)
   
   ## Extract data
-  x     = data()[,input$x]
-  y     = data()[,input$y]
+  x     = data()$x
+  y     = data()$y
   alpha = as.numeric(posterior()[,,"alpha"])
   beta  = as.numeric(posterior()[,,"beta" ])
   sigma = as.numeric(posterior()[,,"sigma"])
@@ -235,8 +235,8 @@ output$residual_boxplots = renderPlot({
     return(NULL)
   
   ## Extract data
-  x     = data()[,input$x]
-  y     = data()[,input$y]
+  x     = data()$x
+  y     = data()$y
   alpha = as.numeric(posterior()[,,"alpha"])
   beta  = as.numeric(posterior()[,,"beta" ])
   sigma = as.numeric(posterior()[,,"sigma"])

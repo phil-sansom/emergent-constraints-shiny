@@ -59,11 +59,11 @@ output$model_prior_interface = renderUI({
   } else {
     
     ## Data
-    x      = data()[,input$x]
+    x      = data()$x
     xrange = diff(range(x))
     xorder = 10^round(log10(xrange))
     
-    y      = data()[,input$y]
+    y      = data()$y
     yrange = diff(range(y))
     yorder = 10^round(log10(yrange))
     
@@ -277,7 +277,7 @@ output$real_prior_interface = renderUI({
     
   } else {
     
-    x      = data()[,input$x]
+    x      = data()$x
     xrange = diff(range(x))
     xorder = 10^round(log10(xrange))
     

@@ -12,7 +12,7 @@ output$predictor = renderUI({
     ymean = 0
     ysd   = 1
   } else {
-    y      = data()[,input$y]
+    y      = data()$y
     yrange = diff(range(y))
     yorder = 10^round(log10(yrange) - 1)
     
@@ -604,7 +604,7 @@ marginal_plot = function() {
     return(NULL)
 
   ## Extract data
-  y      = data()[,input$y]
+  y      = data()$y
   ystar1 = ystar_reference()
   ystar2 = ystar()
   probs  = 0.5*(1 + c(-1,+1)*gamma())
@@ -739,8 +739,8 @@ joint_plot = function() {
     return(NULL)
 
   ## Extract data
-  x         = data()[,input$x]
-  y         = data()[,input$y]
+  x         = data()$x
+  y         = data()$y
   xstar     = as.numeric(xstar())
   ystar     = as.numeric(ystar())
   xstar_ref = as.numeric(xstar_reference())

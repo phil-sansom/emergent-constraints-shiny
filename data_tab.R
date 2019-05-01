@@ -11,8 +11,8 @@ output$data_plot = renderPlot({
     return(NULL)
 
   ## Extract data
-  x = data()[,input$x]
-  y = data()[,input$y]
+  x = data()$x
+  y = data()$y
   z = input$z
 
   ## Graphical parameters
@@ -34,20 +34,6 @@ output$data_plot = renderPlot({
          col = c("black","blue"), lty = c(NA,"dotdash"), lwd = c(2,2),
          pch = c(19,NA), bty = "n")
 
-  # ## Create plot
-  # p = ggplot() +
-  #   geom_point(mapping = aes_string(x = input$x, y = input$y),
-  #              data = data()) +
-  #   labs(x = input$x, y = input$y)
-  #
-  # ## Add observations
-  # if (is.numeric(input$z))
-  #   p = p + geom_vline(mapping = aes_string(xintercept = input$z),
-  #                      na.rm = TRUE, colour   = "blue", linetype = "dotdash")
-  #
-  # ## Plot data
-  # p
-
 })
 
 
@@ -55,10 +41,10 @@ output$data_plot = renderPlot({
 output$data_table = renderTable({
   
   ## Skip table if no data is loaded
-  if (is.null(data()))
+  if (is.null(csv()))
     return(NULL)
   
-  data()
+  csv()
   
 },
 rownames = TRUE

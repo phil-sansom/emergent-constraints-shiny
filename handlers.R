@@ -5,9 +5,9 @@
 ## Check for data
 no_data = reactive({
   # print("Handlers: no_data")
-  any(is.null(data()),
-      ! input$x %in% names(data()),
-      ! input$y %in% names(data())
+  any(is.null(csv()),
+      ! input$x %in% names(csv()),
+      ! input$y %in% names(csv())
   )
 })
 

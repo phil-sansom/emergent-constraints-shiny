@@ -3,8 +3,8 @@
 ##########################
 
 ## Read user data
-data = reactive({
-  # print("Computation 1: data")
+csv = reactive({
+  # print("Computation 1: csv")
 
   input_file = input$file
 
@@ -27,6 +27,26 @@ data = reactive({
            row.names = rownames
   )
 
+})
+
+
+## Pre-processed data
+data = reactive({
+  
+  ## Check for data
+  if (no_data())
+    return(NULL)
+  
+  ## Extract data
+  x = csv()[,input$x]
+  y = csv()[,input$y]
+  
+  ## Mask out NAs
+  mask = ! (is.na(x) | is.na(y))
+  
+  ## Return pre-processed data
+  return(data.frame(x = x[mask], y = y[mask]))
+  
 })
 
 
@@ -57,8 +77,8 @@ posterior = reactive({
   if (input$model_priors == "informative" & ! bad_model_prior()) {
     
     ## Extract data
-    x       = data()[,input$x]
-    y       = data()[,input$y]
+    x = data()$x
+    y = data()$y
     
     ## Sample size
     cores = getOption("mc.cores")
@@ -97,8 +117,8 @@ reference_posterior = reactive({
   # print("Computation 5: reference_posterior")
 
   ## Extract data
-  x       = data()[,input$x]
-  y       = data()[,input$y]
+  x = data()$x
+  y = data()$y
  
   ## Model
   model = lm(y ~ x)
