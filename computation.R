@@ -218,6 +218,8 @@ xstar_reference = reactive({
 ## Intercept uncertainty
 sigma_alpha_star = reactive({
   
+  if (input$discrepancy == "none")
+    return(0)
   if (input$discrepancy == "manual")
     return(input$sigma_alpha_star)
   
@@ -233,6 +235,8 @@ sigma_alpha_star = reactive({
 ## Slope uncertainty
 sigma_beta_star = reactive({
   
+  if (input$discrepancy == "none")
+    return(0)
   if (input$discrepancy == "manual")
     return(input$sigma_beta_star)
   
@@ -262,6 +266,8 @@ rho_star = reactive({
 ## Response spread uncertainty
 sigma_sigma_star = reactive({
   
+  if (input$discrepancy == "none")
+    return(0)
   if (input$discrepancy == "manual")
     return(input$sigma_sigma_star)
   

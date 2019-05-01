@@ -161,7 +161,7 @@ output$discrepancy_input_select = renderUI({
 ## Discrepancy interface
 output$discrepancy_interface = renderUI({
   
-  if (input$discrepancy == "guided" | is.null(input$discrepancy_input_select))
+  if (input$discrepancy != "manual" | is.null(input$discrepancy_input_select))
     return(NULL)
   
   if (no_data()) {

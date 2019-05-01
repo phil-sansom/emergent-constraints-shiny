@@ -286,9 +286,10 @@ ui = navbarPage(
                             radioButtons(
                               inputId  = "discrepancy",
                               label    = "Discrepancy specification",
-                              choices  = list(Guided = "guided", 
+                              choices  = list(None   = "none",
+                                              Guided = "guided", 
                                               Manual = "manual"),
-                              selected = "guided",
+                              selected = "none",
                               inline   = FALSE
                             )
                      ), ## column
