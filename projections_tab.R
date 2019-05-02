@@ -27,7 +27,7 @@ output$predictor = renderUI({
         width = 6,
         numericInput(
           inputId = "ymean",
-          label   = "Response mean",
+          label   = "Current response mean",
           value   = ymean
         )
       ), ## column
@@ -35,7 +35,7 @@ output$predictor = renderUI({
         width = 6,
         numericInput(
           inputId = "ysd",
-          label   = "Response SD",
+          label   = "Current response SD",
           value   = ysd
         )
       ) ## column
