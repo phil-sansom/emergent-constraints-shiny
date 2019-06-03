@@ -91,20 +91,40 @@ output$likelihood_custom = renderUI({
 
 ## Update likelihood
 likelihood = reactive({
-  
-  if (is.null(input$likelihood))
-    return(0.99)
- 
-  if (input$likelihood != "custom")
-    return(as.numeric(input$likelihood))
- 
-  if (is.null(input$likelihood_custom))
-    return(0.99)
-    
-  if (is.na(input$likelihood_custom))
-    return(0.99)
 
-  return(input$likelihood_custom)
+  # if (is.null(input$likelihood))  
+  #   return(NULL)
+  # if(is.na(input$likelihood))
+  #   return(NA)
+  # if (input$likelihood != "custom")
+  #   return(as.numeric(input$likelihood))
+  # 
+  # if (is.null(input$likelihood_custom))
+  #   return(NULL)
+  # if (is.na(input$likelihood_custom)) {
+  #   return(NA)
+  # } else {
+  #   return(input$likelihood_custom)
+  # }
+  
+  if (is.null(input$likelihood)) {
+    lik = NULL
+  } else if (is.na(input$likelihood)) {
+    lik = NA
+  } else if (input$likelihood != "custom") {
+    lik = as.numeric(input$likelihood)
+  } else {
+    if (is.null(input$likelihood_custom)) {
+      lik = NULL
+    } else if (is.na(input$likelihood_custom)) {
+      lik = NA
+    } else if (input$likelihood_custom > 0.5) {
+      lik = input$likelihood_custom
+    } else {
+      lik = NULL
+    }
+  }
+  return(lik)
 
 }) ## likelihood
 

@@ -222,6 +222,11 @@ sigma_alpha_star = reactive({
     return(0)
   if (input$discrepancy == "manual")
     return(input$sigma_alpha_star)
+
+  if (is.null(likelihood()))
+    return(0)
+  if (is.na(likelihood()))
+    return(0)
   
   q = qnorm((1+likelihood())/2)
   
@@ -239,6 +244,11 @@ sigma_beta_star = reactive({
     return(0)
   if (input$discrepancy == "manual")
     return(input$sigma_beta_star)
+
+  if (is.null(likelihood()))
+    return(0)
+  if (is.na(likelihood()))
+   return(0)
   
   q = qnorm((1+likelihood())/2)
   
@@ -273,8 +283,7 @@ sigma_sigma_star = reactive({
   
   if (is.null(likelihood()) | is.null(input$ysd))
     return(0)
-  
-  if (is.na(input$ysd))
+  if (is.na(likelihood()) | is.na(input$ysd))
     return(0)
 
   sigma = as.numeric(posterior()[,,"sigma"])
