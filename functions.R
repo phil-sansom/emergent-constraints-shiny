@@ -5,8 +5,8 @@
 ## Graphical parameters
 graphical_parameters = function() {
   
-  par(ann = FALSE, las = 1, mar = c(2.5,2.5,1,1)+0.1, mgp = c(1.5,0.5,0),
-      ps = 12, tcl = -1/3, xaxs = "i", yaxs = "i")
+  par(ann = FALSE, las = 1, mar = c(3.0,3.0,1,1)+0.1, mgp = c(2.0,0.5,0),
+      ps = input$fontsize, tcl = -1/3, xaxs = "i", yaxs = "i")
   
 }
 

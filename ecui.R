@@ -324,6 +324,17 @@ ui = navbarPage(
                             ) ## ylab
                      ) ## column
                    ), ## fluidRow
+                   fluidRow(
+                     column(width = 6,
+                            numericInput(inputId = "fontsize",
+                                         label   = "Font size",
+                                         value   = 12,
+                                         min     =  2,
+                                         max     = 32,
+                                         step    =  1
+                            ) ## xlab
+                     ) ## column
+                   ), ## fluidRow
                    hr(),
                    h5("Predictor limits"),
                    fluidRow(
