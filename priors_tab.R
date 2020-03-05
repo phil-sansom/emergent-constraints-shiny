@@ -442,7 +442,7 @@ output$prior_predictive_plot = renderPlot({
                    input$rho*input$sigma_alpha*input$sigma_beta,
                    input$sigma_beta^2),
                  2, 2)
-  theta =   mvrnorm(input$N, mu, Sigma)
+  theta = rmnorm(input$N, mu, Sigma)
   sigma = abs(rnorm(input$N, input$mu_sigma, input$sigma_sigma))
 
   ## Plotting points

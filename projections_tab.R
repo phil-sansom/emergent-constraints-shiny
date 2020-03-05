@@ -549,7 +549,7 @@ output$prior_discrepancy_plot = renderPlot({
                    input$rho*input$sigma_alpha*input$sigma_beta,
                    input$sigma_beta^2),
                  2, 2)
-  theta = mvrnorm(input$N, mu, Sigma)
+  theta = rmnorm(input$N, mu, Sigma)
   alpha = theta[,1]
   beta  = theta[,2]
   sigma = abs(rnorm(input$N, input$mu_sigma, input$sigma_sigma))
@@ -560,7 +560,7 @@ output$prior_discrepancy_plot = renderPlot({
                    rho_star()*sigma_alpha_star()*sigma_beta_star(),
                    sigma_beta_star()^2),
                  2, 2)
-  delta = mvrnorm(input$N, c(0,0), Sigma)
+  delta = rmnorm(input$N, c(0,0), Sigma)
   alphastar = alpha + delta[,1]
   betastar  = beta  + delta[,2] 
   sigmastar = abs(rnorm(input$N, sigma, sigma_sigma_star()))

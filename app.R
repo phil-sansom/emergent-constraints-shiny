@@ -1,5 +1,5 @@
 ## Preamble
-library(MASS)
+library(mnormt)
 library(rstan)
 library(shiny)
 options(mc.cores = 4)             ## Set the number of CPU cores to use
