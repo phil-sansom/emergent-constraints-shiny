@@ -140,11 +140,12 @@ reference_posterior = reactive({
   ) ## samples
 
   ## Sample posterior
-  theta = rmt(N, model$coef, vcov(model), model$df.residual)
-  samples[,,"alpha"] = theta[,1]
-  samples[,,"beta" ] = theta[,2]
-  samples[,,"sigma"] = sqrt(sum(model$residuals^2) /
-                              rchisq(N, df.residual(model)))
+  sigma = sqrt(sum(residuals(model)^2) / rchisq(N, df.residual(model)))
+  ss    = sum(residuals(model)^2) / df.residual(model)
+  theta = sigma * mvrnorm(N, c(0,0), vcov(model) / ss)
+  samples[,,"alpha"] = coef(model)[1] + theta[,1]
+  samples[,,"beta" ] = coef(model)[2] + theta[,2]
+  samples[,,"sigma"] = sigma
 
   ## Compute log posterior probability
   samples[,,"lp__"] = apply(samples, c(1,2), function(s)
